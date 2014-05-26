@@ -1,0 +1,41 @@
+partno square test
+$$insert debug=slon
+machin/EBWM1
+insert debug=sloff
+print/on
+clprnt
+multax/off
+
+startp = point/0,0,200
+fromp  = point/0,-50,50
+
+fedrat/1000
+insert fadein=.5
+cutter/0
+
+from/startp
+goto/fromp
+multax/on
+spindl/on,50.4
+
+pprint **first move**
+goto/0,50,50,0,0,1,100
+spindl/off
+goto/0,50,50,0,1,0
+pprint **second move**
+spindl/on
+goto/0,50,-50,0,1,0
+spindl/off
+goto/0,50,-50,0,0,-1
+pprint **third move**
+spindl/on
+goto/0,-50,-50,0,0,-1
+spindl/off
+goto/0,-50,-50,0,-1,0
+pprint **forth move**
+spindl/on
+goto/0,-50,50,0,-1,0
+spindl/off
+goto/0,-50,50,0,0,1
+goto/startp,2000
+fini

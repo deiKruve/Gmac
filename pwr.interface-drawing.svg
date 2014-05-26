@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="297mm"
+   height="210mm"
+   id="svg2820"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="New document 2">
+  <defs
+     id="defs2822">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 372.04724 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="1052.3622 : 372.04724 : 1"
+       inkscape:persp3d-origin="526.18109 : 248.03149 : 1"
+       id="perspective2829" />
+  </defs>
+  <sodipodi:namedview
+     inkscape:document-units="mm"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.60879366"
+     inkscape:cx="532.75146"
+     inkscape:cy="372.04724"
+     inkscape:current-layer="layer1"
+     id="namedview2824"
+     showgrid="false"
+     inkscape:window-width="1100"
+     inkscape:window-height="700"
+     inkscape:window-x="26"
+     inkscape:window-y="44"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata2826">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#ffff00;fill-rule:evenodd;stroke:#000000;stroke-width:2.30414367px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="rect2831"
+       width="392.94119"
+       height="565.46021"
+       x="80.162796"
+       y="71.822197" />
+    <rect
+       style="font-size:12px;fill:#f2f2f2"
+       id="rect2833"
+       width="145.56248"
+       height="55.505848"
+       x="325.89899"
+       y="105.38979" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       x="341.36621"
+       y="132.8871"
+       id="text2835"><tspan
+         sodipodi:role="line"
+         id="tspan2837"
+         x="341.36621"
+         y="132.8871">task pathplanner</tspan></text>
+    <rect
+       style="fill:#f2f2f2"
+       id="rect2839"
+       width="150.0713"
+       height="59.191471"
+       x="320.71643"
+       y="175.21483" />
+    <rect
+       style="fill:#f2f2f2"
+       id="rect2841"
+       width="146.48395"
+       height="52.016747"
+       x="326.68893"
+       y="246.21309" />
+    <rect
+       style="fill:#f2f2f2"
+       id="rect2843"
+       width="145.28815"
+       height="46.635704"
+       x="325.6442"
+       y="312.42819" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       x="335.06592"
+       y="191.35796"
+       id="text2845"><tspan
+         sodipodi:role="line"
+         id="tspan2847"
+         x="335.06592"
+         y="191.35796">task axis panner X</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       x="339.84256"
+       y="265.9436"
+       id="text2849"><tspan
+         sodipodi:role="line"
+         id="tspan2851"
+         x="339.84256"
+         y="265.9436">task axis planner Y</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       x="341.18942"
+       y="330.36499"
+       id="text2853"><tspan
+         sodipodi:role="line"
+         id="tspan2855"
+         x="341.18942"
+         y="330.36499">task axis planner Z</tspan></text>
+    <rect
+       style="fill:#f2f2f2"
+       id="rect2857"
+       width="144.54816"
+       height="45.992596"
+       x="325.23334"
+       y="389.29446" />
+    <rect
+       style="fill:#f2f2f2"
+       id="rect2859"
+       width="151.11853"
+       height="49.277779"
+       x="321.94815"
+       y="459.92596" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       x="330.16113"
+       y="410.64816"
+       id="text2861"><tspan
+         sodipodi:role="line"
+         id="tspan2863"
+         x="330.16113"
+         y="410.64816">task Mfunction planner</tspan></text>
+    <rect
+       style="fill:#f2f2f2"
+       id="rect2865"
+       width="151.11853"
+       height="45.992596"
+       x="321.94815"
+       y="530.55743" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       x="328.51855"
+       y="479.63705"
+       id="text2867"><tspan
+         sodipodi:role="line"
+         id="tspan2869"
+         x="328.51855"
+         y="479.63705">error registrar</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans"
+       x="340.01669"
+       y="550.26855"
+       id="text2871"><tspan
+         sodipodi:role="line"
+         id="tspan2873"
+         x="340.01669"
+         y="550.26855">machine control</tspan></text>
+  </g>
+</svg>

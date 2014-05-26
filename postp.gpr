@@ -1,0 +1,21 @@
+with "florist";
+project Postp is
+   for Languages use ("Ada", "c");
+   for Main use ("postp.adb");
+   for Source_Dirs use (".", "./post", "./gnatcoll", "./gmactextscan", "./globe3d");
+   for Object_Dir use "obj";
+   for Exec_Dir use ".";
+   package Compiler is
+      for Default_Switches ("c")   use ("-g", "-O2");
+      for Default_Switches ("Ada") use ("-g", "-O1", "-gnatafo", "-fdata-sections", "-ffunction-sections");
+--      for Default_Switches ("Ada") use ("-g", "-O1", "-gnatafo");
+   end Compiler;
+   package Binder is
+      for Default_Switches ("Ada") use ("-E");
+   end Binder;
+   package Linker is
+--      for Default_Switches ("Ada") use ("-v","/home/jan/MMS/programs-PC/obj/gnatcoll_support.o", "-Wl,--gc-sections");
+      for Default_Switches ("Ada") use ("/home/jan/MMS/programs-PC/obj/gnatcoll_support.o", "-Wl,--gc-sections");
+--      for Default_Switches ("Ada") use ("/home/jan/MMS/programs-PC/obj/gnatcoll_support.o");
+   end Linker;
+end Postp;

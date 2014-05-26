@@ -1,0 +1,50 @@
+
+for this linker switches line in the project file:
+      for Default_Switches ("Ada") use ("-v","/home/jan/MMS/programs-PC/obj/gnatcoll_support.o", "-Wl,--gc-sections");
+
+this is the output:
+
+
+End of compilation
+gnatbind -E -x /home/jan/MMS/programs-PC/obj/postp.ali
+gnatlink /home/jan/MMS/programs-PC/obj/postp.ali -v /home/jan/MMS/programs-PC/obj/gnatcoll_support.o -Wl,--gc-sections -lflorist -o /home/jan/MMS/programs-PC/postp
+
+GNATLINK GPL 2013 (20130314)
+Copyright (C) 1995-2013, Free Software Foundation, Inc.
+
+gcc -c -O1 -fdata-sections -ffunction-sections -g -gnatA -gnatWb
+-gnatiw -gnatws /home/jan/MMS/programs-PC/obj/b~postp.adb
+
+/usr/gnat/bin/gcc b~postp.o
+/home/jan/MMS/programs-PC/obj/gnatcoll_support.o
+/home/jan/MMS/programs-PC/obj/gnatcoll.o
+/home/jan/MMS/programs-PC/obj/ebwm1.o
+/home/jan/MMS/programs-PC/obj/generic_scanner.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-mmap.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-utils.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-vfs_types.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-io.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-path.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-io-native.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-remote.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-io-remote-unix.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-io-remote-windows.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-remote-db.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-io-remote.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-vfs.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-vfs_utils.o
+/home/jan/MMS/programs-PC/obj/gnatcoll-traces.o
+/home/jan/MMS/programs-PC/obj/math3d.o
+/home/jan/MMS/programs-PC/obj/gmactextscan.o
+/home/jan/MMS/programs-PC/obj/post.o
+/home/jan/MMS/programs-PC/obj/post-scanner.o
+/home/jan/MMS/programs-PC/obj/post-parser.o
+/home/jan/MMS/programs-PC/obj/ebwm1-machin.o
+/home/jan/MMS/programs-PC/obj/postp.o -Wl,--gc-sections -lflorist 
+-o /home/jan/MMS/programs-PC/postp 
+-L/home/jan/MMS/programs-PC/obj/
+-L/home/jan/MMS/programs-PC/obj/ -L/usr/gnat/floristlib/
+-L/usr/gnat/lib/gcc/i686-pc-linux-gnu/4.7.4/adalib/ -lnsl -lrt
+-lpthread /usr/gnat/lib/gcc/i686-pc-linux-gnu/4.7.4/adalib/libgnarl.a
+/usr/gnat/lib/gcc/i686-pc-linux-gnu/4.7.4/adalib/libgnat.a -lpthread
+-static-libgcc
