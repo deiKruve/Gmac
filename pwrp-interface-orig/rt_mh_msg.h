@@ -1,0 +1,66 @@
+#ifndef rt_mh_msg_h
+#define rt_mh_msg_h
+
+#define MH_FACILITY                        2238 /* x000008be */
+#define MH__SUCCESS                   146702345 /* x08be8009 */
+#define MH__NOMESSAVAIL               146702352 /* x08be8010 */
+#define MH__NOSUCHQCOMTYPE            146702360 /* x08be8018 */
+#define MH__NOSUCHQCOMSUBT            146702368 /* x08be8020 */
+#define MH__QCOMALLOCMSG              146702378 /* x08be802a */
+#define MH__QCOMBINDQ                 146702386 /* x08be8032 */
+#define MH__QCOMCONAPPL               146702394 /* x08be803a */
+#define MH__QCOMCONQ                  146702402 /* x08be8042 */
+#define MH__QCOMCREQ                  146702410 /* x08be804a */
+#define MH__QCOMFREEMSG               146702418 /* x08be8052 */
+#define MH__QCOMGETMSG                146702426 /* x08be805a */
+#define MH__QCOMGETQID                146702434 /* x08be8062 */
+#define MH__QCOMPUTMSG                146702442 /* x08be806a */
+#define MH__QCOMRCVMSG                146702450 /* x08be8072 */
+#define MH__QCOMSENDMSG               146702458 /* x08be807a */
+#define MH__FREEMSG                   146702466 /* x08be8082 */
+#define MH__NOMESSSEND                146702472 /* x08be8088 */
+#define MH__ERRMH                     146702482 /* x08be8092 */
+#define MH__ERRINIT                   146702490 /* x08be809a */
+#define MH__GETLOCALOBJ               146702499 /* x08be80a3 */
+#define MH__NOSUCHDESC                146702506 /* x08be80aa */
+#define MH__ERRCREDB                  146702514 /* x08be80b2 */
+#define MH__ERRGDHINI                 146702522 /* x08be80ba */
+#define MH__ERRGETLIST                146702530 /* x08be80c2 */
+#define MH__ERRGETPOINTER             146702538 /* x08be80ca */
+#define MH__ERRGETOBJID               146702546 /* x08be80d2 */
+#define MH__ERRGETNEXT                146702554 /* x08be80da */
+#define MH__ERRCREMESS                146702562 /* x08be80e2 */
+#define MH__ERRSENDMESS               146702570 /* x08be80ea */
+#define MH__ERRRECMESS                146702578 /* x08be80f2 */
+#define MH__ERRWAITANY                146702586 /* x08be80fa */
+#define MH__ERRDELMESS                146702594 /* x08be8102 */
+#define MH__ERRASCEF                  146702602 /* x08be810a */
+#define MH__ALARMLSTFULL              146702610 /* x08be8112 */
+#define MH__ERRLSTLOCATE              146702618 /* x08be811a */
+#define MH__ALLRCON                   146702626 /* x08be8122 */
+#define MH__NOTCONN                   146702635 /* x08be812b */
+#define MH__NOOUTUNIT                 146702642 /* x08be8132 */
+#define MH__ERROR                     146702650 /* x08be813a */
+#define MH__LOG                       146702659 /* x08be8143 */
+#define MH__NOSPACE                   146702666 /* x08be814a */
+#define MH__APPLQUOTA                 146702674 /* x08be8152 */
+#define MH__BADPARAM                  146702682 /* x08be815a */
+#define MH__NOAPPL                    146702690 /* x08be8162 */
+#define MH__EVENTERR                  146702698 /* x08be816a */
+#define MH__PROGERR                   146702706 /* x08be8172 */
+#define MH__NYI                       146702714 /* x08be817a */
+#define MH__NONEXALARM                146702722 /* x08be8182 */
+#define MH__ALLRET                    146702731 /* x08be818b */
+#define MH__NOTOWNED                  146702738 /* x08be8192 */
+#define MH__VERSION                   146702746 /* x08be819a */
+#define MH__SYSTEMID                  146702754 /* x08be81a2 */
+#define MH__NOMOREMSG                 146702763 /* x08be81ab */
+#define MH__NOSUCHOBJ                 146702770 /* x08be81b2 */
+#define MH__HANDLERDOWN               146702778 /* x08be81ba */
+#define MH__XDRFAILED                 146702786 /* x08be81c2 */
+#define MH__XDRUNEXPECT               146702794 /* x08be81ca */
+#define MH__TMO                       146702802 /* x08be81d2 */
+#define MH__NOTMNTCLEAN               146702808 /* x08be81d8 */
+#define MH__IOSTALLED                 146702820 /* x08be81e4 */
+
+#endif

@@ -1,10 +1,10 @@
 ------------------------------------------------------------------------------
 --                                                                          --
---                              POST COMPONENTS                             --
+--                            SILMARIL COMPONENTS                           --
 --                                                                          --
---                                   P O S T                                --
+--                              S I L M A R I L                             --
 --                                                                          --
---                                   S p e c                                --
+--                                  S p e c                                 --
 --                                                                          --
 --                     Copyright (C) 2014, Jan de Kruyf                     --
 --                                                                          --
@@ -21,17 +21,17 @@
 -- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
 -- <http://www.gnu.org/licenses/>.                                          --
 --                                                                          --
---                  Post is maintained by J de Kruijf Engineers             --
+--                Silmaril is maintained by J de Kruijf Engineers           --
 --                     (email: jan.de.kruyf@hotmail.com)                    --
 --                                                                          --
 ------------------------------------------------------------------------------
 
---  The top of the Post architecture
+--  The top of the Silmaril architecture
 
-package Post is
+package Silmaril is
    --pragma Pure;
    If_Debug                 : Boolean := False;
    --If_Trace                 : Boolean := False;
    --If_Debug                 : Boolean := True;
    --If_Trace                 : Boolean := True;
-end Post;
+end Silmaril;

@@ -1,12 +1,12 @@
 ------------------------------------------------------------------------------
 --                                                                          --
---                           POST COMPONENTS                             --
+--                           POST COMPONENTS                                --
 --                                                                          --
---                              E B W M 1                               --
+--                              E B W M 1                                   --
 --                                                                          --
---                                 S p e c                                  --
+--                               S p e c                                    --
 --                                                                          --
---         Copyright (C) 2001-2012, Free Software Foundation, Inc.          --
+--                   Copyright (C) 2014, Jan de Kruijf.                     --
 --                                                                          --
 -- This is free software;  you can redistribute it  and/or modify it  under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
@@ -21,8 +21,8 @@
 -- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
 -- <http://www.gnu.org/licenses/>.                                          --
 --                                                                          --
---                  Post is maintained by J de Kruijf Engineers                       --
---                     (email: jan.de.kruyf@hotmail.com)                           --
+--               Post is maintained by J de Kruijf Engineers                --
+--                    (email: jan.de.kruyf@hotmail.com)                     --
 --                                                                          --
 ------------------------------------------------------------------------------
 
