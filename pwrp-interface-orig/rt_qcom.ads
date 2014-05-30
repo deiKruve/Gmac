@@ -112,36 +112,36 @@ package rt_qcom is
 	 qix : aliased qcom_tQix;  -- Queue index
 	 nid : aliased pwr.pwr_tNodeId;  -- Node identity
       end record;
-   -- ZZZ Text that appers when the Data structure is listed.
+   -- ZZZ Text that appears when the Data structure is listed.
    -- More detailed text  
    pragma Convention (C_Pass_By_Copy, qcom_sQid);  -- rt_qcom.h:155
    
-   --  qcom_cNQid           : aliased qcom_sQid;  -- rt_qcom.h:157
-   --  pragma Import (CPP, qcom_cNQid, "_ZL10qcom_cNQid");
+   qcom_cNQid           : aliased qcom_sQid;  -- rt_qcom.h:157
+   pragma Import (CPP, qcom_cNQid, "_ZL10qcom_cNQid");
 
-   --  qcom_cQnetEvent      : aliased qcom_sQid;  -- rt_qcom.h:158
-   --  pragma Import (CPP, qcom_cQnetEvent, "_ZL15qcom_cQnetEvent");
+   qcom_cQnetEvent      : aliased qcom_sQid;  -- rt_qcom.h:158
+   pragma Import (CPP, qcom_cQnetEvent, "_ZL15qcom_cQnetEvent");
 
-   --  qcom_cQapplEvent     : aliased qcom_sQid;  -- rt_qcom.h:159
-   --  pragma Import (CPP, qcom_cQapplEvent, "_ZL16qcom_cQapplEvent");
+   qcom_cQapplEvent     : aliased qcom_sQid;  -- rt_qcom.h:159
+   pragma Import (CPP, qcom_cQapplEvent, "_ZL16qcom_cQapplEvent");
 
-   --  qcom_cQmhAllHandlers : aliased qcom_sQid;  -- rt_qcom.h:160
-   --  pragma Import (CPP, qcom_cQmhAllHandlers, "_ZL20qcom_cQmhAllHandlers");
+   qcom_cQmhAllHandlers : aliased qcom_sQid;  -- rt_qcom.h:160
+   pragma Import (CPP, qcom_cQmhAllHandlers, "_ZL20qcom_cQmhAllHandlers");
 
-   --  qcom_cQmhAllOutunits : aliased qcom_sQid;  -- rt_qcom.h:161
-   --  pragma Import (CPP, qcom_cQmhAllOutunits, "_ZL20qcom_cQmhAllOutunits");
+   qcom_cQmhAllOutunits : aliased qcom_sQid;  -- rt_qcom.h:161
+   pragma Import (CPP, qcom_cQmhAllOutunits, "_ZL20qcom_cQmhAllOutunits");
 
-   --  qcom_cQhdServer      : aliased qcom_sQid;  -- rt_qcom.h:162
-   --  pragma Import (CPP, qcom_cQhdServer, "_ZL15qcom_cQhdServer");
+   qcom_cQhdServer      : aliased qcom_sQid;  -- rt_qcom.h:162
+   pragma Import (CPP, qcom_cQhdServer, "_ZL15qcom_cQhdServer");
 
-   --  qcom_cQhdClient      : aliased qcom_sQid;  -- rt_qcom.h:163
-   --  pragma Import (CPP, qcom_cQhdClient, "_ZL15qcom_cQhdClient");
+   qcom_cQhdClient      : aliased qcom_sQid;  -- rt_qcom.h:163
+   pragma Import (CPP, qcom_cQhdClient, "_ZL15qcom_cQhdClient");
 
-   --  qcom_cQnacp          : aliased qcom_sQid;  -- rt_qcom.h:164
-   --  pragma Import (CPP, qcom_cQnacp, "_ZL11qcom_cQnacp");
+   qcom_cQnacp          : aliased qcom_sQid;  -- rt_qcom.h:164
+   pragma Import (CPP, qcom_cQnacp, "_ZL11qcom_cQnacp");
 
-   --  qcom_cQini           : aliased qcom_sQid;  -- rt_qcom.h:165
-   --  pragma Import (CPP, qcom_cQini, "_ZL10qcom_cQini");
+   qcom_cQini           : aliased qcom_sQid;  -- rt_qcom.h:165
+   pragma Import (CPP, qcom_cQini, "_ZL10qcom_cQini");
    
    type qcom_sAid   is 
       record
@@ -151,8 +151,8 @@ package rt_qcom is
    -- Application identity
    pragma Convention (C_Pass_By_Copy, qcom_sAid);  -- rt_qcom.h:171
    
-   --  qcom_cNAid            : aliased qcom_sAid;  -- rt_qcom.h:173
-   --  pragma Import (CPP, qcom_cNAid, "_ZL10qcom_cNAid");
+   qcom_cNAid            : aliased qcom_sAid;  -- rt_qcom.h:173
+   pragma Import (CPP, qcom_cNAid, "_ZL10qcom_cNAid");
    
    type Pid_T is new Long_Integer;
    type qcom_sAppl      is 
@@ -310,59 +310,59 @@ package rt_qcom is
 			 return pwr.pwr_tBoolean;  -- rt_qcom.h:310
    pragma Import (C, qcom_CreateQ, "qcom_CreateQ");
    
-   --  function qcom_DeleteQ (sts : access pwr.pwr_tStatus; 
-   --  			  myQ : access constant qcom_sQid) 
-   --  			 return pwr.pwr_tBoolean;  -- rt_qcom.h:317
-   --  pragma Import (C, qcom_DeleteQ, "qcom_DeleteQ");
+   function qcom_DeleteQ (sts : access pwr.pwr_tStatus; 
+   			  myQ : access constant qcom_sQid) 
+   			 return pwr.pwr_tBoolean;  -- rt_qcom.h:317
+   pragma Import (C, qcom_DeleteQ, "qcom_DeleteQ");
 
-   --  function qcom_SignalAnd (status : access pwr.pwr_tStatus;
-   --  			    eid    : access constant qcom_sQid;
-   --  			    mask   : int) 
-   --  			   return pwr.pwr_tBoolean;  -- rt_qcom.h:323
-   --  pragma Import (C, qcom_SignalAnd, "qcom_SignalAnd");
+   function qcom_SignalAnd (status : access pwr.pwr_tStatus;
+   			    eid    : access constant qcom_sQid;
+   			    mask   : int) 
+   			   return pwr.pwr_tBoolean;  -- rt_qcom.h:323
+   pragma Import (C, qcom_SignalAnd, "qcom_SignalAnd");
    
-   --  function qcom_SignalOr (status : access pwr.pwr_tStatus;
-   --  			   eid    : access constant qcom_sQid;
-   --  			   mask   : int) 
-   --  			  return pwr.pwr_tBoolean;  -- rt_qcom.h:329
-   --  pragma Import (C, qcom_SignalOr, "qcom_SignalOr");
+   function qcom_SignalOr (status : access pwr.pwr_tStatus;
+   			   eid    : access constant qcom_sQid;
+   			   mask   : int) 
+   			  return pwr.pwr_tBoolean;  -- rt_qcom.h:329
+   pragma Import (C, qcom_SignalOr, "qcom_SignalOr");
    
-   --  function qcom_WaitAnd (status : access pwr.pwr_tStatus;
-   --  			  qid    : access constant qcom_sQid;
-   --  			  eid    : access constant qcom_sQid;
-   --  			  mask   : int;
-   --  			  tmo    : int) 
-   --  			 return pwr.pwr_tBoolean;  -- rt_qcom.h:335
-   --  pragma Import (C, qcom_WaitAnd, "qcom_WaitAnd");
+   function qcom_WaitAnd (status : access pwr.pwr_tStatus;
+   			  qid    : access constant qcom_sQid;
+   			  eid    : access constant qcom_sQid;
+   			  mask   : int;
+   			  tmo    : int) 
+   			 return pwr.pwr_tBoolean;  -- rt_qcom.h:335
+   pragma Import (C, qcom_WaitAnd, "qcom_WaitAnd");
    
-   --  function qcom_WaitOr (status : access pwr.pwr_tStatus;
-   --  			 Qid    : access constant qcom_sQid;
-   --  			 Eid    : access constant qcom_sQid;
-   --  			 Mask   : int;
-   --  			 Tmo    : int;
-   --  			 Event  : access int) 
-   --  			return pwr.pwr_tBoolean;  -- rt_qcom.h:343
-   --  pragma Import (C, qcom_WaitOr, "qcom_WaitOr");
+   function qcom_WaitOr (status : access pwr.pwr_tStatus;
+   			 Qid    : access constant qcom_sQid;
+   			 Eid    : access constant qcom_sQid;
+   			 Mask   : int;
+   			 Tmo    : int;
+   			 Event  : access int) 
+   			return pwr.pwr_tBoolean;  -- rt_qcom.h:343
+   pragma Import (C, qcom_WaitOr, "qcom_WaitOr");
 
-   --  function qcom_EventMask (status : access pwr.pwr_tStatus; 
-   --  			    eid    : access constant qcom_sQid) 
-   --  			   return pwr.pwr_tBitMask;  -- rt_qcom.h:352
-   --  pragma Import (C, qcom_EventMask, "qcom_EventMask");
+   function qcom_EventMask (status : access pwr.pwr_tStatus; 
+   			    eid    : access constant qcom_sQid) 
+   			   return pwr.pwr_tBitMask;  -- rt_qcom.h:352
+   pragma Import (C, qcom_EventMask, "qcom_EventMask");
    
-   --  function qcom_Exit (sts : access pwr.pwr_tStatus) 
-   --  		      return pwr.pwr_tBoolean;  -- rt_qcom.h:357
-   --  pragma Import (C, qcom_Exit, "qcom_Exit");
+   function qcom_Exit (sts : access pwr.pwr_tStatus) 
+   		      return pwr.pwr_tBoolean;  -- rt_qcom.h:357
+   pragma Import (C, qcom_Exit, "qcom_Exit");
 
-   --  function qcom_Free (Sts    : access pwr.pwr_tStatus; 
-   --  		       buffer : System.Address) 
-   --  		      return pwr.pwr_tBoolean;  -- rt_qcom.h:361
-   --  pragma Import (C, qcom_Free, "qcom_Free");
+   function qcom_Free (Sts    : access pwr.pwr_tStatus; 
+   		       buffer : System.Address) 
+   		      return pwr.pwr_tBoolean;  -- rt_qcom.h:361
+   pragma Import (C, qcom_Free, "qcom_Free");
    
-   --  function qcom_Init (Sts   : access pwr.pwr_tStatus;
-   --  		       Aid   : access qcom_sAid;
-   --  		       aname : Interfaces.C.Strings.chars_ptr) 
-   --  		      return pwr.pwr_tBoolean;  -- rt_qcom.h:366
-   --  pragma Import (C, qcom_Init, "qcom_Init");
+   function qcom_Init (Sts   : access pwr.pwr_tStatus;
+   		       Aid   : access qcom_sAid;
+   		       aname : Interfaces.C.Strings.chars_ptr) 
+   		      return pwr.pwr_tBoolean;  -- rt_qcom.h:366
+   pragma Import (C, qcom_Init, "qcom_Init");
 
    function qcom_Get (sts    : access pwr.pwr_tStatus;
 		      myQ    : access constant qcom_sQid;
@@ -371,20 +371,20 @@ package rt_qcom is
 		     return System.Address;  -- rt_qcom.h:372
    pragma Import (C, qcom_Get, "qcom_Get");
 
-   --  function qcom_MyBus (sts : access pwr.pwr_tStatus) 
-   --  		       return qcom_tBus;  -- rt_qcom.h:379
-   --  pragma Import (C, qcom_MyBus, "qcom_MyBus");
+   function qcom_MyBus (sts : access pwr.pwr_tStatus) 
+   		       return qcom_tBus;  -- rt_qcom.h:379
+   pragma Import (C, qcom_MyBus, "qcom_MyBus");
 
-   --  function qcom_MyNode (sts : access pwr.pwr_tStatus; 
-   --  			 node : access qcom_sNode) 
-   --  			return pwr.pwr_tBoolean;  -- rt_qcom.h:383
-   --  pragma Import (C, qcom_MyNode, "qcom_MyNode");
+   function qcom_MyNode (sts : access pwr.pwr_tStatus; 
+   			 node : access qcom_sNode) 
+   			return pwr.pwr_tBoolean;  -- rt_qcom.h:383
+   pragma Import (C, qcom_MyNode, "qcom_MyNode");
 
-   --  function qcom_NextNode (sts  : access pwr.pwr_tStatus;
-   --  			   node : access qcom_sNode;
-   --  			   Nid  : pwr.pwr_tNodeId) 
-   --  			  return pwr.pwr_tBoolean;  -- rt_qcom.h:388
-   --  pragma Import (C, qcom_NextNode, "qcom_NextNode");
+   function qcom_NextNode (sts  : access pwr.pwr_tStatus;
+   			   node : access qcom_sNode;
+   			   Nid  : pwr.pwr_tNodeId) 
+   			  return pwr.pwr_tBoolean;  -- rt_qcom.h:388
+   pragma Import (C, qcom_NextNode, "qcom_NextNode");
 
    function qcom_Put (Sts      : access pwr.pwr_tStatus;
 		      receiver : access constant qcom_sQid;

@@ -297,6 +297,8 @@ package Pwr is
    -- 256 byte text type.
    subtype Pwr_TText1024    is Interfaces.C.char_array (0 .. 1023);
    -- 1024 byte text type.
+   subtype Pwr_TText8192    is Interfaces.C.char_array (0 .. 8191);
+   -- 8192 byte text type.
    
    -- pwr.h:457
    subtype Pwr_TURL         is Interfaces.C.char_array (0 .. 159);

@@ -1,6 +1,6 @@
 /* 
  * Proview   Open Source Process Control.
- * Copyright (C) 2005-2012 SSAB EMEA AB.
+ * Copyright (C) 2005-2014 SSAB EMEA AB.
  *
  * This file is part of Proview.
  *
@@ -126,6 +126,7 @@ extern "C" {
 #endif
 #define pwr_AlignW(offs) (((offs) + (pwr_cAlignW-1)) & ~(pwr_cAlignW-1))
 #define pwr_AlignLW(offs) (((offs) + (pwr_cAlignLW-1)) & ~(pwr_cAlignLW-1))
+#define pwr_Align(offs, align) ((offs + (align-1)) & ~(align-1))
 
 /* PROVIEW/R types  */
 
@@ -156,7 +157,7 @@ typedef float           pwr_tFloat32;		//!< 32-bit float.
 /*_*
   @aref float64 Float64
 */
-typedef double          pwr_tFloat64;		//!< 64-big float.
+typedef double          pwr_tFloat64;		//!< 64-bit float.
 /*_*
   @aref char Char
 */
@@ -451,6 +452,10 @@ typedef char		pwr_tText256	[256];			//!< 256 byte text type.
   @aref text1024 Text1024
 */
 typedef char		pwr_tText1024	[1024];			//!< 1024 byte text type.
+/*_*
+  @aref text8192 Text8192
+*/
+typedef char		pwr_tText8192	[8192];			//!< 8192 byte text type.
 /*_*
   @aref url URL
 */
@@ -751,9 +756,13 @@ static const pwr_tDeltaTime pwr_cNDeltaTime = {0, 0};	//!< Zero deltatime consta
 #if (defined OS_POSIX) && defined HW_X86_64
 # define pwr_dFormatUInt64 "%lu"
 # define pwr_dFormatInt64 "%ld"
+# define pwr_dFormatHexInt64 "%lx"
+# define pwr_dFormatOctInt64 "%lo"
 #else
 # define pwr_dFormatUInt64 "%llu"
 # define pwr_dFormatInt64 "%lld"
+# define pwr_dFormatHexInt64 "%llx"
+# define pwr_dFormatOctInt64 "%llo"
 #endif
 /*@}*/
 

@@ -185,6 +185,21 @@ package Pwr_Class is
    type pwr_s_Param;
    subtype pwr_sParam    is pwr_s_Param; -- 288
 
+   type pwr_s_Node;
+   subtype pwr_s_Node_ErrLogTerm_array is Interfaces.C.char_array (0 .. 131);
+   subtype pwr_s_Node_ErrLogFile_array is Interfaces.C.char_array (0 .. 131);
+   type pwr_s_Node_ProcStatus_array is 
+     array (0 .. 79) of aliased pwr.pwr_tStatus;
+   type pwr_s_Node_ProcMsgSeverity_array is 
+     array (0 .. 79) of aliased pwr.pwr_tStatus;
+   type pwr_s_Node_ProcMessage_array is 
+     array (0 .. 79, 0 .. 79) of aliased char;
+   type pwr_s_Node_ProcObject_array is 
+     array (0 .. 79) of aliased pwr.pwr_tOid;
+   type pwr_s_Node_ProcTimeStamp_array is 
+     array (0 .. 79) of aliased pwr.pwr_tTime;
+   
+   subtype pwr_sNode is pwr_s_Node; -- 301
    
    type pwr_s_Bit;
    subtype Pwr_SBit      is pwr_s_Bit; -- 377
@@ -364,6 +379,31 @@ package Pwr_Class is
       end record;
    pragma Convention (C_Pass_By_Copy, pwr_s_Value);  -- pwr_class.h:848
    
+   type pwr_s_Node is 
+      record
+	 Description       : aliased pwr.pwr_tString80; 
+	 ErrLogTerm        : aliased pwr_s_Node_ErrLogTerm_array; 
+	 ErrLogFile        : aliased pwr_s_Node_ErrLogFile_array;
+	 BootTime          : aliased pwr.pwr_tTime; 
+	 BootVersion       : aliased pwr.pwr_tTime;
+	 BootPlcVersion    : aliased pwr.pwr_tProjVersion; 
+	 CurrentVersion    : aliased pwr.pwr_tTime;
+	 CurrentPlcVersion : aliased pwr.pwr_tProjVersion;
+	 Restarts          : aliased pwr.pwr_tUInt32;
+	 RestartTime       : aliased pwr.pwr_tTime;
+	 RestartStallTime  : aliased pwr.pwr_tDeltaTime;
+	 SystemTime        : aliased pwr.pwr_tTime;
+	 SystemStatus      : aliased pwr.pwr_tNetStatus;
+	 ProcStatus        : aliased pwr_s_Node_ProcStatus_array;
+	 ProcMsgSeverity   : aliased pwr_s_Node_ProcMsgSeverity_array;
+	 ProcMessage       : aliased pwr_s_Node_ProcMessage_array;
+	 ProcObject        : aliased pwr_s_Node_ProcObject_array;
+	 ProcTimeStamp     : aliased pwr_s_Node_ProcTimeStamp_array;
+	 EmergBreakTrue    : aliased pwr.pwr_tBoolean; 
+	 EmergBreakSelect  : aliased pwr.pwr_tUInt32;
+      end record;
+   pragma Convention (C_Pass_By_Copy, pwr_s_Node);  -- pwr_class.h:1061
+
    
    type pwr_s_Security   is 
       record

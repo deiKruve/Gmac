@@ -1,4 +1,4 @@
-	.file	"rt_appl.h"
+	.file	"rt_io_base.h"
 	.section	.rodata
 	.align 4
 	.type	_ZL13pwr_cNAttrRef, @object
@@ -153,5 +153,10 @@ _ZL10qcom_cQini:
 	.size	_ZL10qcom_cNAid, 8
 _ZL10qcom_cNAid:
 	.zero	8
+	.align 4
+	.type	_ZL16pwr_cInputOffset, @object
+	.size	_ZL16pwr_cInputOffset, 4
+_ZL16pwr_cInputOffset:
+	.long	8
 	.ident	"GCC: (GNU) 4.7.4 20130416 for GNAT GPL 2013 (20130314)"
 	.section	.note.GNU-stack,"",@progbits

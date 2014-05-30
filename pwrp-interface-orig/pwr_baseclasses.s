@@ -1,4 +1,4 @@
-	.file	"rt_appl.h"
+	.file	"pwr_baseclasses.h"
 	.section	.rodata
 	.align 4
 	.type	_ZL13pwr_cNAttrRef, @object
@@ -95,63 +95,5 @@ _ZL10pwr_cNTime:
 	.size	_ZL15pwr_cNDeltaTime, 16
 _ZL15pwr_cNDeltaTime:
 	.zero	16
-	.align 4
-	.type	_ZL10qcom_cNQid, @object
-	.size	_ZL10qcom_cNQid, 8
-_ZL10qcom_cNQid:
-	.zero	8
-	.align 4
-	.type	_ZL15qcom_cQnetEvent, @object
-	.size	_ZL15qcom_cQnetEvent, 8
-_ZL15qcom_cQnetEvent:
-	.long	-2147483548
-	.long	0
-	.align 4
-	.type	_ZL16qcom_cQapplEvent, @object
-	.size	_ZL16qcom_cQapplEvent, 8
-_ZL16qcom_cQapplEvent:
-	.long	-2147483547
-	.long	0
-	.align 4
-	.type	_ZL20qcom_cQmhAllHandlers, @object
-	.size	_ZL20qcom_cQmhAllHandlers, 8
-_ZL20qcom_cQmhAllHandlers:
-	.long	-2147483546
-	.long	0
-	.align 4
-	.type	_ZL20qcom_cQmhAllOutunits, @object
-	.size	_ZL20qcom_cQmhAllOutunits, 8
-_ZL20qcom_cQmhAllOutunits:
-	.long	-2147483545
-	.long	0
-	.align 4
-	.type	_ZL15qcom_cQhdServer, @object
-	.size	_ZL15qcom_cQhdServer, 8
-_ZL15qcom_cQhdServer:
-	.long	-2147483544
-	.long	0
-	.align 4
-	.type	_ZL15qcom_cQhdClient, @object
-	.size	_ZL15qcom_cQhdClient, 8
-_ZL15qcom_cQhdClient:
-	.long	-2147483543
-	.long	0
-	.align 4
-	.type	_ZL11qcom_cQnacp, @object
-	.size	_ZL11qcom_cQnacp, 8
-_ZL11qcom_cQnacp:
-	.long	-2147483542
-	.long	0
-	.align 4
-	.type	_ZL10qcom_cQini, @object
-	.size	_ZL10qcom_cQini, 8
-_ZL10qcom_cQini:
-	.long	-2147483541
-	.long	0
-	.align 4
-	.type	_ZL10qcom_cNAid, @object
-	.size	_ZL10qcom_cNAid, 8
-_ZL10qcom_cNAid:
-	.zero	8
 	.ident	"GCC: (GNU) 4.7.4 20130416 for GNAT GPL 2013 (20130314)"
 	.section	.note.GNU-stack,"",@progbits

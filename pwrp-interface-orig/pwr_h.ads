@@ -620,7 +620,9 @@ package pwr_h is
 
   --!< 1024 byte text type.
    subtype pwr_tText1024 is Interfaces.C.char_array (0 .. 1023);  -- pwr.h:453
-
+   
+   subtype Pwr_TText8192    is Interfaces.C.char_array (0 .. 8191);
+   -- 8192 byte text type.
   --_*
   --  @aref url URL
   -- 
