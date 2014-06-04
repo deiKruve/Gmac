@@ -2,7 +2,7 @@
 --                                                                          --
 --                            SILMARIL COMPONENTS                           --
 --                                                                          --
---                              S I L M A R I L                             --
+--                S I L M A R I L . F I L E _ S E L E C T O R               --
 --                                                                          --
 --                                  S p e c                                 --
 --                                                                          --
@@ -25,34 +25,22 @@
 --                     (email: jan.de.kruyf@hotmail.com)                    --
 --                                                                          --
 ------------------------------------------------------------------------------
+--
+-- implements  a Gtk.Ada file selector with limited file editing posibilities
+-- The Reader gets called with the file selected which then gets parsed for
+-- the rt part of the system.
+--
+-- there is a host of error popups here. which dont really need logging
+-- but Tasks should know about an error, so to limit polling time we should
+-- make an upcall to tasks to inform about any error.
+--
 
---  The top of the Silmaril architecture
---                  /  
---     test_it     /                    real time
---          \     /      ___________________/
---           tasks       \                  \
---             |      build_jog_path   build_hw_path
---      file_selector       |           /
---             |            |          /
---          reader          |         /
---               \_____     |________/
---                     \   /
---             Auto.Dll   jog.Dll
---
--- Auto.Dll Gets Cleared Before loading
---
--- jog.dll gets cleared when switched to jogmode.
--- Since jog is an accumulative thing 
--- jog.dll can just expand and moves done could be wiped dynamically 
--- after a certain size has been reached.  
--- In this way we keep a reasonable backtrack possibility.
--- Jog works by reading an amount of pulses every 100msec and building
--- a path from them.
- 
-package Silmaril is
-   --pragma Pure;
-   If_Debug                 : Boolean := False;
-   --If_Trace                 : Boolean := False;
-   --If_Debug                 : Boolean := True;
-   --If_Trace                 : Boolean := True;
-end Silmaril;
+--with Silmaril.Reader;
+
+package Silmaril.File_Selector is
+   
+   function Start return Boolean;
+   
+   type Error_Reporter_Type is access procedure (Err : Boolean);
+   M_Report_Error : Error_Reporter_Type;
+end Silmaril.File_Selector;

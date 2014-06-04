@@ -1,0 +1,124 @@
+------------------------------------------------------------------------------
+--                                                                          --
+--                            SILMARIL COMPONENTS                           --
+--                                                                          --
+--                          S I L M A R I L . T A S K                       --
+--                                                                          --
+--                                  B o d y                                 --
+--                                                                          --
+--                     Copyright (C) 2014, Jan de Kruyf                     --
+--                                                                          --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.                                               --
+--                                                                          --
+-- You should have received a copy of the GNU General Public License and    --
+-- a copy of the GCC Runtime Library Exception along with this program;     --
+-- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
+-- <http://www.gnu.org/licenses/>.                                          --
+--                                                                          --
+--                Silmaril is maintained by J de Kruijf Engineers           --
+--                     (email: jan.de.kruyf@hotmail.com)                    --
+--                                                                          --
+------------------------------------------------------------------------------
+--
+-- implements the task to be called from a plc thread when data input is needed.
+-- and also a reportback task
+--
+
+with Silmaril.File_Selector;
+
+package body Silmaril.tasks is
+   
+   package Astc renames Ada.Synchronous_Task_Control;
+
+   Err_Flag : Astc.Suspension_Object;
+   
+   
+   protected body Load_Result is
+      
+      function Get return Ld_Result_Type 
+      is
+      begin
+	 return Ld_Result;
+      end Get;
+      
+      procedure Set (Res : Ld_Result_Type)
+      is
+      begin
+	 Ld_Result := Res;
+      end Set;
+      
+   end Load_Result;
+   
+   
+   task type Pushed_Loadp_Button_Type (Pri : System.Priority) is
+      pragma Priority (Pri);
+      ----waits for Button_Push; 
+      -- initiates the reading operation by 
+      -- calling Silmaril.File_Selector.Start
+   end Pushed_Loadp_Button_Type;
+   
+   task body Pushed_Loadp_Button_Type
+      is
+      Fin : Boolean := False;
+   begin
+      loop
+	 Astc.Suspend_Until_True (Button_Push);
+	 Astc.Set_False (Button_Push);
+	 Load_Result.Set (Working);
+	 Fin := Silmaril.File_Selector.Start;
+	 if Fin then Load_Result.Set (Done); end if;
+	 Fin := False;
+	 -- must be aborted!!!!!!
+	 -- note the race condition: done is set until the slow thread starts
+      end loop;
+   end Pushed_Loadp_Button_Type;
+   
+   T1 : Pushed_Loadp_Button_Type (System.Default_Priority); --this is a slow thread
+
+   
+   task type Err_Check_Type (Pri : System.Priority) is
+      pragma Priority (Pri);
+      -- checks the error flag perhaps returned by the app process
+      -- and sets the protected flag accordingly;
+      -- this is to alleviate time skew;
+   end Err_Check_Type;
+   
+   task body Err_Check_Type 
+      is
+   begin
+      loop
+	 Astc.Suspend_Until_True (Err_Flag);
+	 Astc.Set_False (Err_Flag);
+	 Load_Result.Set (Error);
+	 -- must also be aborted!!
+      end loop;
+   end Err_Check_Type;
+   
+   T2 : Err_Check_Type (Thread_Priority); -- this is called by a Proview thread
+   
+   
+   procedure Report_Error (Err : Boolean := True)
+   is
+   begin
+      Astc.Set_True (Err_Flag);
+   end Report_Error;
+   
+   
+   procedure Finalize
+   is
+   begin
+      abort T1;
+      abort T2;
+   end Finalize;
+   
+begin
+   Astc.Set_False (Button_Push);
+   Astc.Set_False (Err_Flag);
+   Silmaril.File_Selector.M_Report_Error := Report_Error'access;
+end Silmaril.tasks;

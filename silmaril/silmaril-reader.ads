@@ -2,7 +2,7 @@
 --                                                                          --
 --                            SILMARIL COMPONENTS                           --
 --                                                                          --
---                              S I L M A R I L                             --
+--                        S I L M A R I L . R E A D E R                     --
 --                                                                          --
 --                                  S p e c                                 --
 --                                                                          --
@@ -26,33 +26,22 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
---  The top of the Silmaril architecture
---                  /  
---     test_it     /                    real time
---          \     /      ___________________/
---           tasks       \                  \
---             |      build_jog_path   build_hw_path
---      file_selector       |           /
---             |            |          /
---          reader          |         /
---               \_____     |________/
---                     \   /
---             Auto.Dll   jog.Dll
---
--- Auto.Dll Gets Cleared Before loading
---
--- jog.dll gets cleared when switched to jogmode.
--- Since jog is an accumulative thing 
--- jog.dll can just expand and moves done could be wiped dynamically 
--- after a certain size has been reached.  
--- In this way we keep a reasonable backtrack possibility.
--- Jog works by reading an amount of pulses every 100msec and building
--- a path from them.
- 
-package Silmaril is
-   --pragma Pure;
-   If_Debug                 : Boolean := False;
-   --If_Trace                 : Boolean := False;
-   --If_Debug                 : Boolean := True;
-   --If_Trace                 : Boolean := True;
-end Silmaril;
+--  Is called by Silmaril.File_Selector to read the file and store it
+--  in the master dll.
+-- In case of error it gets reported to either the file_selector or 
+--  via the file selctor to tasks.
+
+with Interfaces.C.Strings;
+with Silmaril.Dll;
+package Silmaril.Reader is
+   
+   function Start_Reading (Cs : in Interfaces.C.Strings.Chars_ptr)
+			  return boolean;
+   -- function Start_Reading parses the char_array it is given by 
+   -- Silmaril.File_Selector. It will return true when done, or false on error.
+   -- an error would also be indicated in a pop up window in File_Selector perhaps.
+   
+   function Start_Reading (Str : String) 
+			  return Boolean;
+   
+end Silmaril.Reader;

@@ -2,9 +2,9 @@
 --                                                                          --
 --                            SILMARIL COMPONENTS                           --
 --                                                                          --
---                              S I L M A R I L                             --
+--                S I L M A R I L . F I L E _ S E L E C T O R               --
 --                                                                          --
---                                  S p e c                                 --
+--                                  B o d y                                 --
 --                                                                          --
 --                     Copyright (C) 2014, Jan de Kruyf                     --
 --                                                                          --
@@ -25,34 +25,60 @@
 --                     (email: jan.de.kruyf@hotmail.com)                    --
 --                                                                          --
 ------------------------------------------------------------------------------
+--
+-- its a dummy
+-- this is to be replaced with the proper file selector
 
---  The top of the Silmaril architecture
---                  /  
---     test_it     /                    real time
---          \     /      ___________________/
---           tasks       \                  \
---             |      build_jog_path   build_hw_path
---      file_selector       |           /
---             |            |          /
---          reader          |         /
---               \_____     |________/
---                     \   /
---             Auto.Dll   jog.Dll
---
--- Auto.Dll Gets Cleared Before loading
---
--- jog.dll gets cleared when switched to jogmode.
--- Since jog is an accumulative thing 
--- jog.dll can just expand and moves done could be wiped dynamically 
--- after a certain size has been reached.  
--- In this way we keep a reasonable backtrack possibility.
--- Jog works by reading an amount of pulses every 100msec and building
--- a path from them.
+with Ada.Text_IO;
+with POSIX.IO;
+with POSIX.Memory_Mapping;
+with System.Storage_Elements;
+with Silmaril.Reader;
+
+package body Silmaril.File_Selector is
+   
+   function Start return Boolean
+   is
+   begin
+      delay(1.0);
+      M_Report_Error (True);
+      delay (1.0);
+      return True;
+   end Start;
+   
+   
+procedure Read_Entire_File is
+   use POSIX, POSIX.IO, POSIX.Memory_Mapping;
+   use System.Storage_Elements;
  
-package Silmaril is
-   --pragma Pure;
-   If_Debug                 : Boolean := False;
-   --If_Trace                 : Boolean := False;
-   --If_Debug                 : Boolean := True;
-   --If_Trace                 : Boolean := True;
-end Silmaril;
+   Text_File    : File_Descriptor;
+   Text_Size    : System.Storage_Elements.Storage_Offset;
+   Text_Address : System.Address;
+   
+   Reading_Result : Boolean := False;
+begin
+   Text_File := Open (Name => "ring.post",
+                      Mode => Read_Only);
+   Text_Size := Storage_Offset (File_Size (Text_File));
+   Text_Address := Map_Memory (Length     => Text_Size,
+                               Protection => Allow_Read,
+                               Mapping    => Map_Shared,
+                               File       => Text_File,
+                               Offset     => 0);
+ 
+   declare
+      Text : String (1 .. Natural (Text_Size));
+      for Text'Address use Text_Address;
+   begin
+      -- Ada.Text_IO.Put (Text);
+      Reading_Result := Silmaril.Reader.Start_Reading (Text);
+   end;
+ 
+   Unmap_Memory (First  => Text_Address,
+                 Length => Text_Size);
+   Close (File => Text_File);
+exception
+   when others => Ada.Text_IO.Put_Line ("file reader stuffup");
+end Read_Entire_File;
+   
+end Silmaril.File_Selector;

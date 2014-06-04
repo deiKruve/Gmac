@@ -1,0 +1,204 @@
+------------------------------------------------------------------------------
+--                                                                          --
+--                            SILMARIL COMPONENTS                           --
+--                                                                          --
+--                          S I L M A R I L . D L L                         --
+--                                                                          --
+--                                  B o d y                                 --
+--                                                                          --
+--                     Copyright (C) 2014, Jan de Kruyf                     --
+--                                                                          --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.                                               --
+--                                                                          --
+-- You should have received a copy of the GNU General Public License and    --
+-- a copy of the GCC Runtime Library Exception along with this program;     --
+-- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
+-- <http://www.gnu.org/licenses/>.                                          --
+--                                                                          --
+--                Silmaril is maintained by J de Kruijf Engineers           --
+--                     (email: jan.de.kruyf@hotmail.com)                    --
+--                                                                          --
+------------------------------------------------------------------------------
+
+-- implementation of a protected doubly linked list
+--
+
+with Ada.Unchecked_Deallocation;
+
+package body Silmaril.Dll is
+   
+   protected body Program_Que is
+      procedure Initialize is
+      begin
+	 Anchor.Pos   := null; 
+	 Anchor.Prev  := Anchor;
+	 Anchor.mPrev := Anchor;
+	 Anchor.Next  := Anchor;
+	 Anchor.mNext := Anchor;
+      end Initialize;
+      
+      procedure Unlink_From_Dllist (This : access Dllist_Type)
+      is
+      begin 
+	 --Open := False;
+	 This.Prev.Next := This.Next;
+	 This.Next.Prev := This.Prev;
+	 if This.Mnext /= This then
+	    This.Mprev.Mnext := This.Mnext;
+	 end if;
+	 if This.Mprev /= This then
+	    This.mNext.mPrev := This.mPrev;
+	 end if;
+	 --Open := True;
+      end Unlink_From_Dllist;
+      
+      entry Get_Item (N : access Dllist_Type'Class; 
+		      Pos : in out Posvec_Class_Access_Type)
+      when Open is
+      begin
+	 Open := False;
+	 Pos := N.Pos;
+	 -- returns null when N is on the anchor
+	 Open := True;
+      end Get_Item;
+      
+      entry Insert_Pv_Before (This : access Posvec_Type'Class;  
+			      next : access Dllist_Type)
+      when Open is
+	 P : Dllist_Access_Type := 
+	   new Dllist_Type'(Pos   => Posvec_Class_Access_Type (This), 
+			    Prev  => Next.prev, 
+			    Next  => Dllist_Access_Type (Next),
+			    Mprev => null, Mnext => null);
+      begin
+	 Open := False;
+	 Next.Prev   := P;
+	 P.Prev.Next := P;
+	 Open := True;
+      end Insert_Pv_Before;
+      
+      entry Insert_Pv_After
+	(This : access Posvec_Type'Class;   
+	 Prev : access Dllist_Type )
+      when Open is
+	 P : Dllist_Access_Type := 
+	   new Dllist_Type'(Pos   => Posvec_Class_Access_Type (This), 
+			    Prev  => Dllist_Access_Type (Prev), 
+			    Next  => Prev.Next,
+			    Mprev => null, Mnext => null);
+      begin
+	 Open := False;
+	 Prev.Next   := P;
+	 P.Next.Prev := P;
+	 Open := True;
+      end Insert_Pv_After;
+      
+      entry Unlink_Dllist_Item (This : access Dllist_Type)
+      when Open is
+      begin
+	 Open := False; 
+	 Unlink_From_Dllist (This);
+	 Open := True;
+      end Unlink_Dllist_Item;
+      
+      ------------------------
+      -- 3 axis item entrys --
+      ------------------------
+      entry Get_Item (N   : access Dllist_Type'Class; 
+		      Pos : in out Posvec3_Class_Access_Type)
+      when Open is
+      begin
+	 Open := False;
+	 Pos := Posvec3_Class_Access_Type (N.Pos);
+	 -- returns null when N is on the anchor
+	 Open := True;
+      end Get_Item;
+      
+      entry Insert_Pv_Before (This        : access Posvec3_Type'Class;  
+			      Next, Mnext : access Dllist_Type)
+      when Open is
+	 P : Dllist_Access_Type := 
+	   new Dllist_Type'(Pos  => Posvec_Class_Access_Type (This), 
+			    Prev => Next.prev, Next => Dllist_Access_Type (Next),
+			    Mprev => Mnext.Mprev, 
+			    Mnext => Dllist_Access_Type (Mnext)); 
+      begin
+	 Open := False;
+	 Next.Prev     := P;
+	 Mnext.Mprev   := P;
+	 P.Prev.Next   := P;
+	 P.Mprev.Mnext := P;
+	 Open := True;
+      end Insert_Pv_Before;
+      
+      entry Insert_Pv_After (This        : access Posvec3_Type'Class;   
+			     Prev, Mprev : access Dllist_Type)
+      when Open is
+	 P : Dllist_Access_Type := 
+	   new Dllist_Type'(Pos => Posvec_Class_Access_Type (This), 
+			    Prev => Dllist_Access_Type (Prev), Next => Prev.Next,
+			    Mprev => Dllist_Access_Type (Mprev), 
+			    Mnext => Mprev.mnext);
+      begin
+	 Open := False;
+	 Prev.Next     := P;
+	 Mprev.MNext   := P;
+	 P.Next.Prev   := P;
+	 P.Mnext.Mprev := P;
+	 Open := True;
+      end Insert_Pv_After;
+      
+      entry Unlink_Pos3_Node (This : access Dllist_Type)
+      when Open is
+	 procedure Free_Posvec3 is 
+	    new Ada.Unchecked_Deallocation(Posvec3_Type, Posvec3_Access_type);
+      begin
+	 Open := False;
+	 Free_Posvec3 (Posvec3_Access_Type (This.Pos));
+	 Unlink_From_Dllist (This);
+	 Open := True;
+      end Unlink_Pos3_Node;
+      
+      entry Get_Item (N   : access Dllist_Type'Class; 
+		      Pos : in out Posvec9_Access_Type)
+      when Open is
+      begin
+	 Open := False;
+	 Pos := Posvec9_Access_Type (N.Pos);
+	 -- returns null when N is on the anchor
+	 Open := True;
+      end Get_Item;
+      
+      entry Unlink_Pos9_Node  (This : access Dllist_Type)
+      when Open is
+	 procedure Free_Posvec9 is 
+	    new Ada.Unchecked_Deallocation(Posvec9_Type, Posvec9_Access_type);
+      begin
+	 Open := False;
+	 Free_Posvec9 (Posvec9_Access_Type (This.Pos));
+	 Unlink_From_Dllist (This);
+	 Open := True;
+      end Unlink_Pos9_Node;
+      
+      entry Unlink_Pos_S_Node  (This : access Dllist_Type)
+      when Open is
+	 procedure Free_Posvec_S is 
+	    new Ada.Unchecked_Deallocation(Posvec_S_Type, Posvec_S_Access_Type);
+      begin
+	 Open := False;
+	 Free_Posvec_S (Posvec_S_Access_Type (This.Pos));
+	 Unlink_From_Dllist (This);
+	 Open := True;
+      end Unlink_Pos_S_Node;
+      
+   end Program_Que;
+   
+   
+end Silmaril.Dll;
+

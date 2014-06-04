@@ -11,3 +11,5 @@ edit-post:
 	emacs postp.adb ./post/ebwm1-machin.adb ./post/ebwm1-machin.ads ./post/post-scanner.adb ./post/post-scanner.ads ./post/post-parser.adb ./post/post-parser.ads ./post/post.ads ./gnatcoll/gnatcoll-traces.ads
 edit-gscan:
 	emacs testgscan.adb ./gmactextscan/gmactextscan.ads ./gmactextscan/gmactextscan.adb ./gmactextscan/generic_scanner.ads ./gnatcoll/gnatcoll-traces.ads
+edit-silmaril:
+	emacs silmatest.adb ./silmaril/silmaril-dll.adb ./silmaril/silmaril-dll.ads ./silmaril/silmaril-file_selector.adb ./silmaril/silmaril-file_selector.ads ./silmaril/silmaril-reader.adb ./silmaril/silmaril-reader.ads ./silmaril/silmaril-tasks.adb ./silmaril/silmaril-tasks.ads ./silmaril/silmaril.ads ./gmactextscan/generic_scanner.ads

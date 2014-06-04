@@ -1,0 +1,73 @@
+# I put a stop X    0.000 Y  -50.000 Z   50.000
+# I put a stop X    0.000 Y  -50.000 Z   50.000
+# I put a stop X    0.000 Y  -50.000 Z  -50.000
+# I put a stop X    0.000 Y  -50.000 Z  -50.000
+# I put a stop X    0.000 Y   50.000 Z  -50.000
+# I put a stop X    0.000 Y   50.000 Z  -50.000
+# I put a stop X    0.000 Y   50.000 Z   50.000
+# I put a stop X    0.000 Y   50.000 Z   50.000
+# I put a stop X    0.000 Y  -50.000 Z   50.000
+# I put a stop X    0.000 Y  -50.000 Z   50.000
+# I put a stop X    0.000 Y  -50.000 Z  -50.000
+# I put a stop X    0.000 Y   50.000 Z  -50.000
+# I put a stop X    0.000 Y   50.000 Z   50.000
+#  SQUARE TEST
+CLAMP A
+CLAMP B
+CLAMP C
+F  1000.0 
+FADEIN     0.50 secs
+FROM X    0.000 Y    0.000 Z  200.000 T    2.000 D 12.56637 istop : FALSE
+# point label: STARTP  
+GOTO X    0.000 Y  -50.000 Z   50.000 T    2.000 D  1.24905 istop : TRUE
+# I put a stop X    0.000 Y  -50.000 Z   50.000
+# point label:  FROMP  
+RELEASE A
+RELEASE B
+RELEASE C
+SPINDL ON  50.4 %
+#  **FIRST MOVE**
+F   100.0 
+GOTO X    0.000 Y   50.000 Z   50.000 T    2.000
+ A  0.00000 B -0.00000 C  0.00000 D  0.00000 istop : TRUE
+# I put a stop X    0.000 Y   50.000 Z   50.000
+# I put a stop X    0.000 Y   50.000 Z   50.000
+SPINDL OFF        
+GOTO X    0.000 Y  -50.000 Z   50.000 T    2.000
+ A  1.57080 B -0.00000 C  0.00000 D  0.00000 istop : TRUE
+# I put a stop X    0.000 Y   50.000 Z   50.000
+#  **SECOND MOVE**
+SPINDL ON  50.4 %
+GOTO X    0.000 Y   50.000 Z   50.000 T    2.000
+ A  1.57080 B -0.00000 C  0.00000 D  0.00000 istop : TRUE
+# I put a stop X    0.000 Y   50.000 Z  -50.000
+# I put a stop X    0.000 Y   50.000 Z  -50.000
+SPINDL OFF        
+GOTO X    0.000 Y  -50.000 Z   50.000 T    2.000
+ A  3.14159 B -0.00000 C  0.00000 D  0.00000 istop : TRUE
+# I put a stop X    0.000 Y   50.000 Z  -50.000
+#  **THIRD MOVE**
+SPINDL ON  50.4 %
+GOTO X    0.000 Y   50.000 Z   50.000 T    2.000
+ A  3.14159 B -0.00000 C  0.00000 D  0.00000 istop : TRUE
+# I put a stop X    0.000 Y  -50.000 Z  -50.000
+# I put a stop X    0.000 Y  -50.000 Z  -50.000
+SPINDL OFF        
+GOTO X    0.000 Y  -50.000 Z   50.000 T    2.000
+ A -1.57080 B -0.00000 C  0.00000 D  0.00000 istop : TRUE
+# I put a stop X    0.000 Y  -50.000 Z  -50.000
+#  **FORTH MOVE**
+SPINDL ON  50.4 %
+GOTO X    0.000 Y   50.000 Z   50.000 T    2.000
+ A -1.57080 B -0.00000 C  0.00000 D  0.00000 istop : TRUE
+# I put a stop X    0.000 Y  -50.000 Z   50.000
+# I put a stop X    0.000 Y  -50.000 Z   50.000
+SPINDL OFF        
+GOTO X    0.000 Y  -50.000 Z   50.000 T    0.000
+ A  0.00000 B -0.00000 C  0.00000 D  0.00000 istop : TRUE
+# I put a stop X    0.000 Y  -50.000 Z   50.000
+F  2000.0 
+GOTO X    0.000 Y    0.000 Z  200.000 T    2.000
+ A  0.00000 B -0.00000 C  0.00000 D 12.56637 istop : FALSE
+# point label: STARTP  
+FINI
