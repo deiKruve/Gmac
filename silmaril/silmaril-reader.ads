@@ -35,6 +35,11 @@ with Interfaces.C.Strings;
 with Silmaril.Dll;
 package Silmaril.Reader is
    
+   Prog_Anchor : aliased Silmaril.Dll.Dllist_Access_Type;
+   Prog_Q      : Dll.Program_Queue_Type;
+   -- this stores the program that comes from the postprocessor for further
+   -- processing
+   
    function Start_Reading (Cs : in Interfaces.C.Strings.Chars_ptr)
 			  return boolean;
    -- function Start_Reading parses the char_array it is given by 

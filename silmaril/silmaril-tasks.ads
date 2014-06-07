@@ -35,7 +35,7 @@ with Ada.Synchronous_Task_Control;
 
 package Silmaril.tasks is
    
-   Thread_Priority : constant  System.Priority := 60;
+   -- Thread_Priority : constant  System.Priority := 60;
    -- this defines the ceiling priority of 'protected Load_Result'
    -- it must match the calling thread.
    
@@ -51,7 +51,7 @@ package Silmaril.tasks is
       -- perhaps set this to Working before setting Button_Push in order
       -- to avoid a race condition.
    private
-      pragma Priority(Thread_Priority); -- All callers must have priority 
+      pragma Priority(Load_Result_Thread_Priority); -- All callers must have priority 
 					-- no greater than Thread_Priority
       Ld_Result : Ld_Result_Type; -- Shared data declaration
    end Load_Result;
@@ -63,6 +63,8 @@ package Silmaril.tasks is
    -- set true to initiate reading of the program file from the post
    -- the reading operation will be initiated in due course by 
    -- calling Silmaril.File_Selector.Start
+   -- NOTE: make sure to 'Silmaril.tasks.Load_Result.Set (Silmaril.tasks.Working);'
+   -- before pushing this button otherwise a glitch will result.
    
    procedure Finalize;
    -- call at the End of Things to abort the tasks.

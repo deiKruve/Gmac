@@ -80,10 +80,33 @@ package Silmaril.Dll is
 	C      : Posangl_Type := 0.0;  -- rotation angles
    end record;
    
+   
+   ---------------------------------
+   -- the list item for a command --
+   ---------------------------------
+   type Cmd_Token_Type is
+     (
+      Clamp, Release,          -- digital m-functions
+      Spindl, Fadein, Fadeout, -- analog M-fuctions
+      Beam, Sixa, F,           -- analog values
+      Fini);
+   type Axis_Token_Type is  -- same layout as reader.pos_token_type
+     (A, B, C, X, Y, Z);
+   
+   type Posvec_C_Type is tagged;
+   type Posvec_C_Access_Type is access  all Posvec_C_Type;
+   type Posvec_C_Type is new Posvec_Type 
+     with record
+   	C   : Cmd_Token_Type;
+	Ax  : Axis_Token_Type;
+	Val : Long_Float;
+	Tr  : Boolean;
+   end record;
+   
    ----------------------------------------
    -- the list item for a command string --
    ----------------------------------------
-   type Posvec_S_Type;
+   type Posvec_S_Type is tagged;
    type Posvec_S_Access_Type is access  all Posvec_S_Type;
    type Posvec_S_Type is new Posvec_Type 
      with record
@@ -96,22 +119,32 @@ package Silmaril.Dll is
    -- 2 lists that are interwoven.
    -- prev and next link all records, but
    -- mprevand mnext only the movement records.
-   type Dllist_Type is tagged private;
+   
+   type Dllist_Type;
    type Dllist_Access_Type is access all Dllist_Type;
-   protected type Program_Que is
-      procedure Initialize;
-      --entry Add_Item (N : access Dllist_Type'Class);
-      --entry Available ();
+     
+   type Dllist_Type is tagged record
+      --Pos            : Posvec_Class_Access_Type := null;
+      Pos            : access Posvec_Type'Class;
+      Prev, Next,
+	Mprev, Mnext : Dllist_Access_Type       := null;
+   end record;
+
+   procedure Initialize (Anchor : access Dllist_Type);
+   
+   protected type Program_Queue_Type is
+      pragma Priority (Prog_Q_Thread_Priority);
+      
+      entry Finalize (Anchor : access Dllist_Type);
       entry Get_Item (N : access Dllist_Type'Class; 
 		      Pos : in out Posvec_Class_Access_Type);
       entry Insert_Pv_Before (This : access Posvec_Type'Class;  
-			      next : access Dllist_Type)
-	with Pre => This /= null and Next /= null;
+			      next : access Dllist_Type);
+	--with Pre => This /= null and Next /= null;
       entry Insert_Pv_After (This : access Posvec_Type'Class;   
-			     Prev : access Dllist_Type )
-	with Pre => This /= null and Prev /= null;
+			     Prev : access Dllist_Type );
+	--with Pre => This /= null and Prev /= null;
       entry Unlink_Dllist_Item (This : access Dllist_Type);
-	--with Pre => This.Pos = null;
       -- destroy a Dllist-item in the link
       
       ------------------------
@@ -120,16 +153,16 @@ package Silmaril.Dll is
       entry Get_Item (N : access Dllist_Type'Class; 
 		      Pos : in out Posvec3_Class_Access_Type);
       entry Insert_Pv_Before (This        : access Posvec3_Type'Class;  
-			      Next, Mnext : access Dllist_Type)
-	with Pre => This /= null and Next /= null and Mnext /= null;
+			      Next, Mnext : access Dllist_Type);
+	--with Pre => This /= null and Next /= null and Mnext /= null;
       -- inserts 'this' before 'next' and before 'mnext'
       -- so we must know who 'mnext' is, normally the anchor
       --  i.e. the same as next
       -- only for movement records
       
       entry Insert_Pv_After (This        : access Posvec3_Type'Class;   
-			     Prev, Mprev : access Dllist_Type)
-	with Pre => This /= null and Prev /= null and Mprev /= null;
+			     Prev, Mprev : access Dllist_Type);
+	--with Pre => This /= null and Prev /= null and Mprev /= null;
       -- inserts 'this' after 'prev' and after 'mprev'
       -- so we must know who 'mprev' is, normally the anchor
       --  i.e. the same as prev
@@ -138,9 +171,9 @@ package Silmaril.Dll is
       entry Unlink_Pos3_Node (This : access Dllist_Type);
       -- unlink a pos3 node from the chain
       
-      ------------------
-      -- 9 axis entry --
-      ------------------
+      -------------------
+      -- 9 axis entrys --
+      -------------------
       entry Get_Item (N   : access Dllist_Type'Class; 
 		      Pos : in out Posvec9_Access_Type);
       
@@ -152,17 +185,10 @@ package Silmaril.Dll is
       entry Unlink_Pos_S_Node  (This : access Dllist_Type);
       
    private
-      Anchor : aliased Dllist_Access_Type := new Dllist_Type;
       Open : Boolean := False;
-   end Program_Que;
+   end Program_Queue_Type;
 
 private
    
    
-  
-   type Dllist_Type is tagged record
-      Pos            : Posvec_Class_Access_Type := null;
-      Prev, Next,
-	Mprev, Mnext : Dllist_Access_Type       := null;
-   end record;
 end Silmaril.Dll;

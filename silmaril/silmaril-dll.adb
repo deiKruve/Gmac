@@ -33,18 +33,32 @@ with Ada.Unchecked_Deallocation;
 
 package body Silmaril.Dll is
    
-   protected body Program_Que is
-      procedure Initialize is
-      begin
-	 Anchor.Pos   := null; 
-	 Anchor.Prev  := Anchor;
-	 Anchor.mPrev := Anchor;
-	 Anchor.Next  := Anchor;
-	 Anchor.mNext := Anchor;
-      end Initialize;
+   procedure Initialize (Anchor : access Dllist_Type)
+   is
+   begin
+      --Anchor := new Dllist_Type; must be done before calling
+      Anchor.Pos   := null; 
+      Anchor.Prev  := Dllist_Access_Type (Anchor);
+      Anchor.mPrev := Dllist_Access_Type (Anchor);
+      Anchor.Next  := Dllist_Access_Type (Anchor);
+      Anchor.mNext := Dllist_Access_Type (Anchor);
+   end Initialize;
+   
+   protected body Program_Queue_Type is
+      
+      --  entry Set_Ceiling_Priority (Pq : Program_Queue_Type; Pri : System.Any_Priority)
+      --  when Open is
+      --  begin
+      --  	 Open := False;
+      --  	 Prog_Q'Priority := Pri;
+      --  	 Open := True;
+      --  end Set_Ceiling_Priority;
       
       procedure Unlink_From_Dllist (This : access Dllist_Type)
       is
+	 procedure Free_Dllist is
+	    new Ada.Unchecked_Deallocation (Dllist_Type, Dllist_Access_type);
+	 That : Dllist_Access_Type := Dllist_Access_Type (This);
       begin 
 	 --Open := False;
 	 This.Prev.Next := This.Next;
@@ -55,6 +69,7 @@ package body Silmaril.Dll is
 	 if This.Mprev /= This then
 	    This.mNext.mPrev := This.mPrev;
 	 end if;
+	 Free_Dllist (That);
 	 --Open := True;
       end Unlink_From_Dllist;
       
@@ -63,7 +78,7 @@ package body Silmaril.Dll is
       when Open is
       begin
 	 Open := False;
-	 Pos := N.Pos;
+	 Pos := Posvec_Class_Access_Type (N.Pos);
 	 -- returns null when N is on the anchor
 	 Open := True;
       end Get_Item;
@@ -154,16 +169,26 @@ package body Silmaril.Dll is
 	 Open := True;
       end Insert_Pv_After;
       
+      
+      procedure Unlink_This_Pos3_Node (This : access Dllist_Type)
+      is
+	 procedure Free_Posvec3 is 
+	    new Ada.Unchecked_Deallocation (Posvec3_Type, Posvec3_Access_type);
+      begin
+	 Free_Posvec3 (Posvec3_Access_Type (This.Pos));
+	 Unlink_From_Dllist (This);
+      end Unlink_This_Pos3_Node;
+      
       entry Unlink_Pos3_Node (This : access Dllist_Type)
       when Open is
 	 procedure Free_Posvec3 is 
-	    new Ada.Unchecked_Deallocation(Posvec3_Type, Posvec3_Access_type);
+	    new Ada.Unchecked_Deallocation (Posvec3_Type, Posvec3_Access_type);
       begin
 	 Open := False;
-	 Free_Posvec3 (Posvec3_Access_Type (This.Pos));
-	 Unlink_From_Dllist (This);
+	 Unlink_This_Pos3_Node (This);
 	 Open := True;
       end Unlink_Pos3_Node;
+      
       
       entry Get_Item (N   : access Dllist_Type'Class; 
 		      Pos : in out Posvec9_Access_Type)
@@ -175,29 +200,63 @@ package body Silmaril.Dll is
 	 Open := True;
       end Get_Item;
       
-      entry Unlink_Pos9_Node  (This : access Dllist_Type)
-      when Open is
+      
+      procedure Unlink_This_Pos9_Node  (This : access Dllist_Type)
+      is
 	 procedure Free_Posvec9 is 
 	    new Ada.Unchecked_Deallocation(Posvec9_Type, Posvec9_Access_type);
       begin
+	  Free_Posvec9 (Posvec9_Access_Type (This.Pos));
+	  Unlink_From_Dllist (This);
+      end Unlink_This_Pos9_Node;
+      
+      entry Unlink_Pos9_Node  (This : access Dllist_Type)
+      when Open is
+      begin
 	 Open := False;
-	 Free_Posvec9 (Posvec9_Access_Type (This.Pos));
-	 Unlink_From_Dllist (This);
+	 Unlink_This_Pos9_Node (This);
 	 Open := True;
       end Unlink_Pos9_Node;
       
-      entry Unlink_Pos_S_Node  (This : access Dllist_Type)
-      when Open is
+      
+      procedure Unlink_This_Pos_S_Node (This : access Dllist_Type)
+      is
 	 procedure Free_Posvec_S is 
 	    new Ada.Unchecked_Deallocation(Posvec_S_Type, Posvec_S_Access_Type);
       begin
+	  Free_Posvec_S (Posvec_S_Access_Type (This.Pos));
+	  Unlink_From_Dllist (This);
+      end Unlink_This_Pos_S_Node;
+      
+      entry Unlink_Pos_S_Node  (This : access Dllist_Type)
+      when Open is
+      begin
 	 Open := False;
-	 Free_Posvec_S (Posvec_S_Access_Type (This.Pos));
-	 Unlink_From_Dllist (This);
+	 Unlink_This_Pos_S_Node (This);
 	 Open := True;
       end Unlink_Pos_S_Node;
       
-   end Program_Que;
+      
+      entry Finalize (Anchor : access Dllist_Type)
+      when Open is
+	 This, Next : access Dllist_Type := Anchor.Next;
+      begin
+	 Open := False;
+	 while This /= Anchor loop
+	    Next := This.Next;
+	    if This.Pos in Posvec_S_Access_Type then 
+	       Unlink_This_Pos_S_Node (This);
+	    elsif This.Pos in Posvec9_Access_Type then
+	       Unlink_This_Pos9_Node (This);
+	    elsif This.Pos in Posvec3_Access_Type then
+	       Unlink_This_Pos3_Node (This);
+	    end if;
+	    This := Next;
+	 end loop;
+	 Open := True;
+      end Finalize;   
+      
+   end Program_Queue_Type;
    
    
 end Silmaril.Dll;

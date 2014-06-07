@@ -48,8 +48,23 @@
 -- In this way we keep a reasonable backtrack possibility.
 -- Jog works by reading an amount of pulses every 100msec and building
 -- a path from them.
- 
+
+with System;
+
 package Silmaril is
+   Pushed_Loadp_Button_Priority : 
+     constant System.Priority := System.Default_Priority; 
+   -- this defines the ceiling priority of 'Silmaril.Tasks.Pushed_Loadp_Button_Type'
+   -- it is a utility thread
+   
+   Load_Result_Thread_Priority : constant  System.Priority := 60;
+   -- this defines the ceiling priority of 'Silmaril.Tasks.Protected Load_Result'
+   -- it must match the calling threads.
+   Prog_Q_Thread_Priority : constant  System.Priority := 60;
+   -- this defines the ceiling priority of 'Silmaril.Reader.Protected Proq_Q'
+   -- it must match the calling threads.
+   
+   
    --pragma Pure;
    If_Debug                 : Boolean := False;
    --If_Trace                 : Boolean := False;

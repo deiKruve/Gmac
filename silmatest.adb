@@ -10,17 +10,17 @@ with System;
 with Silmaril.Tasks;
 with Ada.Synchronous_Task_Control;
 
-with GNATCOLL.Traces;
+---with GNATCOLL.Traces;
 
 procedure Silmatest is
    
    package Astc renames Ada.Synchronous_Task_Control;
    package St   renames Silmaril.Tasks;
-   package Gct  renames GNATCOLL.Traces;
+   ---package Gct  renames GNATCOLL.Traces;
    
-   Stream1   : constant Gct.Trace_Handle := Gct.Create ("POSTP");
-   Stream2   : constant Gct.Trace_Handle := Gct.Create ("POSTP.EXCEPTIONS");
-   Debug_Str : constant Gct.Trace_Handle := Gct.Create ("POSTP.DEBUG");
+   --Stream1   : constant Gct.Trace_Handle := Gct.Create ("POSTP");
+   --Stream2   : constant Gct.Trace_Handle := Gct.Create ("POSTP.EXCEPTIONS");
+   --Debug_Str : constant Gct.Trace_Handle := Gct.Create ("POSTP.DEBUG");
    
    Res, Last_Res : St.Ld_Result_Type;
    use type St.Ld_Result_Type;

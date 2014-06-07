@@ -79,7 +79,8 @@ package body Silmaril.tasks is
       end loop;
    end Pushed_Loadp_Button_Type;
    
-   T1 : Pushed_Loadp_Button_Type (System.Default_Priority); --this is a slow thread
+   T1 : Pushed_Loadp_Button_Type (Pushed_Loadp_Button_Priority); 
+   --this is a slow thread
 
    
    task type Err_Check_Type (Pri : System.Priority) is
@@ -100,7 +101,8 @@ package body Silmaril.tasks is
       end loop;
    end Err_Check_Type;
    
-   T2 : Err_Check_Type (Thread_Priority); -- this is called by a Proview thread
+   T2 : Err_Check_Type (Load_Result_Thread_Priority); 
+   -- this is called by a Proview thread
    
    
    procedure Report_Error (Err : Boolean := True)
