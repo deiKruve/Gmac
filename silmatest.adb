@@ -1,21 +1,32 @@
 with Text_Io; 
 --with Ada.Command_Line;
 --with Ada.Characters.Handling;
---with Ada.Text_IO;
+with Ada.Text_IO;
+with Ada.Text_IO.Text_Streams;
 --with Ada.Strings.Unbounded;
 --with Gnat.Strings;
 with System;
 --with Silmaril.File_Selector;
---with Silmaril.Reader;
+with Silmaril.Reader;
 with Silmaril.Tasks;
+with Silmaril.Dll;
 with Ada.Synchronous_Task_Control;
-
+with Ada.Exceptions;
 ---with GNATCOLL.Traces;
 
 procedure Silmatest is
    
+   package Tio renames Text_Io; 
+   package Tiots renames Ada.Text_IO.Text_Streams;
    package Astc renames Ada.Synchronous_Task_Control;
    package St   renames Silmaril.Tasks;
+   package Sr    renames Silmaril.Reader;
+   package Dll renames Silmaril.Dll;
+   
+   -- anything distance --
+   subtype Posvec1_Type is Long_Float;
+   package Pvio  is new Ada.Text_IO.Float_IO (Num => Posvec1_Type);
+   
    ---package Gct  renames GNATCOLL.Traces;
    
    --Stream1   : constant Gct.Trace_Handle := Gct.Create ("POSTP");
@@ -24,6 +35,112 @@ procedure Silmatest is
    
    Res, Last_Res : St.Ld_Result_Type;
    use type St.Ld_Result_Type;
+   
+   
+   procedure Output_Program 
+     -- outputs the dllist that has been read from the nc file 
+     -- for checking purposes.
+   is
+      List : aliased Dll.Dllist_Access_Type := Sr.Prog_Anchor.Next;
+      Listpos9 : aliased Dll.Posvec9_Access_Type;
+      Xstr, Ystr, Zstr, Tstr, Fstr   : String := "        ";
+      Astr, Bstr, Cstr, d3dstr       : String := "        ";
+      Cmdstr                         : String := "    ";
+      Ofd      : Tio.File_Type;
+      Ostr     : Tiots.Stream_Access := Tiots.Stream (Tio.Standard_Output);
+      use type Dll.Dllist_Access_Type;
+      use type Dll.Cmd_Token_Type;
+   begin
+      Ostr := Tiots.Stream (Tio.Standard_Output);
+      loop
+	 if List.Pos.all in Dll.Posvec9_Type then
+	    Listpos9 := Dll.Posvec9_Access_Type (List.Pos);
+	    Pvio.Put (Xstr, Listpos9.X, 3, 0);
+	    Pvio.Put (Ystr, Listpos9.Y, 3, 0);
+	    Pvio.Put (Zstr, Listpos9.Z, 3, 0);
+	    Pvio.Put (Tstr, Posvec1_Type (Listpos9.Tightness), 3, 0);
+	    Pvio.Put (Fstr, Listpos9.Fedrat, 2, 0);
+	    if Listpos9.From then Cmdstr := "FROM";
+	    else Cmdstr := "GOTO"; end if;
+	    String'Write (Ostr, Cmdstr & " X " & Xstr & " Y " & Ystr & 
+			    " Z " & Zstr & " T " & Tstr & " F " & Fstr & ASCII.LF);
+	    Pvio.Put (Astr, Posvec1_Type (Listpos9.A), 5, 0);
+	    Pvio.Put (Bstr, Posvec1_Type (Listpos9.B), 5, 0);
+	    Pvio.Put (Cstr, Posvec1_Type (Listpos9.C), 5, 0);
+	    Pvio.Put (d3dstr, Posvec1_Type (Listpos9.d3d), 5, 0);
+	    String'Write (Ostr, " A " & Astr & " B " & Bstr & " C " & Cstr & 
+			    " D " & D3dstr & " istop : " & 
+			    Boolean'Image (ListPos9.Istop) & ASCII.LF);
+	 elsif List.Pos.all in Dll.Posvec_S_Type  then
+	    String'Write (Ostr, Dll.Posvec_S_Access_Type (List.Pos).Sa.all & 
+			    ASCII.LF);
+	 elsif List.Pos.all in Dll.Posvec_C_Type then
+	    declare
+	       Cmdstrn : String := Dll.Cmd_Token_Type'Image 
+		 (Dll.Posvec_C_Access_Type (List.Pos).C);
+	    begin
+	       if Dll.Posvec_C_Access_Type (List.Pos).C = Dll.Clamp or 
+		 Dll.Posvec_C_Access_Type (List.Pos).C = Dll.Release then
+		  declare
+		     Axstrn  : String := Dll.Axis_Token_Type'Image 
+		       (Dll.Posvec_C_Access_Type (List.Pos).Ax);
+		  begin
+		     String'Write (Ostr, Cmdstrn & " " & Axstrn);
+		     Tio.Put_Line ("");
+		  end;
+	       elsif Dll.Posvec_C_Access_Type (List.Pos).C = Dll.Fadein or
+		 Dll.Posvec_C_Access_Type (List.Pos).C = Dll.Fadeout then
+		  declare
+		     Valstrn : String := Long_Float'Image 
+		       (Dll.Posvec_C_Access_Type (List.Pos).Val);
+		  begin
+		     String'Write (Ostr, Cmdstrn & " " & Valstrn & "secs");
+		     Tio.Put_Line ("");
+		  end;
+	       elsif Dll.Posvec_C_Access_Type (List.Pos).C = Dll.F then
+		  declare  -- this section is not applicable
+		     Valstrn : String := Long_Float'Image 
+		       (Dll.Posvec_C_Access_Type (List.Pos).Val);
+		  begin
+		     String'Write (Ostr, Cmdstrn & " " & Valstrn);
+		     Tio.Put_Line ("");
+		  end;
+	       elsif Dll.Posvec_C_Access_Type (List.Pos).C = Dll.Spindl or
+		 Dll.Posvec_C_Access_Type (List.Pos).C = Dll.Beam then
+		  declare
+		     Trstrn : String := Boolean'Image 
+		       (Dll.Posvec_C_Access_Type (List.Pos).Tr);
+		  begin
+		     if Dll.Posvec_C_Access_Type (List.Pos).Tr = True then
+			declare
+			   Valstrn : String := Long_Float'Image 
+			     (Dll.Posvec_C_Access_Type (List.Pos).Val);
+			begin
+			   String'Write 
+			     (Ostr, Cmdstrn & " " & Trstrn & " " & Valstrn);
+			   Tio.Put_Line ("");
+			end;
+		     else
+			String'Write (Ostr, Cmdstrn & " " & Trstrn);
+			Tio.Put_Line ("");
+		     end if;
+		  end;
+	       elsif Dll.Posvec_C_Access_Type (List.Pos).C = Dll.Fini then
+		  Tio.Put_Line ("THE END OF THINGS.");
+	       else Tio.Put_Line ("not done yet!!!!");
+	       end if;
+	    end;
+
+	 else 
+	    Tio.Put_Line (" Output_Program : unknown class");
+	 end if;
+	 List := List.Next; -- this goes to the following vector !!
+	 exit when List = Sr.Prog_Anchor;
+      end loop;
+   end Output_Program;
+   
+   
+   
 begin
    
    null;
@@ -40,12 +157,14 @@ begin
       case Res is
 	 when St.Done    => 
 	    Text_Io.Put_Line ("read the post file");
+	    exit;
 	 when St.Error   => 
 	    Text_Io.Put_Line ("an error occurred reading the post file");
 	 when St.Working => 
 	    Text_Io.Put_Line ("waiting . . . .");
       end case;
    end loop;
-   St.Finalize;
+   Output_Program;
+   --St.Finalize;
    
 end Silmatest;

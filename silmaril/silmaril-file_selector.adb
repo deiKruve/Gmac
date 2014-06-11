@@ -73,9 +73,9 @@ package body Silmaril.File_Selector is
       return Reading_Result;
    exception
       when others => 
-	 M_Report_Error (False);
-	 Ada.Text_IO.Put_Line ("file reader stuffup");
-	 return False;
+   	 M_Report_Error (False);
+   	 Ada.Text_IO.Put_Line ("file reader stuffup");
+   	 return False;
    end Read_Entire_File;
    
    

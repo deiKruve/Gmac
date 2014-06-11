@@ -1074,12 +1074,15 @@ package body Ebwm1.Machin is
    begin
       if S (S'First .. S'First + 2) = "IPM" then
 	 Fedratunit := Ipm;
+      elsif S (S'First .. S'First + 2) = "MMP" then
+	 Fedratunit := Mmpm;
+	 return; -----------------------
       end if;
       declare
 	 Fi : Posvec1_Type := 0.0;
 	 I  : Integer      := S'First + 3;
       begin
-	 while S (I) not in '0' .. '9' loop
+	 while S (I) not in '0' .. '9' and I < S'Last loop
 	    I := I + 1;
 	 end loop;
 	 Fi := Posvec1_Type'Value (S (I .. I + 19));

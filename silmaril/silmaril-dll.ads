@@ -72,9 +72,6 @@ package Silmaril.Dll is
 	I,
 	J,
 	K      : Posvec1_Type := 0.0;  -- rotation vector
-	Xr,
-	Yr,
-	Zr     : Posvec1_Type := 0.0;  -- new xyz, to be modified.
 	A,
 	B,
 	C      : Posangl_Type := 0.0;  -- rotation angles

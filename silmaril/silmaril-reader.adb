@@ -33,8 +33,8 @@
 ---
 -- the sixth axis remains to be done.
 --
-
---with GNATCOLL.Traces;
+with Ada.Exceptions;
+with GNATCOLL.Traces;
 with Ada.Text_IO;
 
 with Generic_Scanner;
@@ -43,7 +43,7 @@ with Silmaril.Dll;
 
 package body Silmaril.Reader is
    
-   --package Gct renames GNATCOLL.Traces;
+   package Gct renames GNATCOLL.Traces;
    package Asu renames Ada.Strings.Unbounded;
    package Ics renames Interfaces.C.Strings;
    package Dll renames Silmaril.Dll;
@@ -60,8 +60,8 @@ package body Silmaril.Reader is
       Fini,
       A, B, C, X, Y, Z, D, T, Istop,
       Float, Number,
-      On, Off,
-      Secs, Percent, 
+      Tru, Flse, On, Off,
+      Secs, Percent, Colon,
       EOF, Error, Ok);
    -- the tokens recognized by this scanner --
 
@@ -79,16 +79,17 @@ package body Silmaril.Reader is
      renames Asu.To_Unbounded_String;
    
    
-   -- package Gct renames GNATCOLL.Traces;
-   --Stream1 : constant Gct.Trace_Handle := Gct.Create ("SILMARILREADER");
-   --Stream2 : constant Gct.Trace_Handle := 
-   --Gct.Create ("SILMARILREADER.EXCEPTIONS");
-   --Debug_Str : constant Gct.Trace_Handle := Gct.Create ("SILMARILREADER.DEBUG");
+   package Gct renames GNATCOLL.Traces;
+   -- logging
+   Stream1 : constant Gct.Trace_Handle := Gct.Create ("SILMARILREADER");
+   Stream2 : constant Gct.Trace_Handle := 
+     Gct.Create ("SILMARILREADER.EXCEPTIONS");
+   Debug_Str : constant Gct.Trace_Handle := Gct.Create ("SILMARILREADER.DEBUG");
 
    Tokens : constant Scan.Token_Regexp_Array :=
      (Clamp       => +"CLAMP",
       Release     => +"RELEASE",
-      Spindl      => +"SPINDLE",
+      Spindl      => +"SPINDL",
       Fadein      => +"FADEIN",
       Fadeout     => +"FADEOUT",
       Beam        => +"BEAM",
@@ -107,10 +108,13 @@ package body Silmaril.Reader is
       Istop       => +"istop",
       Float       => Scan.Float_Regexp,
       Number      => Scan.Number_Regexp,
+      Tru         => +"TRUE",
+      Flse        => +"FALSE",
       On          => +"ON",
       Off         => +"OFF",
       Secs        => +"secs",
       Percent     => +"%",
+      Colon       => +":",
       Fini        => +"FINI",
       EOF         => +"");
    
@@ -177,13 +181,26 @@ package body Silmaril.Reader is
       begin
 	 if not Scanner.At_Eof then
 	    Token := Scanner.Next_Token;
-	    if Token = on then B := True; return Ok;
-	    elsif Token = Off then B := False; return Ok;
+	    if Token = On or Token = Tru then B := True; return Ok;
+	    elsif Token = Off or Token = Flse then B := False; return Ok;
 	    else return Error; 
 	    end if;
 	 else return Error;
 	 end if;
       end Find_Bool_Tok;
+      
+      function Find_Percent_Tok return Extended_Token_Type
+      is
+	 Token : Token_Type;
+      begin
+	 if not Scanner.At_Eof then
+	    Token := Scanner.Next_Token;
+	    if Token = Percent then return Ok;
+	    else return Error; 
+	    end if;
+	 else return Error;
+	 end if;
+      end Find_Percent_Tok;
       
       function Find_Pos (Pos9 : access Dll.Posvec9_Type) 
 			return Extended_Token_Type
@@ -221,16 +238,19 @@ package body Silmaril.Reader is
 	       exit when Curtok /= C;
 	       exit when Find_Val_Tok (Val) = Error;
 	       Pos9.C := Val;
+	       Curtok := Next_Tok;
 	    else 
 	       Pos9.A := 0.0;
 	       Pos9.B := 0.0;
 	       Pos9.C := 0.0;
-	       exit when Curtok /= D;
-	       exit when Find_Val_Tok (Val) = Error;
-	       Pos9.D3d := Val;
 	    end if;
+	    exit when Curtok /= D;
+	    exit when Find_Val_Tok (Val) = Error;
+	    Pos9.D3d := Val;
 	    Curtok := Next_Tok;
 	    exit when Curtok /= Istop;
+	    Curtok := Next_Tok;
+	    exit when Curtok /= Colon;
 	    exit when Find_Bool_Tok (Truth) = Error;
 	    Pos9.Istop := Truth;
 	    Pos9.Fedrat := Fedrat;
@@ -284,13 +304,12 @@ package body Silmaril.Reader is
 	 B      : Boolean    := False;
       begin
 	 loop
-	    Ada.Text_IO.Put_line ("we are here. FIND_BEAM");
 	    exit when Find_Bool_Tok (B) = Error;
-	    --Ada.Text_IO.Put_line ("we are here. FIND_BEAM");
 	    if B = True then
 	       exit when Find_Val_Tok (Val) = Error;
 	       Posc.Val := Val;
 	       Posc.Tr  := B;
+	       exit when Find_Percent_Tok = Error;
 	    else
 	       Posc.Tr  := False;
 	    end if;
@@ -300,14 +319,12 @@ package body Silmaril.Reader is
       end Find_Beam;
       
    begin
-      --Ada.Text_IO.Put_line ("we are here");
       Prog_Anchor := new Dll.Dllist_Type;
       Dll.Initialize (Prog_Anchor);
       Curtok := Find_Command;
       while Curtok /= EOF and Curtok /= Error loop
 	 loop
-	    --Ada.Text_IO.Put_line ("we are here");
-	    Ada.Text_IO.Put_line (Token_Type'Image (Curtok));
+	    --Ada.Text_IO.Put_line (Token_Type'Image (Curtok));
 	    case Curtok is
 	       when F       => 
 		  exit when Find_Val_Tok (Val) = Error;
@@ -333,7 +350,6 @@ package body Silmaril.Reader is
 		  begin
 		     Posc.C := Dll.Clamp;
 		     exit when Find_Axis (Posc) = Error;
-		     Ada.Text_IO.Put_line ("we are here, clamp");
 		     Prog_Q.Insert_Pv_Before 
 		       (This  => Dll.Posvec_Class_Access_Type (Posc), 
 			Next  => Prog_Anchor);
@@ -356,7 +372,6 @@ package body Silmaril.Reader is
 		  begin
 		     Posc.C := Dll.Beam;
 		     exit when Find_Beam (Posc) = Error;
-		     --Ada.Text_IO.Put_line ("we are here. FIND_BEAM");
 		     Prog_Q.Insert_Pv_Before 
 		       (This  => Dll.Posvec_Class_Access_Type (Posc), 
 			Next  => Prog_Anchor);
@@ -409,21 +424,24 @@ package body Silmaril.Reader is
 		  null;
 	    end case;
 	    Curtok := Ok;
-	    --Ada.Text_IO.Put_line ("we are here, ok");
 	    exit;
 	 end loop;
-	 --Ada.Text_IO.Put_line ("we are here, error");
 	 if Curtok = Ok then
 	    Curtok := Find_Command;
-	 else exit;
+	 else 
+	    --Ada.Text_IO.Put_line (Token_Type'Image (Curtok));
+	    exit;
 	 end if;
       end loop;
       if Curtok = EOF then
 	 return True;  -- must have been EOF.
       else
-	 --Ada.Text_IO.Put_line ("we are here, error");
 	 return False; -- return false if eof was not reached
       end if;
+   exception
+      when E : others =>
+	 Ada.Text_IO.Put_Line (Ada.Exceptions.Exception_Information (E));
+	 return False;
    end Scanit;
    
    

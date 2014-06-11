@@ -205,45 +205,98 @@ package body Post.Parser is
    -- 3rd level --
    ---------------
    --function Parse_Debug (Stt : String) return Boolean
-   function Parse_Debug (Stt : String; J, I : Integer) return Boolean
+   function Parse_Insert_Debug (S : String; Jj, Ii : Integer) return Boolean
    is
-      Sp      : String (1 .. Stt'Length);
+      I       : Integer := Ii;
+      J       : Integer := Jj; 
+      Stt     : String (1 .. Ii);
+      Stti    : Integer := Stt'First - 1;
       Err     : Boolean := False;
    begin
-      Sp := Ach.To_Upper (Stt);
-      if Sp = "SLON" or Sp = "SLOFF" then
-	 M_Print_Debug (Sp);
-      else
-	 M_Print_Error 
-	   ("misspelled 'INSERT DEBUG' argument. I read " & Sp);
-	 Err := True;
-      end if;
+      loop
+	 while J <= I and S(J) /= ',' loop
+	    if S(J) /= ' ' then
+	       Stti := Stti + 1;
+	       Stt (Stti) := S (J);
+	    end if;
+	    J := J + 1;
+	 end loop;
+	 Gct.Trace (Debug_Str, "Parse_Insert_Debug : S " & S);
+	 Gct.Trace (Debug_Str, 
+		    "Parse_Insert_Debug : Stt " & Stt (1 .. stti));
+	 declare
+	    Sp : String := Ach.To_Upper (Stt (Stt'First .. Stti));
+	 begin
+	    if Sp = "SLON" or Sp = "SLOFF" then
+	       M_Print_Debug (Sp);
+	    else
+	       M_Print_Error 
+		 ("misspelled 'INSERT DEBUG' argument. I read " & Sp);
+	       Err := True;
+	       exit;
+	    end if;
+	 exception
+	    when others =>
+	       M_Print_Error 
+		 ("misspelled 'INSERT DEBUG' argument. I read " & Sp);
+	       Err := True;
+	       exit;
+	 end;
+	 exit;
+      end loop;
       return Err;
-   end Parse_Debug;
+   end Parse_Insert_Debug;
    
    
    --function Parse_Insert_Fedrat_Units (Stt : String) return Boolean
-   function Parse_Insert_Fedrat_Units (Stt : String; J, I : Integer) return Boolean
+   function Parse_Insert_Fedrat_Units (S : String; Jj, Ii : Integer) return Boolean
    is
-      Sp      : String (1 .. Stt'Length);
+      Stt     : String (1 .. Ii);
+      Stti    : Integer := Stt'First - 1;
+      I       : Integer := Ii;
+      J       : Integer := Jj;      
       Err     : Boolean := False;
    begin
-      Sp := Ach.To_Upper (Stt);
-      if Sp = "MMPM" or Sp = "IPM" then
-	 M_Print_Fedrat_Units (Sp);
-	 Gct.Trace (Debug_Str, "#### fedrat units are " & Sp);
-      else
-	 M_Print_Error 
-	   ("misspelled 'INSERT FEDRAT' argument. I read " & Sp);
-	 Err := True;
-      end if;
+      loop
+	 while J <= I and S(J) /= ',' loop
+	    if S(J) /= ' ' then
+	       Stti := Stti + 1;
+	       Stt (Stti) := S (J);
+	    end if;
+	    J := J + 1;
+	 end loop;
+	 Gct.Trace (Debug_Str, "Parse_Insert_Fedrat_Units : S " & S);
+	 Gct.Trace (Debug_Str, 
+		    "Parse_Insert_Fedrat_Units : Stt " & Stt (1 .. stti));
+	 
+	 declare
+	    Sp : String := Ach.To_Upper (Stt (Stt'First .. Stti));
+	 begin
+	    if Sp = "MMPM" or Sp = "IPM" then
+	       M_Print_Fedrat_Units (Sp);
+	       Gct.Trace (Debug_Str, "#### fedrat units are " & Sp);
+	    else
+	       M_Print_Error 
+		 ("misspelled 'INSERT FEDRAT' argument. I read " & Sp);
+	       Err := True;
+	       exit;
+	    end if;
+	 exception
+	    when others =>
+	       M_Print_Error 
+		 ("misspelled 'INSERT FEDRAT' argument. I read " & Sp);
+	       Err := True;
+	       exit;
+	 end;
+	 exit;
+      end loop;
       return Err;
    end Parse_Insert_Fedrat_Units;
    
    
    function Parse_Insert_Fadeout  (S : String; Jj, Ii : Integer) return Boolean
    is
-      Stt     : String (1 .. 88);
+      Stt     : String (1 .. Ii);
       Stti    : Integer := Stt'First - 1;
       I       : Integer := Ii;
       J       : Integer := Jj;
@@ -277,7 +330,7 @@ package body Post.Parser is
    
    function Parse_Insert_Fadein (S : String; Jj, Ii : Integer) return Boolean
    is
-      Stt     : String (1 .. 88);
+      Stt     : String (1 .. Ii);
       Stti    : Integer := Stt'First - 1;
       I       : Integer := Ii;
       J       : Integer := Jj;
@@ -312,7 +365,7 @@ package body Post.Parser is
    function Parse_Insert_Beam (S : String; Jj, Ii : Integer) return boolean
    is
       Stt, 
-      Sttt    : String (1 .. 88);
+      Sttt    : String (1 .. Ii);
       Stti,
       Sttti   : Integer := S'First - 1;
       I       : Integer := Ii;
@@ -602,7 +655,7 @@ package body Post.Parser is
 			Err := Parse_Insert_Fedrat_Units (S, J, I);
 			exit;
 		     when Ps.Debug =>
-			Err := Parse_Debug (S, J, I);
+			Err := Parse_Insert_Debug (S, J, I);
 			exit;
 		     when others => 
 			M_Print_error 
