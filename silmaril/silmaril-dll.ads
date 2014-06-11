@@ -185,7 +185,7 @@ package Silmaril.Dll is
       entry Unlink_Pos_S_Node  (This : access Dllist_Type);
       
    private
-      Open : Boolean := False;
+      Open : Boolean := True;
    end Program_Queue_Type;
 
 private

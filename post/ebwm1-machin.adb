@@ -1031,6 +1031,24 @@ package body Ebwm1.Machin is
    end Print_Beam_Current;
    
    
+   procedure Print_Fadeout_Time (F : in Float)
+     with Pre => (F >= 0.0 and F <= 5.0);
+   procedure Print_Fadeout_Time (F : in Float)
+   is
+      Tstr : String := "        ";
+   begin
+      Pvio.Put (Tstr, Long_Float (F), 2, 0);
+      declare
+	 Strp : access String := new String'("FADEOUT " & Tstr &  " secs");
+	 Pv :  Posvec_S_Access_Type := new Posvec_S_Type;
+      begin
+	 Pv.Sa := Strp;
+	 Insert_Pv_Before (This => Posvec_Class_Access_Type (Pv),
+			   Next => Pos_List_Anchor);
+      end;
+   end Print_Fadeout_Time;
+   
+   
    procedure Print_Fadein_Time (F : in Float)
      with Pre => (F >= 0.0 and F <= 5.0);
    procedure Print_Fadein_Time (F : in Float)
@@ -1086,7 +1104,7 @@ package body Ebwm1.Machin is
    
    procedure Print_Spindle (S : in String)
    is
-      S1 : String := S (S'First .. (S'First + 5)); -- 'SPINDL'
+      S1 : String := S (S'First .. (S'First + 5)); -- 'SPINDL or BEAM'
       S2 : String := S ((S'First + 7) .. (S'First + 10)); -- 'OFF', 'ON ', 'CLW' ...
       S3 : String := S ((S'First + 12) .. S'Last); -- 'NaN', or spindle revs
       V  : Long_Float := 0.0;   
@@ -1366,6 +1384,7 @@ begin
    Pp.M_Print_Apt_Block    := Print_Apt_Block'Access;
    Pp.M_Print_Beam_Current := Print_Beam_Current'Access;
    Pp.M_Print_Fadein_Time  := Print_Fadein_Time'Access;
+   Pp.M_Print_Fadeout_Time := Print_Fadeout_Time'Access;   
    Pp.M_Print_Fedrat_Units := Print_Fedrat_Units'Access;
    Pp.M_Print_Spindle      := Print_Spindle'Access;
    Pp.M_Print_Multax       := Print_Multax'Access;

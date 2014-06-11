@@ -72,6 +72,7 @@ package body Silmaril.tasks is
 	 Astc.Set_False (Button_Push);
 	 Load_Result.Set (Working);
 	 Fin := Silmaril.File_Selector.Start;
+	 --Fin := Silmaril.File_Selector.Read_Entire_File;
 	 if Fin then Load_Result.Set (Done); end if;
 	 Fin := False;
 	 -- must be aborted!!!!!!

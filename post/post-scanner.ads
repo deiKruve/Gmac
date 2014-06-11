@@ -147,7 +147,7 @@ package Post.Scanner is
 		     Fini                => 14000);
    -- type of records in an apt360 cl file
    
-   type Kwi_Ins_Type is (Beam, Fadein, Fedrat, Debug); -- for function Parse_Insert
+   type Kwi_Ins_Type is (Beam, Fadein, Fadeout, Fedrat, Debug); -- for function Parse_Insert
    
    type Header_Type is record
 	 Rec_No   : Positive;

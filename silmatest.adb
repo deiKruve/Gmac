@@ -27,6 +27,7 @@ procedure Silmatest is
 begin
    
    null;
+   St.Load_Result.Set (St.Working);
    Astc.Set_True (St.Button_Push);
    --delay (0.1);
    Res := St.Load_Result.Get ;

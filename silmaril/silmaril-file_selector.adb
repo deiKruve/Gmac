@@ -37,48 +37,57 @@ with Silmaril.Reader;
 
 package body Silmaril.File_Selector is
    
+   function Read_Entire_File return Boolean
+   is
+      use POSIX, POSIX.IO, POSIX.Memory_Mapping;
+      use System.Storage_Elements;
+      
+      Text_File    : File_Descriptor;
+      Text_Size    : System.Storage_Elements.Storage_Offset;
+      Text_Address : System.Address;
+      
+      Reading_Result : Boolean := False;
+   begin
+      Text_File := Open (Name => "ring.post",
+			 Mode => Read_Only);
+      Text_Size := Storage_Offset (File_Size (Text_File));
+      Text_Address := Map_Memory (Length     => Text_Size,
+				  Protection => Allow_Read,
+				  Mapping    => Map_Shared,
+				  File       => Text_File,
+				  Offset     => 0);
+      
+      declare
+	 Text : String (1 .. Natural (Text_Size));
+	 for Text'Address use Text_Address;
+      begin
+	 Reading_Result := Silmaril.Reader.Start_Reading (Text);
+	 if not Reading_Result then
+	    M_Report_Error (Reading_Result);
+	 end if;
+      end;
+      
+      Unmap_Memory (First  => Text_Address,
+		    Length => Text_Size);
+      Close (File => Text_File);
+      return Reading_Result;
+   exception
+      when others => 
+	 M_Report_Error (False);
+	 Ada.Text_IO.Put_Line ("file reader stuffup");
+	 return False;
+   end Read_Entire_File;
+   
+   
    function Start return Boolean
    is
    begin
-      delay(1.0);
-      M_Report_Error (True);
-      delay (1.0);
-      return True;
+      --  delay(1.0);
+      --  M_Report_Error (True);
+      --  delay (1.0);
+      --  return True;
+      return Read_Entire_File;
    end Start;
-   
-   
-procedure Read_Entire_File is
-   use POSIX, POSIX.IO, POSIX.Memory_Mapping;
-   use System.Storage_Elements;
- 
-   Text_File    : File_Descriptor;
-   Text_Size    : System.Storage_Elements.Storage_Offset;
-   Text_Address : System.Address;
-   
-   Reading_Result : Boolean := False;
-begin
-   Text_File := Open (Name => "ring.post",
-                      Mode => Read_Only);
-   Text_Size := Storage_Offset (File_Size (Text_File));
-   Text_Address := Map_Memory (Length     => Text_Size,
-                               Protection => Allow_Read,
-                               Mapping    => Map_Shared,
-                               File       => Text_File,
-                               Offset     => 0);
- 
-   declare
-      Text : String (1 .. Natural (Text_Size));
-      for Text'Address use Text_Address;
-   begin
-      -- Ada.Text_IO.Put (Text);
-      Reading_Result := Silmaril.Reader.Start_Reading (Text);
-   end;
- 
-   Unmap_Memory (First  => Text_Address,
-                 Length => Text_Size);
-   Close (File => Text_File);
-exception
-   when others => Ada.Text_IO.Put_Line ("file reader stuffup");
-end Read_Entire_File;
+      
    
 end Silmaril.File_Selector;

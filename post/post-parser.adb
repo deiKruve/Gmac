@@ -204,7 +204,8 @@ package body Post.Parser is
    ---------------
    -- 3rd level --
    ---------------
-   function Parse_Debug (Stt : String) return Boolean
+   --function Parse_Debug (Stt : String) return Boolean
+   function Parse_Debug (Stt : String; J, I : Integer) return Boolean
    is
       Sp      : String (1 .. Stt'Length);
       Err     : Boolean := False;
@@ -221,7 +222,8 @@ package body Post.Parser is
    end Parse_Debug;
    
    
-   function Parse_Insert_Fedrat_Units (Stt : String) return Boolean
+   --function Parse_Insert_Fedrat_Units (Stt : String) return Boolean
+   function Parse_Insert_Fedrat_Units (Stt : String; J, I : Integer) return Boolean
    is
       Sp      : String (1 .. Stt'Length);
       Err     : Boolean := False;
@@ -239,72 +241,169 @@ package body Post.Parser is
    end Parse_Insert_Fedrat_Units;
    
    
-   function Parse_Insert_Fadein (Stt : String) return Boolean
+   function Parse_Insert_Fadeout  (S : String; Jj, Ii : Integer) return Boolean
    is
-      Sp      : String (1 .. Stt'Length);
-      Spi     : Integer range 0 .. Stt'Length := 0;
-      Time    : Float   := 0.0;
+      Stt     : String (1 .. 88);
       Stti    : Integer := Stt'First - 1;
-      Err,
-      Dp      : Boolean := False;
+      I       : Integer := Ii;
+      J       : Integer := Jj;
+      Time    : Float   := 0.0;
+      Err     : Boolean := False;
    begin
-      for i in 1 .. Stt'Length loop --Extract 
-	 if Stt(I) = ' ' then
-	    null; --skip
-	 elsif (Stt(I) in '0' .. '9') then
-	    Spi := Spi + 1;
-	    Sp (Spi) := Stt(I);
-	 elsif (Stt(I) = '.') then -- decimal point
-	    if Dp then exit; end if; -- 2nd dec point
-	    Spi := Spi + 1;
-	    Sp (Spi) := Stt(I);
-	    Dp := True;
-	 else
+            loop
+	 while J <= I and S(J) /= ',' loop
+	    if S(J) /= ' ' then
+	       Stti := Stti + 1;
+	       Stt (Stti) := S (J);
+	    end if;
+	    J := J + 1;
+	 end loop;
+	 Gct.Trace (Debug_Str, "Parse_Insert_Fadeout : S " & S);
+	 Gct.Trace (Debug_Str, "Parse_Insert_Fadeout : Stt " & Stt (1 .. stti));
+	 Time := Float'Value (Stt (Stt'First .. Stti));
+	 if not (Time in 0.0 .. 5.0) then
+	    M_Print_Error 
+	      ("Fade Out Time out of range");
+	    Err := True;
 	    exit;
 	 end if;
+	 M_Print_Fadeout_Time (Time);
+	 Gct.Trace (Debug_Str, "#### Fade Out = " & Float'Image (Time) & " sec");
+	 exit;
       end loop;
-      Time := Float'Value (Sp (Sp'First .. Spi));
-      if not (Time in 0.0 .. 5.0) then
-	 M_Print_Error 
-	   ("Fade In Time out of range");
-	 Err := True;
-	 goto Uit;
-      end if;
-      M_Print_Fadein_Time (Time);
-      Gct.Trace (Debug_Str, "#### Fade In = " & Float'Image (Time) & " sec");
-  <<Uit>>
+      return Err;     
+   end Parse_Insert_Fadeout;
+   
+   
+   function Parse_Insert_Fadein (S : String; Jj, Ii : Integer) return Boolean
+   is
+      Stt     : String (1 .. 88);
+      Stti    : Integer := Stt'First - 1;
+      I       : Integer := Ii;
+      J       : Integer := Jj;
+      Time    : Float   := 0.0;
+      Err     : Boolean := False;
+   begin
+      loop
+	 while J <= I and S(J) /= ',' loop
+	    if S(J) /= ' ' then
+	       Stti := Stti + 1;
+	       Stt (Stti) := S (J);
+	    end if;
+	    J := J + 1;
+	 end loop;
+	 Gct.Trace (Debug_Str, "Parse_Insert_Fadein : S " & S);
+	 Gct.Trace (Debug_Str, "Parse_Insert_Fadein : Stt " & Stt (1 .. stti));
+	 Time := Float'Value (Stt (Stt'First .. Stti));
+	 if not (Time in 0.0 .. 5.0) then
+	    M_Print_Error 
+	      ("Fade In Time out of range");
+	    Err := True;
+	    exit;
+	 end if;
+	 M_Print_Fadein_Time (Time);
+	 Gct.Trace (Debug_Str, "#### Fade In = " & Float'Image (Time) & " sec");
+	 exit;
+      end loop;
       return Err;     
    end Parse_Insert_Fadein;
    
    
-   function Parse_Insert_Beam (Stt : String) return Boolean
+   function Parse_Insert_Beam (S : String; Jj, Ii : Integer) return boolean
    is
-      Sp      : String (1 .. Stt'Length);
-      Spi     : Integer range 0 .. Stt'Length := 0;
-      Percent : Integer := 0;
-      Stti    : Integer := Stt'First - 1;
+      Stt, 
+      Sttt    : String (1 .. 88);
+      Stti,
+      Sttti   : Integer := S'First - 1;
+      I       : Integer := Ii;
+      J       : Integer := Jj;
+      F       : Long_Float        := -1.0;
+      M       : Ps.Mkwi_Type;
+      Su      : String (1 .. 5)   := "     ";
+      Got_Value,
       Err     : Boolean := False;
    begin
-      for i in 1 .. Stt'Length loop --Extract integer part
-	 if Stt(I) = ' ' then
-	    null; --skip
-	 elsif Stt(I) in '0' .. '9' then
-	    Spi := Spi + 1;
-	    Sp (Spi) := Stt(I);
+      loop
+	 --J := J + 1;
+	 while J <= I and S(J) /= ',' loop
+	    if S(J) /= ' ' then
+	       Stti := Stti + 1;
+	       Stt (Stti) := S (J);
+	    end if;
+	    J := J + 1;
+	 end loop; -- found 1st parm
+	 Gct.Trace (Debug_Str, "Parse_Insert_Beam : S " & S);
+	 Gct.Trace (Debug_Str, "Parse_Insert_Beam : Stt " & Stt (1 .. stti));
+	 if S(J) = ',' then -- there is a second parm
+	    J := J + 1;
+	    while J <= I loop
+	       if S(J) /= ' ' then
+		  Sttti := Sttti + 1;
+		  Sttt (Sttti) := S (J);
+	       end if;
+	       J := J + 1;
+	    end loop; -- found 2nd parm
+	    Gct.Trace (Debug_Str, "Parse_Insert_Beam : Sttt " & Sttt (1 .. sttti));
+	    if Sttt (Sttt'First) in '0' .. '9' then -- percentage
+	       F := Long_Float'Value (Sttt (Sttt'First .. Sttti));
+	       if not F'Valid then
+		  F := Long_Float (Integer'Value (Sttt (Sttt'First .. Sttti)));
+	       end if;
+	       if F'Valid then
+		  Got_Value := True;
+	       else
+		  M_Print_Error 
+		    ("badly formed Beam intensity value " & Sttt);
+		  Err := True;
+		  exit;
+	       end if;
+	    elsif Ach.To_Upper (Sttt (Sttt'First .. Sttti)) = "ON" then
+	       M := Ps.On;
+	    elsif Ach.To_Upper (Sttt (Sttt'First .. Sttti)) = "OFF" then
+	       M := Ps.Off;
+	    else
+	       Err := True;
+	    end if;
+	 end if;
+	 if Stt (Stt'First) in '0' .. '9' then -- percentage
+	    F := Long_Float'Value (Stt (Stt'First .. Stti));
+	    if not F'Valid then
+	       F := Long_Float (Integer'Value (Stt (Stt'First .. Stti)));
+	    end if;
+	    if F'Valid then
+	       Got_Value := True;
+	    else
+	       M_Print_Error 
+		 ("badly formed Beam intensity value " & Stt (Stt'First .. Stti));
+	       Err := True;
+	       exit;
+	    end if;
+	 elsif Ach.To_Upper (Stt (Stt'First .. Stti)) = "ON" then
+	    M := Ps.On;
+	 elsif Ach.To_Upper (Stt (Stt'First .. Stti)) = "OFF" then
+	    M := Ps.Off;
 	 else
+	    Err := True;
 	    exit;
 	 end if;
+	 case M is
+	    when Ps.On =>
+	       Su := Ps.Mkwi_Type'Image (M) & "   ";
+	    when Ps.Off =>
+	       Su := Ps.Mkwi_Type'Image (M) & "  ";
+	    when others => 
+	       M_Print_Error ("Beam option " & Ps.Mkwi_Type'Image (M) & 
+				" cannot be used at present");
+	       Err := True;
+	       exit;
+	 end case;
+	 if Got_Value then
+	    M_Print_Spindle ("BEAM   " & Su & Long_Float'image (F));
+	 else
+	    M_Print_Spindle ("BEAM   " & Su & "NaN");
+	 end if;
+	 exit;
       end loop;
-      Percent := Integer'Value (Sp (Sp'First .. Spi));
-      if not (Percent in 1 .. 100) then
-	 M_Print_Error 
-	   ("Beam current out of range");
-	 Err := True;
-	 goto Uit;
-      end if;
-      M_Print_Beam_Current (Percent);
-      Gct.Trace (Debug_Str, "#### Beam = " & Integer'Image (Percent) & " %");
-  <<Uit>>
       return Err;
    end Parse_Insert_Beam;
    
@@ -456,7 +555,7 @@ package body Post.Parser is
    
    function Parse_Insert return Boolean
    is
-      S, St, Stt : String (1 .. 88);
+      S, St      : String (1 .. 88);
       Err, 
       Done,
       Found_Name : Boolean := False;
@@ -474,7 +573,7 @@ package body Post.Parser is
 	       Done := True;
 	    end if;
 	 end loop;
-	 while (S (J) /= '=' and  J <= I) loop -- extract parameter
+	 while (S (J) /= '/' and  J <= I) loop -- extract parameter
 	    if S(J) /= ' ' then
 	       Sti := Sti + 1;
 	       St (Sti) := S (J);
@@ -482,13 +581,6 @@ package body Post.Parser is
 	    J := J + 1;
 	 end loop; -- found parameter name
 	 J := J + 1;
-	 while J <= I loop
-	    if S(J) /= ' ' then
-	       Stti := Stti + 1;
-	       Stt (Stti) := S (J);
-	    end if;
-	    J := J + 1;
-	 end loop; -- found setting
 	 for E in Ps.Kwi_Ins_Type'Range loop
 	    declare 
 	       use type Ps.Kwi_Ins_Type;
@@ -498,16 +590,19 @@ package body Post.Parser is
 		  Found_Name := True;
 		  case E is
 		     when Ps.Beam =>
-			Err := Parse_Insert_Beam (Stt (1 .. Stti));
+			Err := Parse_Insert_Beam (S, J, I);
 			exit;
 		     when Ps.Fadein =>
-			Err := Parse_Insert_Fadein (Stt (1 .. Stti));
+			Err := Parse_Insert_Fadein (S, J, I);
+			exit;
+		     when Ps.Fadeout =>
+			Err := Parse_Insert_Fadeout (S, J, I);
 			exit;
 		     when Ps.Fedrat =>
-			Err := Parse_Insert_Fedrat_Units (Stt (1 .. Stti));
+			Err := Parse_Insert_Fedrat_Units (S, J, I);
 			exit;
 		     when Ps.Debug =>
-			Err := Parse_Debug (Stt (1 .. Stti));
+			Err := Parse_Debug (S, J, I);
 			exit;
 		     when others => 
 			M_Print_error 
@@ -526,6 +621,83 @@ package body Post.Parser is
   <<Uit>>
       return Err;
    end Parse_Insert;
+   
+			
+			
+			
+	 --------------------------------------------
+  --   function Parse_O_Insert return Boolean
+  --   is
+  --      S, St, Stt : String (1 .. 88);
+  --      Err, 
+  --      Done,
+  --      Found_Name : Boolean := False;
+  --      I          : Integer := S'Last;
+  --      J          : Integer := S'First;
+  --      Sti, 
+  --      Stti       : Integer := S'First - 1;
+  --   begin
+  --      Err := Ps.Scan_Info (S);
+  --      if not Err then
+  --  	 while not Done loop -- strip trailing spaces
+  --  	    if S (I) = ' ' then
+  --  	       I := I  - 1;
+  --  	    else
+  --  	       Done := True;
+  --  	    end if;
+  --  	 end loop;
+  --  	 while (S (J) /= '=' and  J <= I) loop -- extract parameter
+  --  	    if S(J) /= ' ' then
+  --  	       Sti := Sti + 1;
+  --  	       St (Sti) := S (J);
+  --  	    end if;
+  --  	    J := J + 1;
+  --  	 end loop; -- found parameter name
+  --  	 J := J + 1;
+  --  	 while J <= I loop
+  --  	    if S(J) /= ' ' then
+  --  	       Stti := Stti + 1;
+  --  	       Stt (Stti) := S (J);
+  --  	    end if;
+  --  	    J := J + 1;
+  --  	 end loop; -- found setting
+  --  	 for E in Ps.Kwi_Ins_Type'Range loop
+  --  	    declare 
+  --  	       use type Ps.Kwi_Ins_Type;
+  --  	       Sp : String := Ach.To_Upper (St (St'First .. Sti));
+  --  	    begin
+  --  	       if Sp = Ps.Kwi_Ins_Type'Image (E) then
+  --  		  Found_Name := True;
+  --  		  case E is
+  --  		     when Ps.Beam =>
+  --  			Err := Parse_Insert_Beam (Stt (1 .. Stti));
+  --  			exit;
+  --  		     when Ps.Fadein =>
+  --  			Err := Parse_Insert_Fadein (Stt (1 .. Stti));
+  --  			exit;
+  --  		     when Ps.Fedrat =>
+  --  			Err := Parse_Insert_Fedrat_Units (Stt (1 .. Stti));
+  --  			exit;
+  --  		     when Ps.Debug =>
+  --  			Err := Parse_Debug (Stt (1 .. Stti));
+  --  			exit;
+  --  		     when others => 
+  --  			M_Print_error 
+  --  			  ("internal error, Parse_Insert in de post parser has not been updated");
+  --  			Err := True;
+  --  			goto Uit;
+  --  		  end case;
+  --  	       end if; 
+  --  	    end;
+  --  	 end loop;
+  --  	 if not Found_Name then
+  --  	    M_Print_Error ("misspelled 'INSERT' argument. I read " & S);
+  --  	    Err := True;
+  --  	 end if;
+  --      end if;
+  --  <<Uit>>
+  --      return Err;
+  --   end Parse_O_Insert;
    
    
    function Parse_Info return Boolean

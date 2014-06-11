@@ -35,6 +35,8 @@
 --
 
 --with GNATCOLL.Traces;
+with Ada.Text_IO;
+
 with Generic_Scanner;
 with Ada.Strings.Unbounded;
 with Silmaril.Dll;
@@ -282,7 +284,9 @@ package body Silmaril.Reader is
 	 B      : Boolean    := False;
       begin
 	 loop
+	    Ada.Text_IO.Put_line ("we are here. FIND_BEAM");
 	    exit when Find_Bool_Tok (B) = Error;
+	    --Ada.Text_IO.Put_line ("we are here. FIND_BEAM");
 	    if B = True then
 	       exit when Find_Val_Tok (Val) = Error;
 	       Posc.Val := Val;
@@ -296,11 +300,14 @@ package body Silmaril.Reader is
       end Find_Beam;
       
    begin
+      --Ada.Text_IO.Put_line ("we are here");
       Prog_Anchor := new Dll.Dllist_Type;
       Dll.Initialize (Prog_Anchor);
       Curtok := Find_Command;
       while Curtok /= EOF and Curtok /= Error loop
 	 loop
+	    --Ada.Text_IO.Put_line ("we are here");
+	    Ada.Text_IO.Put_line (Token_Type'Image (Curtok));
 	    case Curtok is
 	       when F       => 
 		  exit when Find_Val_Tok (Val) = Error;
@@ -326,6 +333,7 @@ package body Silmaril.Reader is
 		  begin
 		     Posc.C := Dll.Clamp;
 		     exit when Find_Axis (Posc) = Error;
+		     Ada.Text_IO.Put_line ("we are here, clamp");
 		     Prog_Q.Insert_Pv_Before 
 		       (This  => Dll.Posvec_Class_Access_Type (Posc), 
 			Next  => Prog_Anchor);
@@ -348,6 +356,7 @@ package body Silmaril.Reader is
 		  begin
 		     Posc.C := Dll.Beam;
 		     exit when Find_Beam (Posc) = Error;
+		     --Ada.Text_IO.Put_line ("we are here. FIND_BEAM");
 		     Prog_Q.Insert_Pv_Before 
 		       (This  => Dll.Posvec_Class_Access_Type (Posc), 
 			Next  => Prog_Anchor);
@@ -400,8 +409,10 @@ package body Silmaril.Reader is
 		  null;
 	    end case;
 	    Curtok := Ok;
+	    --Ada.Text_IO.Put_line ("we are here, ok");
 	    exit;
 	 end loop;
+	 --Ada.Text_IO.Put_line ("we are here, error");
 	 if Curtok = Ok then
 	    Curtok := Find_Command;
 	 else exit;
@@ -410,6 +421,7 @@ package body Silmaril.Reader is
       if Curtok = EOF then
 	 return True;  -- must have been EOF.
       else
+	 --Ada.Text_IO.Put_line ("we are here, error");
 	 return False; -- return false if eof was not reached
       end if;
    end Scanit;

@@ -56,6 +56,8 @@ package Post.Parser is
    M_Print_Apt_Block    : Apt_Block_Print_Proc_Type;
    type Beam_Current_Print_Proc_Type is access procedure (N : in Integer := 0);
    M_Print_Beam_Current : Beam_Current_Print_Proc_Type;
+   type Fadeout_Print_Proc_Type is access procedure (F : in Float := 0.0);
+   M_Print_Fadeout_Time  : Fadeout_Print_Proc_Type;
    type Fadein_Print_Proc_Type is access procedure (F : in Float := 0.0);
    M_Print_Fadein_Time  : Fadein_Print_Proc_Type;
    type Fedrat_Units_Print_Proc_Type is access procedure (S : in String);
