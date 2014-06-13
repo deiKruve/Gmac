@@ -121,7 +121,6 @@ package Silmaril.Dll is
    type Dllist_Access_Type is access all Dllist_Type;
      
    type Dllist_Type is tagged record
-      --Pos            : Posvec_Class_Access_Type := null;
       Pos            : access Posvec_Type'Class;
       Prev, Next,
 	Mprev, Mnext : Dllist_Access_Type       := null;

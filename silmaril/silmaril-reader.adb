@@ -36,6 +36,8 @@
 with Ada.Exceptions;
 with GNATCOLL.Traces;
 with Ada.Text_IO;
+--with Ada.Text_IO.Float_IO;
+with Ada.Streams;
 
 with Generic_Scanner;
 with Ada.Strings.Unbounded;
@@ -50,6 +52,10 @@ package body Silmaril.Reader is
    
    subtype Fedrat_Type is Long_Float;
    Fedrat : Fedrat_Type := 0.0;
+   
+   -- anything distance --
+   subtype Posvec1_Type is Long_Float;
+   package Pvio  is new Ada.Text_IO.Float_IO (Num => Posvec1_Type);
    
    type Extended_Token_Type is
      (
@@ -79,7 +85,6 @@ package body Silmaril.Reader is
      renames Asu.To_Unbounded_String;
    
    
-   package Gct renames GNATCOLL.Traces;
    -- logging
    Stream1 : constant Gct.Trace_Handle := Gct.Create ("SILMARILREADER");
    Stream2 : constant Gct.Trace_Handle := 
@@ -117,13 +122,97 @@ package body Silmaril.Reader is
       Colon       => +":",
       Fini        => +"FINI",
       EOF         => +"");
-   
-   procedure Error_Message (Message : String)
-   is
-   begin
-      null; -- Gct.Trace (Stream1, Message);
-   end Error_Message;
 
+   
+   procedure Debug_Line (Pos : Dll.Posvec_Class_Access_Type)
+   is
+      Listpos9 : aliased Dll.Posvec9_Access_Type;
+      Xstr, Ystr, Zstr, Tstr, Fstr   : String := "        ";
+      Astr, Bstr, Cstr, d3dstr       : String := "        ";
+      Cmdstr                         : String := "    ";
+      use type Dll.Cmd_Token_Type;
+   begin
+      if Gct.Active (Debug_Str) then
+      	 if Pos.all in Dll.Posvec9_Type then
+	    Listpos9 := Dll.Posvec9_Access_Type (Pos);
+	    Pvio.Put (Xstr, Listpos9.X, 3, 0);
+	    Pvio.Put (Ystr, Listpos9.Y, 3, 0);
+	    Pvio.Put (Zstr, Listpos9.Z, 3, 0);
+	    Pvio.Put (Tstr, Posvec1_Type (Listpos9.Tightness), 3, 0);
+	    Pvio.Put (Fstr, Listpos9.Fedrat, 2, 0);
+	    if Listpos9.From then Cmdstr := "FROM";
+	    else Cmdstr := "GOTO"; end if;
+	    Gct.Trace (Debug_Str, Cmdstr & " X " & Xstr & " Y " & Ystr & 
+			    " Z " & Zstr & " T " & Tstr & " F " & Fstr & ASCII.LF);
+	    Pvio.Put (Astr, Posvec1_Type (Listpos9.A), 5, 0);
+	    Pvio.Put (Bstr, Posvec1_Type (Listpos9.B), 5, 0);
+	    Pvio.Put (Cstr, Posvec1_Type (Listpos9.C), 5, 0);
+	    Pvio.Put (d3dstr, Posvec1_Type (Listpos9.d3d), 5, 0);
+	    Gct.Trace (Debug_Str, " A " & Astr & " B " & Bstr & " C " & Cstr & 
+			    " D " & D3dstr & " istop : " & 
+			    Boolean'Image (ListPos9.Istop) & ASCII.LF);
+	 elsif Pos.all in Dll.Posvec_S_Type  then
+	    Gct.Trace (Debug_Str, Dll.Posvec_S_Access_Type (Pos).Sa.all & 
+			    ASCII.LF);
+	 elsif Pos.all in Dll.Posvec_C_Type then
+	    declare
+	       Cmdstrn : String := Dll.Cmd_Token_Type'Image 
+		 (Dll.Posvec_C_Access_Type (Pos).C);
+	    begin
+	       if Dll.Posvec_C_Access_Type (Pos).C = Dll.Clamp or 
+		 Dll.Posvec_C_Access_Type (Pos).C = Dll.Release then
+		  declare
+		     Axstrn  : String := Dll.Axis_Token_Type'Image 
+		       (Dll.Posvec_C_Access_Type (Pos).Ax);
+		  begin
+		     Gct.Trace (Debug_Str, Cmdstrn & " " & Axstrn & ASCII.LF);
+		  end;
+	       elsif Dll.Posvec_C_Access_Type (Pos).C = Dll.Fadein or
+		 Dll.Posvec_C_Access_Type (Pos).C = Dll.Fadeout then
+		  declare
+		     Valstrn : String := Long_Float'Image 
+		       (Dll.Posvec_C_Access_Type (Pos).Val);
+		  begin
+		     Gct.Trace 
+		       (Debug_Str, Cmdstrn & " " & Valstrn & "secs" & ASCII.LF);
+		  end;
+	       elsif Dll.Posvec_C_Access_Type (Pos).C = Dll.F then
+		  declare  -- this section is not applicable
+		     Valstrn : String := Long_Float'Image 
+		       (Dll.Posvec_C_Access_Type (Pos).Val);
+		  begin
+		     Gct.Trace (Debug_Str, Cmdstrn & " " & Valstrn & ASCII.LF);
+		  end;
+	       elsif Dll.Posvec_C_Access_Type (Pos).C = Dll.Spindl or
+		 Dll.Posvec_C_Access_Type (Pos).C = Dll.Beam then
+		  declare
+		     Trstrn : String := Boolean'Image 
+		       (Dll.Posvec_C_Access_Type (Pos).Tr);
+		  begin
+		     if Dll.Posvec_C_Access_Type (Pos).Tr = True then
+			declare
+			   Valstrn : String := Long_Float'Image 
+			     (Dll.Posvec_C_Access_Type (Pos).Val);
+			begin
+			   Gct.Trace  (Debug_Str, Cmdstrn & " " & Trstrn & " " & 
+					    Valstrn & ASCII.LF);
+			end;
+		     else
+			Gct.Trace (Debug_Str, Cmdstrn & " " & Trstrn & ASCII.LF);
+		     end if;
+		  end;
+	       elsif Dll.Posvec_C_Access_Type (Pos).C = Dll.Fini then
+		  Gct.Trace (Debug_Str, "THE END OF THINGS." & ASCII.LF);
+	       else 
+		  Gct.Trace (Debug_Str, "Debug_Line : not done yet!!!!");
+	       end if;
+	    end;
+	 else 
+	    Gct.Trace (Debug_Str, "Debug_Line : unknown class");
+	 end if;
+      end if;
+   end Debug_Line;
+   
    
    function Scanit (S : String) return Boolean
    is
@@ -340,6 +429,7 @@ package body Silmaril.Reader is
 		       (This  => Dll.Posvec3_Class_Access_Type (Pos9), 
 			Next  => Prog_Anchor,
 			Mnext => Prog_Anchor);
+		     Debug_Line (Dll.Posvec_Class_Access_Type (Pos9));
 		  end;
 	       when Sixa    =>
 		  null;
@@ -353,6 +443,7 @@ package body Silmaril.Reader is
 		     Prog_Q.Insert_Pv_Before 
 		       (This  => Dll.Posvec_Class_Access_Type (Posc), 
 			Next  => Prog_Anchor);
+		     Debug_Line (Dll.Posvec_Class_Access_Type (Posc));
 		  end;
 	       when Release =>
 		  declare
@@ -364,6 +455,7 @@ package body Silmaril.Reader is
 		     Prog_Q.Insert_Pv_Before 
 		       (This  => Dll.Posvec_Class_Access_Type (Posc), 
 			Next  => Prog_Anchor);
+		     Debug_Line (Dll.Posvec_Class_Access_Type (Posc));
 		  end;
 	       when Beam | Spindl    =>
 		  declare
@@ -375,6 +467,7 @@ package body Silmaril.Reader is
 		     Prog_Q.Insert_Pv_Before 
 		       (This  => Dll.Posvec_Class_Access_Type (Posc), 
 			Next  => Prog_Anchor);
+		     Debug_Line (Dll.Posvec_Class_Access_Type (Posc));
 		  end;
 	       when Fadein  =>
 		  declare
@@ -386,6 +479,7 @@ package body Silmaril.Reader is
 		     Prog_Q.Insert_Pv_Before 
 		       (This  => Dll.Posvec_Class_Access_Type (Posc), 
 			Next  => Prog_Anchor);
+		     Debug_Line (Dll.Posvec_Class_Access_Type (Posc));
 		  end;
 	       when Fadeout =>
 		  declare
@@ -397,6 +491,7 @@ package body Silmaril.Reader is
 		     Prog_Q.Insert_Pv_Before 
 		       (This  => Dll.Posvec_Class_Access_Type (Posc), 
 			Next  => Prog_Anchor);
+		     Debug_Line (Dll.Posvec_Class_Access_Type (Posc));
 		  end;
 	       when From    =>
 		  declare
@@ -409,6 +504,7 @@ package body Silmaril.Reader is
 		       (This  => Dll.Posvec3_Class_Access_Type (Pos9), 
 			Next  => Prog_Anchor,
 			Mnext => Prog_Anchor);
+		     Debug_Line (Dll.Posvec_Class_Access_Type (Pos9));
 		  end;
 	       when Fini    =>
 		  declare
@@ -419,6 +515,7 @@ package body Silmaril.Reader is
 		     Prog_Q.Insert_Pv_Before 
 		       (This  => Dll.Posvec_Class_Access_Type (Posc), 
 			Next  => Prog_Anchor);
+		     Debug_Line (Dll.Posvec_Class_Access_Type (Posc));
 		  end;
 	       when others =>
 		  null;
@@ -429,7 +526,8 @@ package body Silmaril.Reader is
 	 if Curtok = Ok then
 	    Curtok := Find_Command;
 	 else 
-	    --Ada.Text_IO.Put_line (Token_Type'Image (Curtok));
+	    Gct.Trace (Debug_Str, "Faulty line started with " & 
+			 Token_Type'Image (Curtok) & "token.");
 	    exit;
 	 end if;
       end loop;
@@ -440,7 +538,7 @@ package body Silmaril.Reader is
       end if;
    exception
       when E : others =>
-	 Ada.Text_IO.Put_Line (Ada.Exceptions.Exception_Information (E));
+	 Gct.Trace (Stream2, Ada.Exceptions.Exception_Information (E));
 	 return False;
    end Scanit;
    

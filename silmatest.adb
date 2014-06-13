@@ -12,7 +12,7 @@ with Silmaril.Tasks;
 with Silmaril.Dll;
 with Ada.Synchronous_Task_Control;
 with Ada.Exceptions;
----with GNATCOLL.Traces;
+with GNATCOLL.Traces;
 
 procedure Silmatest is
    
@@ -27,7 +27,7 @@ procedure Silmatest is
    subtype Posvec1_Type is Long_Float;
    package Pvio  is new Ada.Text_IO.Float_IO (Num => Posvec1_Type);
    
-   ---package Gct  renames GNATCOLL.Traces;
+   package Gct  renames GNATCOLL.Traces;
    
    --Stream1   : constant Gct.Trace_Handle := Gct.Create ("POSTP");
    --Stream2   : constant Gct.Trace_Handle := Gct.Create ("POSTP.EXCEPTIONS");
@@ -85,8 +85,7 @@ procedure Silmatest is
 		     Axstrn  : String := Dll.Axis_Token_Type'Image 
 		       (Dll.Posvec_C_Access_Type (List.Pos).Ax);
 		  begin
-		     String'Write (Ostr, Cmdstrn & " " & Axstrn);
-		     Tio.Put_Line ("");
+		     String'Write (Ostr, Cmdstrn & " " & Axstrn & ASCII.LF);
 		  end;
 	       elsif Dll.Posvec_C_Access_Type (List.Pos).C = Dll.Fadein or
 		 Dll.Posvec_C_Access_Type (List.Pos).C = Dll.Fadeout then
@@ -94,16 +93,15 @@ procedure Silmatest is
 		     Valstrn : String := Long_Float'Image 
 		       (Dll.Posvec_C_Access_Type (List.Pos).Val);
 		  begin
-		     String'Write (Ostr, Cmdstrn & " " & Valstrn & "secs");
-		     Tio.Put_Line ("");
+		     String'Write 
+		       (Ostr, Cmdstrn & " " & Valstrn & "secs" & ASCII.LF);
 		  end;
 	       elsif Dll.Posvec_C_Access_Type (List.Pos).C = Dll.F then
 		  declare  -- this section is not applicable
 		     Valstrn : String := Long_Float'Image 
 		       (Dll.Posvec_C_Access_Type (List.Pos).Val);
 		  begin
-		     String'Write (Ostr, Cmdstrn & " " & Valstrn);
-		     Tio.Put_Line ("");
+		     String'Write (Ostr, Cmdstrn & " " & Valstrn & ASCII.LF);
 		  end;
 	       elsif Dll.Posvec_C_Access_Type (List.Pos).C = Dll.Spindl or
 		 Dll.Posvec_C_Access_Type (List.Pos).C = Dll.Beam then
@@ -116,23 +114,22 @@ procedure Silmatest is
 			   Valstrn : String := Long_Float'Image 
 			     (Dll.Posvec_C_Access_Type (List.Pos).Val);
 			begin
-			   String'Write 
-			     (Ostr, Cmdstrn & " " & Trstrn & " " & Valstrn);
-			   Tio.Put_Line ("");
+			   String'Write  (Ostr, Cmdstrn & " " & Trstrn & " " & 
+					    Valstrn & ASCII.LF);
 			end;
 		     else
-			String'Write (Ostr, Cmdstrn & " " & Trstrn);
-			Tio.Put_Line ("");
+			String'Write (Ostr, Cmdstrn & " " & Trstrn & ASCII.LF);
 		     end if;
 		  end;
 	       elsif Dll.Posvec_C_Access_Type (List.Pos).C = Dll.Fini then
-		  Tio.Put_Line ("THE END OF THINGS.");
-	       else Tio.Put_Line ("not done yet!!!!");
+		  String'Write (Ostr, "THE END OF THINGS." & ASCII.LF);
+	       else 
+		  String'Write (Ostr, "not done yet!!!!");
 	       end if;
 	    end;
 
 	 else 
-	    Tio.Put_Line (" Output_Program : unknown class");
+	    String'Write (Ostr, "Output_Program : unknown class");
 	 end if;
 	 List := List.Next; -- this goes to the following vector !!
 	 exit when List = Sr.Prog_Anchor;
@@ -142,7 +139,7 @@ procedure Silmatest is
    
    
 begin
-   
+   Gct.Parse_Config_File;   --  parses default ./.gnatdebug
    null;
    St.Load_Result.Set (St.Working);
    Astc.Set_True (St.Button_Push);
@@ -165,6 +162,7 @@ begin
       end case;
    end loop;
    Output_Program;
+   Gct.Finalize;
    --St.Finalize;
    
 end Silmatest;
