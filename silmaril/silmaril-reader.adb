@@ -149,8 +149,10 @@ package body Silmaril.Reader is
 	    Pvio.Put (Cstr, Posvec1_Type (Listpos9.C), 5, 0);
 	    Pvio.Put (d3dstr, Posvec1_Type (Listpos9.d3d), 5, 0);
 	    Gct.Trace (Debug_Str, " A " & Astr & " B " & Bstr & " C " & Cstr & 
-			    " D " & D3dstr & " istop : " & 
-			    Boolean'Image (ListPos9.Istop) & ASCII.LF);
+			 " D " & D3dstr & 
+			 " istop : " & Boolean'Image (ListPos9.Istop) & 
+			 " Blend : " & Dll.Move_Type'Image (Listpos9.Blend) &
+			 ASCII.LF);
 	 elsif Pos.all in Dll.Posvec_S_Type  then
 	    Gct.Trace (Debug_Str, Dll.Posvec_S_Access_Type (Pos).Sa.all & 
 			    ASCII.LF);
@@ -220,7 +222,7 @@ package body Silmaril.Reader is
       List_Next  : Dll.Dllist_Access_Type := null;
       Curtok     : Extended_Token_Type;
       Val        : Long_Float             := 0.0;
-      Last_Istop : Boolean                := False;
+      Last_Istop : Boolean                := True;
       use type Dll.Dllist_Access_Type;
       
       Scanner : Scan.Scanner_Type :=

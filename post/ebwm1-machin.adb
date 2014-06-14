@@ -853,9 +853,11 @@ package body Ebwm1.Machin is
       --  calculate the segment angles --
       --  and set stops if too sharp   --
       List := Pos_List_Anchor.mNext;
+      
       Listpos3 := Posvec3_Access_Type (List.Pos);
       -- impossible value for the first one
       ListPos3.D3d := 4.0 * Math.Pi; 
+      ListPos3.Istop := True; -- set the 'from' istop true
       Vector2 (1) := Listpos3.X;
       Vector2 (2) := Listpos3.Y;
       Vector2 (3) := Listpos3.Z;
@@ -912,20 +914,14 @@ package body Ebwm1.Machin is
 	 else 
 	    -- impossible value for the last one
 	    ListPos3.D3d := 4.0 * Math.Pi; 
+	    ListPos3.Istop := True; -- set the last istop true
+
 	    null;--Done := True;
 	 end if;
 	 Gct.Trace (Debug_Str, " space angle : " & 
 		      Long_Float'Image (ListPos3.D3d));
 	 List := List.mNext;
       end loop;
-      
-      --  List := Pos_List_Anchor.mNext;
-      --  while  List /= Pos_List_Anchor loop
-	 
-	 
-      --  	 List := List.mNext;
-      --  	 exit when List = Pos_List_Anchor;
-      --  end loop;
    end Process_Vectors;
    
    
