@@ -33,6 +33,8 @@ with Ada.Unchecked_Deallocation;
 
 package body Silmaril.Dll is
    
+   type String_Access_Type is access all String;
+   
    procedure Initialize (Anchor : access Dllist_Type)
    is
    begin
@@ -219,11 +221,43 @@ package body Silmaril.Dll is
       end Unlink_Pos9_Node;
       
       
+       entry Get_Item (N   : access Dllist_Type'Class; 
+		      Pos : in out Posvec_C_Access_Type)
+      when Open is
+      begin
+	 Open := False;
+	 Pos := Posvec_C_Access_Type (N.Pos);
+	 -- returns null when N is on the anchor
+	 Open := True;
+      end Get_Item;
+      
+      
+      procedure Unlink_This_Posc_Node  (This : access Dllist_Type)
+      is
+	 procedure Free_Posc is 
+	    new Ada.Unchecked_Deallocation(Posvec_C_Type, Posvec_C_Access_Type);
+      begin
+	  Free_Posc (Posvec_C_Access_Type (This.Pos));
+	  Unlink_From_Dllist (This);
+      end Unlink_This_Posc_Node;
+      
+      entry Unlink_Pos_C_Node  (This : access Dllist_Type)
+      when Open is
+      begin
+	 Open := False;
+	 Unlink_This_Posc_Node (This);
+	 Open := True;
+      end Unlink_Pos_C_Node;
+      
+      
       procedure Unlink_This_Pos_S_Node (This : access Dllist_Type)
       is
 	 procedure Free_Posvec_S is 
 	    new Ada.Unchecked_Deallocation(Posvec_S_Type, Posvec_S_Access_Type);
+	 procedure Free_String is
+	    new Ada.Unchecked_Deallocation(String, String_Access_type);
       begin
+	 Free_String (String_Access_Type (Posvec_S_Access_Type (This.Pos).Sa));
 	  Free_Posvec_S (Posvec_S_Access_Type (This.Pos));
 	  Unlink_From_Dllist (This);
       end Unlink_This_Pos_S_Node;
@@ -250,6 +284,8 @@ package body Silmaril.Dll is
 	       Unlink_This_Pos9_Node (This);
 	    elsif This.Pos in Posvec3_Access_Type then
 	       Unlink_This_Pos3_Node (This);
+	    elsif This.Pos in Posvec_C_Access_Type then
+	       Unlink_This_PosC_Node (This);
 	    end if;
 	    This := Next;
 	 end loop;

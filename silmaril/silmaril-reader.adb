@@ -216,16 +216,20 @@ package body Silmaril.Reader is
    
    function Scanit (S : String) return Boolean
    is
-      Curtok  : Extended_Token_Type;
-      Val     : Long_Float := 0.0;
+      List, 
+      List_Next  : Dll.Dllist_Access_Type := null;
+      Curtok     : Extended_Token_Type;
+      Val        : Long_Float             := 0.0;
+      Last_Istop : Boolean                := False;
+      use type Dll.Dllist_Access_Type;
       
       Scanner : Scan.Scanner_Type :=
 	Scan.New_Scanner
-	(Input         => S,
-	 Regexps       => Tokens,
+	(Input            => S,
+	 Regexps          => Tokens,
 	 Xtra_White_Space => "",
-	 Comment_Delim => Scan.Comment_Like (Scan.Shell_Like),
-	 Scan          => False);
+	 Comment_Delim    => Scan.Comment_Like (Scan.Shell_Like),
+	 Scan             => False);
       
       function Next_Tok return Extended_Token_Type
       is
@@ -343,6 +347,16 @@ package body Silmaril.Reader is
 	    exit when Find_Bool_Tok (Truth) = Error;
 	    Pos9.Istop := Truth;
 	    Pos9.Fedrat := Fedrat;
+	    if Last_Istop and  Truth then -- both on
+	       Pos9.Blend := Dll.Straight;
+	    elsif Last_Istop and not Truth then 
+	       Pos9.Blend := Dll.Blendout;
+	    elsif not Last_Istop and Truth then
+	       Pos9.Blend := Dll.Blendin;
+	    elsif not Last_Istop and not Truth then
+	       Pos9.Blend := Dll.Blendboth;
+	    end if;
+	    Last_Istop := Truth;
 	    return Ok;
 	 end loop;
 	 return Error;
@@ -408,6 +422,10 @@ package body Silmaril.Reader is
       end Find_Beam;
       
    begin
+      if Prog_Anchor /= null then
+	 Prog_Q.Finalize (Prog_Anchor);
+	 Prog_Anchor := null;
+      end if;
       Prog_Anchor := new Dll.Dllist_Type;
       Dll.Initialize (Prog_Anchor);
       Curtok := Find_Command;

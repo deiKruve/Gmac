@@ -69,8 +69,10 @@ procedure Silmatest is
 	    Pvio.Put (Cstr, Posvec1_Type (Listpos9.C), 5, 0);
 	    Pvio.Put (d3dstr, Posvec1_Type (Listpos9.d3d), 5, 0);
 	    String'Write (Ostr, " A " & Astr & " B " & Bstr & " C " & Cstr & 
-			    " D " & D3dstr & " istop : " & 
-			    Boolean'Image (ListPos9.Istop) & ASCII.LF);
+			    " D " & D3dstr & 
+			    " istop : " & Boolean'Image (ListPos9.Istop) & 
+			    " Blend : " & Dll.Move_Type'Image (Listpos9.Blend) &
+			    ASCII.LF);
 	 elsif List.Pos.all in Dll.Posvec_S_Type  then
 	    String'Write (Ostr, Dll.Posvec_S_Access_Type (List.Pos).Sa.all & 
 			    ASCII.LF);

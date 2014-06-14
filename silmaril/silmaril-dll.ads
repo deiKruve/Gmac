@@ -47,13 +47,22 @@ package Silmaril.Dll is
    --------------------------------------
    -- the list item for a 3 axis entry --
    --------------------------------------
+   type Move_Type is
+     (Straight,
+      Blendin,
+      Blendout,
+      Blendboth);
+   
    type Posvec3_Type is tagged;
    type Posvec3_Access_Type is access  all Posvec3_Type;
    type Posvec3_Class_Access_Type is access all Posvec3_Type'Class;
    type Posvec3_Type is new Posvec_Type
      with record
 	From,
-	Istop  : Boolean := False;
+	Best,
+	Sweet,
+	Istop  : Boolean      := False;
+	Blend  : Move_Type    := Straight;
 	Fedrat : Posvec1_Type := 0.0;
 	D3d    : Posangl_Type := 0.0;  -- space angle between segments
 	Tightness : Long_Float;
@@ -174,6 +183,14 @@ package Silmaril.Dll is
 		      Pos : in out Posvec9_Access_Type);
       
       entry Unlink_Pos9_Node  (This : access Dllist_Type);
+      
+      -------------------
+      -- command entry --
+      -------------------
+      entry Get_Item (N   : access Dllist_Type'Class; 
+		      Pos : in out Posvec_C_Access_Type);
+      
+      entry Unlink_Pos_C_Node (This : access Dllist_Type);
       
       --------------------------
       -- command string entry --
