@@ -122,8 +122,9 @@ package body Silmaril.Reader is
       Colon       => +":",
       Fini        => +"FINI",
       EOF         => +"");
-
    
+   
+   -- print a line for debug purposes --
    procedure Debug_Line (Pos : Dll.Posvec_Class_Access_Type)
    is
       Listpos9 : aliased Dll.Posvec9_Access_Type;
@@ -216,6 +217,7 @@ package body Silmaril.Reader is
    end Debug_Line;
    
    
+   -- scan the text block (ex. post poc) in string --
    function Scanit (S : String) return Boolean
    is
       List, 
@@ -242,6 +244,7 @@ package body Silmaril.Reader is
 	 end if;
       end Next_Tok;
       
+      -- find the command for this node --
       function Find_Command return Extended_Token_Type
       is
 	 Token : Token_Type;
@@ -253,6 +256,7 @@ package body Silmaril.Reader is
 	 end if;
       end Find_Command;
       
+      -- find a long_float value --
       function Find_Val_Tok (Val : in out Long_Float) 
 			    Return Extended_Token_Type
       is
@@ -269,6 +273,7 @@ package body Silmaril.Reader is
 	 end if;
       end Find_Val_Tok;
       
+      -- find a boolean value --
       function Find_Bool_Tok (B : in out Boolean) 
 			     return Extended_Token_Type
       is
@@ -284,6 +289,7 @@ package body Silmaril.Reader is
 	 end if;
       end Find_Bool_Tok;
       
+      -- find units (%) --
       function Find_Percent_Tok return Extended_Token_Type
       is
 	 Token : Token_Type;
@@ -297,6 +303,7 @@ package body Silmaril.Reader is
 	 end if;
       end Find_Percent_Tok;
       
+      -- find the position for this node --
       function Find_Pos (Pos9 : access Dll.Posvec9_Type) 
 			return Extended_Token_Type
       is
@@ -349,6 +356,9 @@ package body Silmaril.Reader is
 	    exit when Find_Bool_Tok (Truth) = Error;
 	    Pos9.Istop := Truth;
 	    Pos9.Fedrat := Fedrat;
+	    -- Pos9.Blend describes the blend parm for the move to this point
+	    -- so it must be transferred in the main routine to the previous point
+	    -- since the movement parms in any point, are for the UPCOMING move.
 	    if Last_Istop and  Truth then -- both on
 	       Pos9.Blend := Dll.Straight;
 	    elsif Last_Istop and not Truth then 
@@ -364,6 +374,7 @@ package body Silmaril.Reader is
 	 return Error;
       end Find_Pos;
       
+      -- find the axis we talk about in this command node --
       function Find_Axis (Posc : access Dll.Posvec_C_Type) 
 			 return Extended_Token_Type
       is
@@ -386,6 +397,7 @@ package body Silmaril.Reader is
 	 return Error;
       end Find_Axis;
       
+      -- for beam timers et. --
       function Find_Time (Posc : access Dll.Posvec_C_Type) 
 			 return Extended_Token_Type
       is
@@ -402,6 +414,9 @@ package body Silmaril.Reader is
 	 return Error;
       end Find_Time;
       
+      -- find the beam command for this node --
+      -- beam on value --
+      -- beam off --
       function Find_Beam (Posc : access Dll.Posvec_C_Type) 
 			 return Extended_Token_Type
       is
@@ -423,6 +438,7 @@ package body Silmaril.Reader is
 	 return Error;
       end Find_Beam;
       
+      -- the main body starts here --
    begin
       if Prog_Anchor /= null then
 	 Prog_Q.Finalize (Prog_Anchor);
@@ -445,6 +461,12 @@ package body Silmaril.Reader is
 		  begin
 		     Pos9.From := False;
 		     exit when Find_Pos (Pos9) = Error;
+		     Dll.Posvec9_Access_Type (Prog_Anchor.Mprev.Pos).Blend := 
+		       Pos9.Blend; -- transfer to the previous node
+		     Pos9.Blend := Dll.None;
+		     ---Dll.Posvec9_Access_Type (Prog_Anchor.Mprev.Pos).Fedrat := 
+		       ---Pos9.Fedrat;
+		     ---Pos9.Fedrat := 0.0;
 		     Prog_Q.Insert_Pv_Before 
 		       (This  => Dll.Posvec3_Class_Access_Type (Pos9), 
 			Next  => Prog_Anchor,

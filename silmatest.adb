@@ -1,6 +1,7 @@
 with Text_Io; 
 --with Ada.Command_Line;
 --with Ada.Characters.Handling;
+with Ada.Characters.Latin_1;
 with Ada.Text_IO;
 with Ada.Text_IO.Text_Streams;
 --with Ada.Strings.Unbounded;
@@ -10,18 +11,20 @@ with System;
 with Silmaril.Reader;
 with Silmaril.Tasks;
 with Silmaril.Dll;
+with Silmaril.Param;
 with Ada.Synchronous_Task_Control;
 with Ada.Exceptions;
 with GNATCOLL.Traces;
 
 procedure Silmatest is
    
-   package Tio renames Text_Io; 
+   package Tio   renames Text_Io; 
    package Tiots renames Ada.Text_IO.Text_Streams;
-   package Astc renames Ada.Synchronous_Task_Control;
-   package St   renames Silmaril.Tasks;
+   package Astc  renames Ada.Synchronous_Task_Control;
+   package St    renames Silmaril.Tasks;
    package Sr    renames Silmaril.Reader;
-   package Dll renames Silmaril.Dll;
+   package Dll   renames Silmaril.Dll;
+   package Spar  renames Silmaril.Param;
    
    -- anything distance --
    subtype Posvec1_Type is Long_Float;
@@ -32,6 +35,10 @@ procedure Silmatest is
    --Stream1   : constant Gct.Trace_Handle := Gct.Create ("POSTP");
    --Stream2   : constant Gct.Trace_Handle := Gct.Create ("POSTP.EXCEPTIONS");
    --Debug_Str : constant Gct.Trace_Handle := Gct.Create ("POSTP.DEBUG");
+   
+   
+   Ch            : Character;
+   Available     : Boolean;
    
    Res, Last_Res : St.Ld_Result_Type;
    use type St.Ld_Result_Type;
@@ -143,28 +150,40 @@ procedure Silmatest is
 begin
    Gct.Parse_Config_File;   --  parses default ./.gnatdebug
    null;
-   St.Load_Result.Set (St.Working);
-   Astc.Set_True (St.Button_Push);
-   --delay (0.1);
-   Res := St.Load_Result.Get ;
-   Last_Res := Res;
-   loop
-      while Last_Res = Res loop
-	 Res := St.Load_Result.Get ;
-      end loop;
-      Last_Res := Res;
-      case Res is
-	 when St.Done    => 
-	    Text_Io.Put_Line ("read the post file");
-	    exit;
-	 when St.Error   => 
-	    Text_Io.Put_Line ("an error occurred reading the post file");
-	 when St.Working => 
-	    Text_Io.Put_Line ("waiting . . . .");
-      end case;
-   end loop;
-   Output_Program;
-   Gct.Finalize;
+   Spar.Read_Parameters;
+   --  loop
+   --     St.Load_Result.Set (St.Working);
+   --     Astc.Set_True (St.Button_Push);
+   --     --delay (0.1);
+   --     Res := St.Load_Result.Get ;
+   --     Last_Res := Res;
+   --     loop
+   --  	 while Last_Res = Res loop
+   --  	    Res := St.Load_Result.Get ;
+   --  	 end loop;
+   --  	 Last_Res := Res;
+   --  	 case Res is
+   --  	    when St.Done    => 
+   --  	       Text_Io.Put_Line ("read the post file");
+   --  	       exit;
+   --  	    when St.Error   => 
+   --  	       Text_Io.Put_Line ("an error occurred reading the post file");
+   --  	       exit;
+   --  	    when St.Working => 
+   --  	       Text_Io.Put_Line ("waiting . . . .");
+   --  	 end case;
+   --     end loop;
+   --     Output_Program;
+   --     --Gct.Finalize;
+   --     Tio.Get_Immediate (Ch, Available);
+   --     while not Available loop
+   --  	 Tio.Get_Immediate (Ch, Available);
+   --     end loop;
+   --     if Ch = Ada.Characters.Latin_1.ETX then
+   --  	 exit;
+   --     end if;
+   --  end loop;
+   --  Gct.Finalize;
    --St.Finalize;
    
 end Silmatest;

@@ -2,7 +2,7 @@
 --                                                                          --
 --                            SILMARIL COMPONENTS                           --
 --                                                                          --
---                              S I L M A R I L                             --
+--                        S I L M A R I L . P A R A M                       --
 --                                                                          --
 --                                  S p e c                                 --
 --                                                                          --
@@ -26,49 +26,54 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
---  The top of the Silmaril architecture
---                  /  
---     test_it     /                    real time
---          \     /      ___________________/
---           tasks       \                  \
---             |      build_jog_path   build_hw_path
---      file_selector       |           /
---             |            |          /
---          reader          |         /
---               \_____     |________/
---                     \   /
---             Auto.Dll   jog.Dll
---
--- Auto.Dll Gets Cleared Before loading
---
--- jog.dll gets cleared when switched to jogmode.
--- Since jog is an accumulative thing 
--- jog.dll can just expand and moves done could be wiped dynamically 
--- after a certain size has been reached.  
--- In this way we keep a reasonable backtrack possibility.
--- Jog works by reading an amount of pulses every 100msec and building
--- a path from them.
+-- the machine parameters are read here on start up and stored
+-- for retreaval by the runtime
 
-with System;
-
-package Silmaril is
-   Pushed_Loadp_Button_Priority : 
-     constant System.Priority := System.Default_Priority; 
-   -- this defines the ceiling priority of 'Silmaril.Tasks.Pushed_Loadp_Button_Type'
-   -- it is a utility thread
+package Silmaril.Param is
    
-   Load_Result_Thread_Priority : constant  System.Priority := 60;
-   -- this defines the ceiling priority of 'Silmaril.Tasks.Protected Load_Result'
-   -- it must match the calling threads.
-   Prog_Q_Thread_Priority : constant  System.Priority := 60;
-   -- this defines the ceiling priority of 'Silmaril.Reader.Protected Proq_Q' and
-   -- 'Silmaril.Param.Parameter_Table_Type' and
-   -- it must match the calling threads.
+   type Pparam_Enum_Type is
+     (Tightnes,
+      Maxangle);
    
+   Post_Par : array (Pparam_Enum_Type) of Long_Float;
+   -- this array will hold the postprocessor parameters, if at all needed --
    
-   --pragma Pure;
-   If_Debug                 : Boolean := False;
-   --If_Trace                 : Boolean := False;
-   --If_Debug                 : Boolean := True;
-   --If_Trace                 : Boolean := True;
-end Silmaril;
+   type Mparam_Enum_Type is
+     (X_Maxfeed,
+      Y_Maxfeed,
+      Z_Maxfeed,
+      A_Maxfeed,
+      B_Maxfeed,
+      C_Maxfeed,
+      X_Accel,
+      Y_Accel,
+      Z_Accel,
+      A_Accel,
+      B_Accel,
+      C_Accel,
+      X_Jerktime,
+      Y_Jerktime,
+      Z_Jerktime,
+      A_Jerktime,
+      B_Jerktime,
+      C_Jerktime);
+   
+   Mach_Par : array (Mparam_Enum_Type) of Long_Float;
+   -- this array will hold the machine parameters --
+   
+   protected type Parameter_Table_Type is
+      -- protected type to query the machine parameters from runtime --
+      pragma Priority (Prog_Q_Thread_Priority);
+      
+      entry Set_Postpar (I : in Pparam_Enum_Type; Val : in Long_Float);
+      entry Get_Postpar (I : in Pparam_Enum_Type; Val : out Long_Float);
+      
+      entry Set_Machpar (I : in Mparam_Enum_Type; Val : in Long_Float);
+      entry Get_Machpar (I : in Mparam_Enum_Type; Val : out Long_Float);
+   private
+      Open: Boolean := True;
+   end Parameter_Table_Type;
+   
+   procedure Read_Parameters;
+   
+end Silmaril.Param;

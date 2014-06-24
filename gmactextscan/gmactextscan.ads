@@ -52,7 +52,7 @@ package Gmactextscan is
    -- full path to the set up file --
    
    type Extended_Token_Type is
-     (ID, Number, Float, T_String, Comma, 
+     (ID, Number, Float, T_String, Comma, Fwd_Slash, Caret, 
       Exclamation, Equal, Open_Brace, Close_Brace, EOF, 
       Error);
    -- the tokens recognized by this scanner --

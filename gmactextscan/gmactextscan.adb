@@ -83,6 +83,8 @@ package body Gmactextscan is
       Float       => Scan.Float_Regexp,
       T_String    => Scan.String_Regexp ('"'),
       Comma       => +",",
+      Fwd_Slash   => +"/",
+      Caret       => +"/^",
       Exclamation => +"!",
       --Colon       => +":",
       --Semicolon   => +";",

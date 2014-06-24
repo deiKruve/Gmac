@@ -5,3 +5,55 @@ Post = {
           {* how close the path must come to the destination point in a blend *}
       Maxangle  = {90 degrees} {* blends do not occur anymore above this angle *}
 }
+Machine = {
+	Xaxis = {
+	      MaxFeed = {3 m / min} {* mm or inch *}
+	              {* the maximum allowed or possible feeds for the axis *}
+	      Acceleration = {0.1 m / sec2}
+	              {* time to accelerate to MaxFeed *}
+	      JerkTime  = {0.15 secs}
+	              {* time to get to max acceleration *}
+	}
+	Yaxis = {
+	      MaxFeed = {3 m / min} {* mm or inch *}
+	              {* the maximum allowed or possible feeds for the axis *}
+	      Acceleration = {0.1 m/sec2}
+	              {* time to accelerate to MaxFeed *}
+	      JerkTime  = {0.15 secs}
+	              {* time to get to max acceleration *}
+	}
+	Zaxis = {
+	      {* axis is only used for focussing at the moment *}
+              MaxFeed = {100000 m / min} 
+	      Acceleration = {0.1 m/sec2}
+	              {* time to accelerate to MaxFeed *}
+	      JerkTime  = {0.15 secs}
+	              {* time to get to max acceleration *}
+	}
+	Aaxis = {
+              {* axis does not exist at the moment, so make it big *}
+	      MaxFeed = {100000 deg / min}
+	              {* the maximum allowed or possible feeds for the axis *}
+	      Acceleration = {0.1 m/sec2}
+	              {* time to accelerate to MaxFeed *}
+	      JerkTime  = {0.15 secs}
+	              {* time to get to max acceleration *}
+	}
+	Baxis = {
+              {* axis does not exist at the moment, so make it big *}
+              MaxFeed = {100000 deg / min}
+	              {* the maximum allowed or possible feeds for the axis *}
+	      Acceleration = {0.1 m/sec2}
+	              {* time to accelerate to MaxFeed *}
+	      JerkTime  = {0.15 secs}
+	              {* time to get to max acceleration *}
+	}
+	Caxis = {
+              MaxFeed = {360 deg / min} {* deg or rad *}
+	              {* the maximum allowed or possible feeds for the axis *}
+	      Acceleration = {0.1 m/sec2}
+	              {* time to accelerate to MaxFeed *}
+	      JerkTime  = {0.15 secs}
+	              {* time to get to max acceleration *}
+	}
+}

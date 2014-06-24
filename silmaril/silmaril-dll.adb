@@ -35,6 +35,7 @@ package body Silmaril.Dll is
    
    type String_Access_Type is access all String;
    
+   
    procedure Initialize (Anchor : access Dllist_Type)
    is
    begin
@@ -46,16 +47,9 @@ package body Silmaril.Dll is
       Anchor.mNext := Dllist_Access_Type (Anchor);
    end Initialize;
    
+   
    protected body Program_Queue_Type is
-      
-      --  entry Set_Ceiling_Priority (Pq : Program_Queue_Type; Pri : System.Any_Priority)
-      --  when Open is
-      --  begin
-      --  	 Open := False;
-      --  	 Prog_Q'Priority := Pri;
-      --  	 Open := True;
-      --  end Set_Ceiling_Priority;
-      
+       
       procedure Unlink_From_Dllist (This : access Dllist_Type)
       is
 	 procedure Free_Dllist is
@@ -65,10 +59,10 @@ package body Silmaril.Dll is
 	 --Open := False;
 	 This.Prev.Next := This.Next;
 	 This.Next.Prev := This.Prev;
-	 if This.Mnext /= This then
+	 if This.Mnext /= null and This.Mnext /= This then
 	    This.Mprev.Mnext := This.Mnext;
 	 end if;
-	 if This.Mprev /= This then
+	 if This.Mprev /= null and This.Mprev /= This then
 	    This.mNext.mPrev := This.mPrev;
 	 end if;
 	 Free_Dllist (That);
@@ -123,6 +117,7 @@ package body Silmaril.Dll is
 	 Unlink_From_Dllist (This);
 	 Open := True;
       end Unlink_Dllist_Item;
+      
       
       ------------------------
       -- 3 axis item entrys --
@@ -192,6 +187,9 @@ package body Silmaril.Dll is
       end Unlink_Pos3_Node;
       
       
+      ------------------------
+      -- 9 axis item entrys --
+      ------------------------
       entry Get_Item (N   : access Dllist_Type'Class; 
 		      Pos : in out Posvec9_Access_Type)
       when Open is
@@ -221,7 +219,10 @@ package body Silmaril.Dll is
       end Unlink_Pos9_Node;
       
       
-       entry Get_Item (N   : access Dllist_Type'Class; 
+      --------------------------
+      -- command item entries --
+      --------------------------
+      entry Get_Item (N   : access Dllist_Type'Class; 
 		      Pos : in out Posvec_C_Access_Type)
       when Open is
       begin
@@ -250,6 +251,9 @@ package body Silmaril.Dll is
       end Unlink_Pos_C_Node;
       
       
+      -------------------------
+      -- string item entries --
+      -------------------------
       procedure Unlink_This_Pos_S_Node (This : access Dllist_Type)
       is
 	 procedure Free_Posvec_S is 
@@ -271,6 +275,9 @@ package body Silmaril.Dll is
       end Unlink_Pos_S_Node;
       
       
+      -----------------------------------
+      -- finalize a doubly linked list --
+      -----------------------------------
       entry Finalize (Anchor : access Dllist_Type)
       when Open is
 	 This, Next : access Dllist_Type := Anchor.Next;

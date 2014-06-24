@@ -93,7 +93,10 @@ package body Ebwm1.Machin is
    Outtol     : Posvec1_Type    := 0.0005;
    Orig_X,
    Orig_Y,
-   Orig_Z     : Posvec1_Type    := 0.0;
+   Orig_Z,
+   Orig_A,
+   Orig_B,
+   Orig_C     : Posvec1_Type    := 0.0;
    Multax_On,
    From_Seen  : Boolean         := False;
    Fedratunit : Fedratunit_Type := Mmpm;
@@ -553,16 +556,35 @@ package body Ebwm1.Machin is
    is
       List         : aliased Dllist_Access_Type := Pos_List_Anchor.mNext;
       Listpos3,
+      Listppos3,
       Listnextpos3 : aliased Posvec3_Access_Type;
-
-      Token     : Gts.Extended_Token_Type;
+      Listpos9,
+      Listppos9    : aliased Posvec9_Access_Type;
+      Token        : Gts.Extended_Token_Type;
       Tightness,
-      Distance  : Long_Float := 0.0;
-      Max_Angle : Posangl_Type := To_Radians (0.0);
+      Max_Feed_X,
+      Max_Feed_Y,
+      Max_Feed_Z,
+      Max_Feed_A,
+      Max_Feed_B,
+      Max_Feed_C,
+      Dist_X,
+      Dist_Y,
+      Dist_Z,
+      Dist_A,
+      Dist_B,
+      Dist_C,
+      Distance,
+      Itf,
+      Fedrat_Now : Long_Float := 0.0;
+      Last_A     : Long_Float := Orig_A;
+      Last_B     : Long_Float := Orig_B;
+      Last_C     : Long_Float := Orig_C;
+      Max_Angle  : Posangl_Type := To_Radians (0.0);
       Vector1,
       Vector2,
-      Vector3   : Math3d.Long_Vector_3d := (0.0, 0.0, 0.0);
-      Vector    : array (1 .. 4) of Math3d.Long_Vector_3d:= ((0.0, 0.0, 0.0),
+      Vector3    : Math3d.Long_Vector_3d := (0.0, 0.0, 0.0);
+      Vector     : array (1 .. 4) of Math3d.Long_Vector_3d:= ((0.0, 0.0, 0.0),
 							     (0.0, 0.0, 0.0),
 							     (0.0, 0.0, 0.0),
 							     (0.0, 0.0, 0.0));
@@ -642,7 +664,157 @@ package body Ebwm1.Machin is
 	 Gct.Trace 
 	   (Debug_Str, "maxangle is " & 
 	      Posangl_Type'Image (Max_Angle) & " radians");
-      end Get_Max_Angle;      
+      end Get_Max_Angle;
+      
+      
+      -- find the maximum feeds in the setup file
+      procedure Get_Max_Feed
+      is
+	 procedure Mm_Convert (Feed : in out Long_Float)
+	 is
+	 begin
+	    Token := Gts.Next_Token;
+	 case Token is
+	    when Gts.Id =>
+	       if Gts.String_Value = "inch" then
+		  Feed := Feed * 25.4;
+	       elsif Gts.String_Value = "mm" then
+		  null;
+	       else
+		  Gct.Trace 
+		    (Stream1, 
+		     "error in gmac.text-Machine.maxFeed: " & 
+		       "expected 'mm/min' or 'inch/min'");
+	       end if;
+	    when others =>
+	       Gct.Trace 
+		 (Stream1, 
+		  "error in gmac.text-Machine.MaxFeed: " & 
+		    "expected 'mm/min' or 'inch/min'");
+	 end case;
+	 end Mm_Convert;
+	 
+	 procedure Rad_Convert (Angle : in out Long_Float)
+	 is
+	 begin
+	    Token := Gts.Next_Token;
+	 case Token is
+	    when Gts.Id =>
+	       if Gts.String_Value = "deg" then
+		  Angle := To_Radians (Angle);
+	       elsif Gts.String_Value = "rad" then
+		  null;
+	       else
+		  Gct.Trace 
+		    (Stream1, 
+		     "error in gmac.text-Machine.maxFeed: " & 
+		       "expected 'deg/min' or 'rad/min'");
+	       end if;
+	    when others =>
+	       Gct.Trace 
+		 (Stream1, 
+		  "error in gmac.text-Machine.MaxFeed: " & 
+		    "expected 'deg/min' or 'rad/min'");
+	 end case;
+	 end Rad_Convert;
+	 
+      begin
+	 Token := Gts.Find_Parameter ("Machine.Xaxis.MaxFeed");
+	 case Token is
+	    when Gts.Number => 
+	       Max_Feed_X := Long_Float (Integer'Value (Gts.String_Value));
+	    when Gts.Float  =>
+	       Max_Feed_X := Long_float'Value (Gts.String_Value);
+	    when others     =>
+	       Gct.Trace 
+		 (Stream1, 
+		  "error in gmac.text-Machine.Xaxis.MaxFeed: " & 
+		    "expected number or float");
+	 end case;
+	 Mm_Convert (Max_Feed_X);
+	 Gct.Trace (Debug_Str, "MaxFeedX is " &
+		      Long_Float'Image (Max_Feed_X) & " mm / min");
+	 
+	 Token := Gts.Find_Parameter ("Machine.Yaxis.MaxFeed");
+	 case Token is
+	    when Gts.Number => 
+	       Max_Feed_Y := Long_Float (Integer'Value (Gts.String_Value));
+	    when Gts.Float  =>
+	       Max_Feed_Y := Long_float'Value (Gts.String_Value);
+	    when others     =>
+	       Gct.Trace 
+		 (Stream1, 
+		  "error in gmac.text-Machine.Yaxis.MaxFeed: " & 
+		    "expected number or float");
+	 end case;
+	 Mm_Convert (Max_Feed_Y);
+	 Gct.Trace (Debug_Str, "MaxFeedY is " &
+		      Long_Float'Image (Max_Feed_Y) & " mm / min");
+	 
+	  Token := Gts.Find_Parameter ("Machine.Zaxis.MaxFeed");
+	 case Token is
+	    when Gts.Number => 
+	       Max_Feed_Z := Long_Float (Integer'Value (Gts.String_Value));
+	    when Gts.Float  =>
+	       Max_Feed_Z := Long_float'Value (Gts.String_Value);
+	    when others     =>
+	       Gct.Trace 
+		 (Stream1, 
+		  "error in gmac.text-Machine.Zaxis.MaxFeed: " & 
+		    "expected number or float");
+	 end case;
+	 Mm_Convert (Max_Feed_Z);
+	 Gct.Trace (Debug_Str, "MaxFeedZ is " &
+		      Long_Float'Image (Max_Feed_Z) & " mm / min");
+	 
+	 Token := Gts.Find_Parameter ("Machine.Aaxis.MaxFeed");
+	 case Token is
+	    when Gts.Number => 
+	       Max_Feed_A := Long_Float (Integer'Value (Gts.String_Value));
+	    when Gts.Float  =>
+	       Max_Feed_A := Long_float'Value (Gts.String_Value);
+	    when others     =>
+	       Gct.Trace 
+		 (Stream1, 
+		  "error in gmac.text-Machine.Aaxis.MaxFeed: " & 
+		    "expected number or float");
+	 end case;
+	 Rad_Convert (Max_Feed_A);
+	 Gct.Trace (Debug_Str, "MaxFeedA is " &
+		      Long_Float'Image (Max_Feed_A) & " rad / min");
+	 
+	 Token := Gts.Find_Parameter ("Machine.Baxis.MaxFeed");
+	 case Token is
+	    when Gts.Number => 
+	       Max_Feed_B := Long_Float (Integer'Value (Gts.String_Value));
+	    when Gts.Float  =>
+	       Max_Feed_B := Long_float'Value (Gts.String_Value);
+	    when others     =>
+	       Gct.Trace 
+		 (Stream1, 
+		  "error in gmac.text-Machine.Baxis.MaxFeed: " & 
+		    "expected number or float");
+	 end case;
+	 Rad_Convert (Max_Feed_B);
+	 Gct.Trace (Debug_Str, "MaxFeedB is " &
+		      Long_Float'Image (Max_Feed_B) & " rad / min");
+	 
+	 Token := Gts.Find_Parameter ("Machine.Caxis.MaxFeed");
+	 case Token is
+	    when Gts.Number => 
+	       Max_Feed_C := Long_Float (Integer'Value (Gts.String_Value));
+	    when Gts.Float  =>
+	       Max_Feed_C := Long_float'Value (Gts.String_Value);
+	    when others     =>
+	       Gct.Trace 
+		 (Stream1, 
+		  "error in gmac.text-Machine.Caxis.MaxFeed: " & 
+		    "expected number or float");
+	 end case;
+	 Rad_Convert (Max_Feed_C);
+	 Gct.Trace (Debug_Str, "MaxFeedC is " &
+		      Long_Float'Image (Max_Feed_C) & " rad / min");
+      end Get_Max_Feed;
       
       procedure Load_Vector4
       is
@@ -659,7 +831,7 @@ package body Ebwm1.Machin is
    begin
       Get_Tightness;
       Get_Max_Angle;
-      
+      Get_Max_Feed;
       -- check for nodes that are too close --
       -- 
       -- use 4 points, the things get done between 2 and 3
@@ -921,6 +1093,126 @@ package body Ebwm1.Machin is
 	 Gct.Trace (Debug_Str, " space angle : " & 
 		      Long_Float'Image (ListPos3.D3d));
 	 List := List.mNext;
+      end loop;
+      
+      -- calculate the inverse time feed and 
+      -- check that the individual axes are not overdriven
+      List := Pos_List_Anchor.mNext;
+      -- load initial vector
+      if List /= Pos_List_Anchor then
+	 Listpos3 := Posvec3_Access_Type (List.Pos);
+	 Vector (1) (1) := Listpos3.X;
+	 Vector (1) (2) := Listpos3.Y;
+	 Vector (1) (3) := Listpos3.Z;
+	 List := List.Mnext;
+      end if;
+      while  List /= Pos_List_Anchor loop
+	 Listpos3 := Posvec3_Access_Type (List.Pos);
+	 Vector (2) (1) := ListPos3.X;
+	 Vector (2) (2) := ListPos3.Y;
+	 Vector (2) (3) := ListPos3.Z;
+	 Distance := abs (Vector (2) - Vector (1)) + Long_Float'Model_Epsilon;
+	 Gct.Trace 
+	   (Debug_Str, "distance is " & 
+	      Long_Float'Image (Distance) & " mm");
+	 Itf := Fedrat / Distance;
+	 Gct.Trace 
+	   (Debug_Str, "inverse time feedrate is " & 
+	      Long_Float'Image (Itf) & " min-1");
+	 if List.Pos.all in Posvec9_Type then 
+	   Listpos9 := Posvec9_Access_Type (List.Pos);
+	   if List.Mprev.Pos.all in Posvec3_Type then
+	      Listppos3 := Posvec3_Access_Type (List.Mprev.Pos);
+	      Dist_X := abs (ListPos9.Xr - ListpPos3.X);
+	      Dist_Y := abs (ListPos9.Yr - ListpPos3.Y);
+	      Dist_Z := abs (ListPos9.Zr - ListpPos3.Z);
+	      --and abc are from origin or else 0 but thats only the 1st time
+	      Dist_A := abs (ListPos9.A - Last_A);
+	      Dist_B := abs (ListPos9.B - Last_B);
+	      Dist_C := abs (ListPos9.C - Last_C);
+	   elsif List.Mprev.Pos.all in Posvec9_Type then
+	      Listppos9 := Posvec9_Access_Type (List.Mprev.Pos);
+	      Dist_X := abs (ListPos9.Xr - ListpPos9.Xr);
+	      Dist_Y := abs (ListPos9.Yr - ListpPos9.Yr);
+	      Dist_Z := abs (ListPos9.Zr - ListpPos9.Zr);
+	      
+	      Dist_A := abs (ListPos9.A - ListpPos9.A);
+	      Dist_B := abs (ListPos9.B - ListpPos9.B);
+	      Dist_C := abs (ListPos9.C - ListpPos9.C);
+	   end if;
+	   if Dist_A * Itf > Max_Feed_A then
+	      Itf := Max_Feed_A / Dist_A;
+	   end if;
+	   if Dist_B * Itf > Max_Feed_B then
+	      Itf := Max_Feed_B / Dist_B;
+	   end if;
+	   if Dist_C * Itf > Max_Feed_C then
+	      Itf := Max_Feed_C / Dist_C;
+	   end if;
+	 elsif List.Pos.all in Posvec3_Type  then
+	    if List.Mprev.Pos.all in Posvec9_Type then
+	      Listppos9 := Posvec9_Access_Type (List.Mprev.Pos);
+	      Last_A := Listppos9.A;
+	      Last_B := Listppos9.B;
+	      Last_C := Listppos9.C;
+	    end if;
+	    Listppos3 := Posvec3_Access_Type (List.Mprev.Pos);
+	    Dist_X := abs (ListPos3.X - ListpPos3.X);
+	    Dist_Y := abs (ListPos3.Y - ListpPos3.Y);
+	    Dist_Z := abs (ListPos3.Z - ListpPos3.Z);
+	 end if;
+	 if Dist_X * Itf > Max_Feed_X then
+	    Itf := Max_Feed_X / Dist_X;
+	 end if;
+	 if Dist_Y * Itf > Max_Feed_Y then
+	    Itf := Max_Feed_Y / Dist_Y;
+	 end if;
+	 if Dist_Z * Itf > Max_Feed_Z then
+	    Itf := Max_Feed_Z / Dist_Z;
+	 end if;
+
+	 Fedrat_Now := Distance * Itf;
+	 if Fedrat_Now < (Fedrat - 20.0 * Long_Float'Model_Epsilon) then
+	    declare 
+	       Strp : access String := new 
+		 String'("# I had to reduce the feedrate: ");
+	       Pv   :  Posvec_S_Access_Type := new Posvec_S_Type;
+	    begin
+	       Pv.Sa := Strp;
+	       Insert_Pv_Before (This => Posvec_Class_Access_Type (Pv),
+				Next => List.Mprev);
+	       Insert_Pv_After (This => Posvec_Class_Access_Type (Pv),
+				Prev => Pos_List_Anchor);
+	       Gct.Trace (Stream1, Strp.all);
+	       Gct.Trace 
+		 (Stream1, 
+		  "# the maximum feedrate of one of the axes was violated.");
+	       declare
+		  Strp : access String := new String'("          ");
+		  Pv   :  Posvec_S_Access_Type := new Posvec_S_Type;
+	       begin
+		  Pvio.Put (Strp.all(3 .. 9), Posvec1_Type (Fedrat_Now), 1, 0);
+		  Strp (1) := 'F';
+		  Pv.Sa := Strp;
+		  Insert_Pv_Before (This => Posvec_Class_Access_Type (Pv),
+				    Next => List.Mprev);
+		  declare
+		     Strp : access String := new String'("          ");
+		     Pv   :  Posvec_S_Access_Type := new Posvec_S_Type;
+		  begin
+		     Pvio.Put (Strp.all(3 .. 9), Posvec1_Type (Fedrat), 1, 0);
+		     Strp (1) := 'F';
+		     Pv.Sa := Strp;
+		     Insert_Pv_Before (This => Posvec_Class_Access_Type (Pv),
+				       Next => List);
+		  end;
+	       end;
+	    end;
+	 end if;
+	 Vector (1)(1) := Vector (2)(1);
+	 Vector (1)(2) := Vector (2)(2);
+	 Vector (1)(3) := Vector (2)(3);
+	 List       := List.Mnext;
       end loop;
    end Process_Vectors;
    

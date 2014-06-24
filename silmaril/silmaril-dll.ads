@@ -48,7 +48,8 @@ package Silmaril.Dll is
    -- the list item for a 3 axis entry --
    --------------------------------------
    type Move_Type is
-     (Straight,
+     (None,
+      Straight,
       Blendin,
       Blendout,
       Blendboth);
