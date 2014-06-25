@@ -560,7 +560,6 @@ package body Ebwm1.Machin is
       Listnextpos3 : aliased Posvec3_Access_Type;
       Listpos9,
       Listppos9    : aliased Posvec9_Access_Type;
-      Token        : Gts.Extended_Token_Type;
       Tightness,
       Max_Feed_X,
       Max_Feed_Y,
@@ -589,11 +588,15 @@ package body Ebwm1.Machin is
 							     (0.0, 0.0, 0.0),
 							     (0.0, 0.0, 0.0));
       use type Math3d.Long_Vector_3d;
-
       
+      ------------------------------------------
       -- find the tightness in the setup file --
+      ------------------------------------------
       procedure Get_Tightness
       is
+	 Done      : Boolean    := False;
+	 Token     : Gts.Extended_Token_Type;
+	 use type Gts.Extended_Token_Type;
       begin
 	 Token := Gts.Find_Parameter ("Post.Tightness");
 	 case Token is
@@ -607,29 +610,35 @@ package body Ebwm1.Machin is
 		  "error in gmac.text-Post.Tightness: expected number or float");
 	 end case;
 	 Token := Gts.Next_Token;
-	 case Token is
-	    when Gts.Id =>
-	       if Gts.String_Value = "inch" then
-		  Tightness := Tightness * 25.4;
-	       elsif Gts.String_Value = "mm" then
-		  null;
-	       else
-		  Gct.Trace 
-		    (Stream1, 
-		     "error in gmac.text-Post.Tightness: expected 'mm' or 'inch'");
-	       end if;
-	    when others =>
-	       Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Post.Tightness: expected 'mm' or 'inch'");
-	 end case;
-	 Gct.Trace (Debug_Str, "tightness is " & 
-		      Long_Float'Image (Tightness) & " mm");
-      end Get_Tightness;
+	 loop
+	    exit when Token /= Gts.Id;
+	    if Gts.String_Value = "inch" then
+	       Tightness := Tightness * 25.4;
+	    elsif Gts.String_Value = "mm" then
+	       null;
+	    else exit;
+	    end if;
+	    Done := True;
+	    exit;
+	 end loop;
+	 if not Done then
+	    Gct.Trace 
+	      (Stream1, 
+	       "error in gmac.text-Post.Tightness: expected 'mm' or 'inch'");
+	 else
+	    Gct.Trace (Debug_Str, "tightness is " & 
+			 Long_Float'Image (Tightness) & " mm");
+	 end if;
+      end Get_Tightness;     
       
-      -- find the max angle in the setup file -- 
+      ------------------------------------------
+      -- find the max angle in the setup file --
+      ------------------------------------------
       procedure Get_Max_Angle
       is
+	 Token     : Gts.Extended_Token_Type;
+	 Done      : Boolean    := False;
+	 use type Gts.Extended_Token_Type;
       begin
 	 Token := Gts.Find_Parameter ("Post.Maxangle");
 	 case Token is
@@ -643,179 +652,141 @@ package body Ebwm1.Machin is
 		  "error in gmac.text-Post.Maxangle: expected number or float");
 	 end case;
 	 Token := Gts.Next_Token;
-	 case Token is
-	    when Gts.Id => 
-	       if Gts.String_Value = "degrees" then
-		  Max_Angle := To_Radians (Max_Angle);
-	       elsif Gts.String_Value = "radians" then
-		  null;
-	       else
-		  Gct.Trace 
-		    (Stream1, 
-		     "error in gmac.text-Post.Maxangle: " & 
-		       "expected 'degrees' or 'radians'");
-	       end if;
-	    when others =>
-	       Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Post.Maxangle: " & 
-		    "expected 'degrees' or 'radians'");
-	 end case;
-	 Gct.Trace 
-	   (Debug_Str, "maxangle is " & 
-	      Posangl_Type'Image (Max_Angle) & " radians");
+	 loop
+	    exit when Token /= Gts.Id;
+	    if Gts.String_Value = "degrees" then
+	       Max_Angle := To_Radians (Max_Angle);
+	    elsif Gts.String_Value = "radians" then null;
+	    else exit;
+	    end if;
+	    Done := True;
+	    exit;
+	 end loop;
+	 if not Done then
+	    Gct.Trace 
+	      (Stream1, 
+	       "error in gmac.text-Post.Maxangle: " & 
+		 "expected 'degrees' or 'radians'");
+	 else
+	    Gct.Trace 
+	      (Debug_Str, "maxangle is " & 
+		 Posangl_Type'Image (Max_Angle) & " radians");
+	 end if;
       end Get_Max_Angle;
       
       
-      -- find the maximum feeds in the setup file
-      procedure Get_Max_Feed
+      ----------------------------------------------
+      -- find the maximum feeds in the setup file --
+      ----------------------------------------------
+      procedure Get_Maximum_Feed 
       is
-	 procedure Mm_Convert (Feed : in out Long_Float)
-	 is
-	 begin
-	    Token := Gts.Next_Token;
-	 case Token is
-	    when Gts.Id =>
-	       if Gts.String_Value = "inch" then
-		  Feed := Feed * 25.4;
-	       elsif Gts.String_Value = "mm" then
-		  null;
-	       else
-		  Gct.Trace 
-		    (Stream1, 
-		     "error in gmac.text-Machine.maxFeed: " & 
-		       "expected 'mm/min' or 'inch/min'");
-	       end if;
-	    when others =>
-	       Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Machine.MaxFeed: " & 
-		    "expected 'mm/min' or 'inch/min'");
-	 end case;
-	 end Mm_Convert;
+	 Token     : Gts.Extended_Token_Type;
 	 
-	 procedure Rad_Convert (Angle : in out Long_Float)
+	 procedure Get_Max_Feed (Axis : Character; Feed_Param : in out Long_Float)
 	 is
-	 begin
-	    Token := Gts.Next_Token;
-	 case Token is
-	    when Gts.Id =>
-	       if Gts.String_Value = "deg" then
-		  Angle := To_Radians (Angle);
-	       elsif Gts.String_Value = "rad" then
-		  null;
-	       else
+	    F : Long_Float;
+	    
+	    procedure M_Convert (Feed : in out Long_Float)
+	      -- converts feed to mm/min --
+	    is
+	       Done : Boolean := False;
+	       use type Gts.Extended_Token_Type;
+	    begin
+	       Token := Gts.Next_Token;
+	       loop
+		  exit when Token /= Gts.Id;
+		  if Gts.String_Value = "inch" then
+		     Feed := Feed *  0.0254; -- / 60.0;
+		  elsif Gts.String_Value = "m" then
+		     Feed := Feed *1000.0; -- / 60.0;
+		  else exit;
+		  end if;
+		  Token := Gts.Next_Token;
+		  exit when Token /= Gts.Fwd_Slash;
+		  Token := Gts.Next_Token;
+		  exit when Token /= Gts.Id;
+		  exit when Gts.String_Value /= "min";
+		  Done := True;
+		  exit;
+	       end loop;
+	       if not Done then
+		  Feed := 0.0;
 		  Gct.Trace 
 		    (Stream1, 
-		     "error in gmac.text-Machine.maxFeed: " & 
+		     "error in gmac.text-Machine." & Axis & "axis.MaxFeed: " & 
+		       "expected 'm/min' or 'inch/min'");
+	       end if;
+	    end M_Convert;
+	    
+	    procedure Rad_Convert (Angle : in out Long_Float)
+	      -- converts feed to rads/min --
+	    is
+	       Done : Boolean := False;
+	       use type Gts.Extended_Token_Type;
+	    begin
+	       Token := Gts.Next_Token;
+	       loop
+		  exit when Token /= Gts.Id;
+		  if Gts.String_Value = "deg" then
+		     Angle := To_Radians (Angle); -- / 60.0;
+		  elsif Gts.String_Value = "rad" then
+		     Angle := Angle; -- / 60.0;
+		  else exit;
+		  end if;
+		  Token := Gts.Next_Token;
+		  exit when Token /= Gts.Fwd_Slash;
+		  Token := Gts.Next_Token;
+		  exit when Token /= Gts.Id;
+		  exit when Gts.String_Value /= "min";
+		  Done := True;
+		  exit;
+	       end loop;
+	       if not Done then
+		  Angle := 0.0;
+		  Gct.Trace 
+		    (Stream1, 
+		     "error in gmac.text-Machine.MaxFeed: " & 
 		       "expected 'deg/min' or 'rad/min'");
 	       end if;
-	    when others =>
-	       Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Machine.MaxFeed: " & 
-		    "expected 'deg/min' or 'rad/min'");
-	 end case;
-	 end Rad_Convert;
+	    end Rad_Convert;
+	    
+	 begin -- Get_Max_Feed
+	    Gct.Trace (Debug_Str, "Gettoken Machine." & Axis & "axis.MaxFeed");
+	    Token := Gts.Find_Parameter ("Machine." & Axis & "axis.MaxFeed");
+	    case Token is
+	       when Gts.Number => 
+		  F := Long_Float (Integer'Value (Gts.String_Value));
+	       when Gts.Float  =>
+		  F := Long_float'Value (Gts.String_Value);
+	       when others     =>
+		  Gct.Trace 
+		    (Stream1, 
+		     "error in gmac.text-Machine." & Axis & "axis.MaxFeed: " & 
+		       "expected number or float");
+	    end case;
+	    case Axis is
+	       when 'X' | 'Y' | 'Z' => 
+		  M_Convert (F);
+		  Gct.Trace (Debug_Str, "MaxFeed" & Axis & "is " &
+			       Long_Float'Image (F) & " mm / min");
+	       when 'A' | 'B' | 'C' => 
+		  Rad_Convert (F);
+		  Gct.Trace (Debug_Str, "MaxFeed" & Axis & "is " &
+			       Long_Float'Image (F) & " rad / min");
+	       when others          => null;
+	    end case;
+	    Feed_Param := F;
+	 end Get_Max_Feed;
 	 
-      begin
-	 Token := Gts.Find_Parameter ("Machine.Xaxis.MaxFeed");
-	 case Token is
-	    when Gts.Number => 
-	       Max_Feed_X := Long_Float (Integer'Value (Gts.String_Value));
-	    when Gts.Float  =>
-	       Max_Feed_X := Long_float'Value (Gts.String_Value);
-	    when others     =>
-	       Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Machine.Xaxis.MaxFeed: " & 
-		    "expected number or float");
-	 end case;
-	 Mm_Convert (Max_Feed_X);
-	 Gct.Trace (Debug_Str, "MaxFeedX is " &
-		      Long_Float'Image (Max_Feed_X) & " mm / min");
-	 
-	 Token := Gts.Find_Parameter ("Machine.Yaxis.MaxFeed");
-	 case Token is
-	    when Gts.Number => 
-	       Max_Feed_Y := Long_Float (Integer'Value (Gts.String_Value));
-	    when Gts.Float  =>
-	       Max_Feed_Y := Long_float'Value (Gts.String_Value);
-	    when others     =>
-	       Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Machine.Yaxis.MaxFeed: " & 
-		    "expected number or float");
-	 end case;
-	 Mm_Convert (Max_Feed_Y);
-	 Gct.Trace (Debug_Str, "MaxFeedY is " &
-		      Long_Float'Image (Max_Feed_Y) & " mm / min");
-	 
-	  Token := Gts.Find_Parameter ("Machine.Zaxis.MaxFeed");
-	 case Token is
-	    when Gts.Number => 
-	       Max_Feed_Z := Long_Float (Integer'Value (Gts.String_Value));
-	    when Gts.Float  =>
-	       Max_Feed_Z := Long_float'Value (Gts.String_Value);
-	    when others     =>
-	       Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Machine.Zaxis.MaxFeed: " & 
-		    "expected number or float");
-	 end case;
-	 Mm_Convert (Max_Feed_Z);
-	 Gct.Trace (Debug_Str, "MaxFeedZ is " &
-		      Long_Float'Image (Max_Feed_Z) & " mm / min");
-	 
-	 Token := Gts.Find_Parameter ("Machine.Aaxis.MaxFeed");
-	 case Token is
-	    when Gts.Number => 
-	       Max_Feed_A := Long_Float (Integer'Value (Gts.String_Value));
-	    when Gts.Float  =>
-	       Max_Feed_A := Long_float'Value (Gts.String_Value);
-	    when others     =>
-	       Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Machine.Aaxis.MaxFeed: " & 
-		    "expected number or float");
-	 end case;
-	 Rad_Convert (Max_Feed_A);
-	 Gct.Trace (Debug_Str, "MaxFeedA is " &
-		      Long_Float'Image (Max_Feed_A) & " rad / min");
-	 
-	 Token := Gts.Find_Parameter ("Machine.Baxis.MaxFeed");
-	 case Token is
-	    when Gts.Number => 
-	       Max_Feed_B := Long_Float (Integer'Value (Gts.String_Value));
-	    when Gts.Float  =>
-	       Max_Feed_B := Long_float'Value (Gts.String_Value);
-	    when others     =>
-	       Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Machine.Baxis.MaxFeed: " & 
-		    "expected number or float");
-	 end case;
-	 Rad_Convert (Max_Feed_B);
-	 Gct.Trace (Debug_Str, "MaxFeedB is " &
-		      Long_Float'Image (Max_Feed_B) & " rad / min");
-	 
-	 Token := Gts.Find_Parameter ("Machine.Caxis.MaxFeed");
-	 case Token is
-	    when Gts.Number => 
-	       Max_Feed_C := Long_Float (Integer'Value (Gts.String_Value));
-	    when Gts.Float  =>
-	       Max_Feed_C := Long_float'Value (Gts.String_Value);
-	    when others     =>
-	       Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Machine.Caxis.MaxFeed: " & 
-		    "expected number or float");
-	 end case;
-	 Rad_Convert (Max_Feed_C);
-	 Gct.Trace (Debug_Str, "MaxFeedC is " &
-		      Long_Float'Image (Max_Feed_C) & " rad / min");
-      end Get_Max_Feed;
-      
+      begin --Get_Maximum_Feed
+	 Get_Max_Feed ('X', Max_Feed_X);
+	 Get_Max_Feed ('Y', Max_Feed_Y);
+	 Get_Max_Feed ('Z', Max_Feed_Z);
+	 Get_Max_Feed ('A', Max_Feed_A);
+	 Get_Max_Feed ('B', Max_Feed_B);
+	 Get_Max_Feed ('C', Max_Feed_C);	 
+      end Get_Maximum_Feed;
+
       procedure Load_Vector4
       is
       begin
@@ -831,7 +802,7 @@ package body Ebwm1.Machin is
    begin
       Get_Tightness;
       Get_Max_Angle;
-      Get_Max_Feed;
+      Get_Maximum_Feed;
       -- check for nodes that are too close --
       -- 
       -- use 4 points, the things get done between 2 and 3

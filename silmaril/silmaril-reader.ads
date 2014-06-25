@@ -28,8 +28,7 @@
 
 --  Is called by Silmaril.File_Selector to read the file and store it
 --  in the master dll.
--- In case of error it gets reported to either the file_selector or 
---  via the file selctor to tasks.
+-- In case of error it gets reported to the real time thread via tasks.
 
 with Interfaces.C.Strings;
 with Silmaril.Dll;
@@ -48,5 +47,9 @@ package Silmaril.Reader is
    
    function Start_Reading (Str : String) 
 			  return Boolean;
+   
+   -- so we can report errors to the real time thread.
+   type Error_Reporter_Type is access procedure (Err_Str : String);
+   M_Report_Error : Error_Reporter_Type;
    
 end Silmaril.Reader;

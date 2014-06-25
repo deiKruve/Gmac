@@ -34,7 +34,7 @@ Machine = {
               {* axis does not exist at the moment, so make it big *}
 	      MaxFeed = {100000 deg / min}
 	              {* the maximum allowed or possible feeds for the axis *}
-	      Acceleration = {0.1 m/sec2}
+	      Acceleration = {0.1 deg/sec2}
 	              {* time to accelerate to MaxFeed *}
 	      JerkTime  = {0.15 secs}
 	              {* time to get to max acceleration *}
@@ -43,7 +43,7 @@ Machine = {
               {* axis does not exist at the moment, so make it big *}
               MaxFeed = {100000 deg / min}
 	              {* the maximum allowed or possible feeds for the axis *}
-	      Acceleration = {0.1 m/sec2}
+	      Acceleration = {0.1 deg/sec2}
 	              {* time to accelerate to MaxFeed *}
 	      JerkTime  = {0.15 secs}
 	              {* time to get to max acceleration *}
@@ -51,7 +51,7 @@ Machine = {
 	Caxis = {
               MaxFeed = {360 deg / min} {* deg or rad *}
 	              {* the maximum allowed or possible feeds for the axis *}
-	      Acceleration = {0.1 m/sec2}
+	      Acceleration = {0.1 deg/sec2}
 	              {* time to accelerate to MaxFeed *}
 	      JerkTime  = {0.15 secs}
 	              {* time to get to max acceleration *}

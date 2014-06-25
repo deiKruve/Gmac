@@ -63,7 +63,7 @@ package body Silmaril.File_Selector is
       begin
 	 Reading_Result := Silmaril.Reader.Start_Reading (Text);
 	 if not Reading_Result then
-	    M_Report_Error (Reading_Result);
+	    M_Report_Error ("Silmaril.Reader: could not interpret the program");
 	 end if;
       end;
       
@@ -73,8 +73,7 @@ package body Silmaril.File_Selector is
       return Reading_Result;
    exception
       when others => 
-   	 M_Report_Error (False);
-   	 Ada.Text_IO.Put_Line ("file reader stuffup");
+   	 M_Report_Error ("Silmaril.File_selector: could not read the program.");
    	 return False;
    end Read_Entire_File;
    

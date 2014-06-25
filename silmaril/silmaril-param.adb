@@ -29,14 +29,14 @@
 -- the machine parameters are read here on start up and stored
 -- for retreaval by the runtime
 
---!!!!!!!!!errors must be integrated into the proview env.---------
 
+--with Text_Io; 
 with Ada.Numerics;
 with Gmactextscan;
 with GNATCOLL.Traces;
 
 package body Silmaril.Param is
-   
+   --package Tio renames Text_Io; 
    package Math renames Ada.Numerics;
    package Gts renames Gmactextscan;
    package Gct renames GNATCOLL.Traces;
@@ -51,6 +51,21 @@ package body Silmaril.Param is
    Stream2 : constant Gct.Trace_Handle := 
      Gct.Create ("SILMARILREADER.EXCEPTIONS");
    Debug_Str : constant Gct.Trace_Handle := Gct.Create ("SILMARILREADER.DEBUG");
+   
+   
+   -------------------
+   -- handle errors --
+   -------------------
+   Error_Reported : Boolean := False;
+   
+   procedure Report_Error (Err_Str : String)
+   is
+   begin
+      M_Report_Error (Err_Str);
+      Gct.Trace (Stream1, Err_Str);
+      Error_Reported := True;
+   end Report_Error;
+   pragma Inline (Report_Error);
    
    
    -------------------------------------
@@ -130,9 +145,7 @@ package body Silmaril.Param is
 	 when Gts.Float  =>
 	    Tightness := Long_Float'Value (Gts.String_Value);
 	 when others     =>
-	    Gct.Trace 
-	      (Stream1, 
-	       "error in gmac.text-Post.Tightness: expected number or float");
+	    Report_Error ("gmac.text: Post.Tightness: expected number or float");
       end case;
       Token := Gts.Next_Token;
       loop
@@ -147,9 +160,7 @@ package body Silmaril.Param is
 	 exit;
       end loop;
       if not Done then
-	 Gct.Trace 
-	   (Stream1, 
-	    "error in gmac.text-Post.Tightness: expected 'mm' or 'inch'");
+	 Report_Error ("gmac.text: Post.Tightness: expected 'mm' or 'inch'");
       else
 	 Gct.Trace (Debug_Str, "tightness is " & 
 		      Long_Float'Image (Tightness) & " mm");
@@ -175,9 +186,7 @@ package body Silmaril.Param is
 	 when Gts.Float  =>
 	    Max_Angle := Posangl_Type'Value (Gts.String_Value);
 	 when others     =>
-	    Gct.Trace 
-	      (Stream1, 
-	       "error in gmac.text-Post.Maxangle: expected number or float");
+	    Report_Error ("gmac.text: Post.Maxangle: expected number or float");
       end case;
       Token := Gts.Next_Token;
       loop
@@ -192,10 +201,8 @@ package body Silmaril.Param is
 	 exit;
       end loop;
       if not Done then
-	 Gct.Trace 
-	   (Stream1, 
-	    "error in gmac.text-Post.Maxangle: " & 
-	      "expected 'degrees' or 'radians'");
+	 Report_Error ("gmac.text: Post.Maxangle: " & 
+			 "expected 'degrees' or 'radians'");
       else
 	 Gct.Trace 
 	   (Debug_Str, "maxangle is " & 
@@ -226,7 +233,7 @@ package body Silmaril.Param is
 	    loop
 	       exit when Token /= Gts.Id;
 	       if Gts.String_Value = "inch" then
-		     Feed := Feed * 0.0254 / 60.0;
+		  Feed := Feed * 0.0254 / 60.0;
 	       elsif Gts.String_Value = "m" then
 		  Feed := Feed / 60.0;
 	       else exit;
@@ -241,10 +248,8 @@ package body Silmaril.Param is
 	    end loop;
 	    if not Done then
 	       Feed := 0.0;
-	      Gct.Trace 
-		    (Stream1, 
-		     "error in gmac.text-Machine." & Axis & "axis.MaxFeed: " & 
-		       "expected 'm/min' or 'inch/min'");
+	       Report_Error ("gmac.text: Machine." & Axis & "axis.MaxFeed: " & 
+			       "expected 'm/min' or 'inch/min'");
 	    end if;
 	 end M_Convert;
 	 
@@ -273,10 +278,8 @@ package body Silmaril.Param is
 	    end loop;
 	    if not Done then
 	       Angle := 0.0;
-		  Gct.Trace 
-		    (Stream1, 
-		     "error in gmac.text-Machine.MaxFeed: " & 
-		       "expected 'deg/min' or 'rad/min'");
+	       Report_Error ("gmac.text: Machine.MaxFeed: " & 
+			       "expected 'deg/min' or 'rad/min'");
 	    end if;
 	 end Rad_Convert;
 	 
@@ -289,10 +292,8 @@ package body Silmaril.Param is
 	    when Gts.Float  =>
 	       F := Long_float'Value (Gts.String_Value);
 	    when others     =>
-	       Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Machine." & Axis & "axis.MaxFeed: " & 
-		    "expected number or float");
+	       Report_Error ("gmac.text: Machine." & Axis & "axis.MaxFeed: " & 
+			       "expected number or float");
 	 end case;
 	 case Axis is
 	    when 'X' | 'Y' | 'Z' => 
@@ -326,7 +327,7 @@ package body Silmaril.Param is
       is
 	 A : Long_Float;
 	 
-	  procedure M_Convert (Accel : in out Long_Float)
+	 procedure M_Convert (Accel : in out Long_Float)
 	   -- converts accel to m/sec^2 --
 	 is
 	    Done : Boolean := False;
@@ -336,7 +337,7 @@ package body Silmaril.Param is
 	    loop
 	       exit when Token /= Gts.Id;
 	       if Gts.String_Value = "inch" then
-		     Accel := Accel * 0.0254;
+		  Accel := Accel * 0.0254;
 	       elsif Gts.String_Value = "m" then
 		  null; --Accel := Accel / 60.0;
 	       else exit;
@@ -345,21 +346,15 @@ package body Silmaril.Param is
 	       exit when Token /= Gts.Fwd_Slash;
 	       Token := Gts.Next_Token;
 	       exit when Token /= Gts.Id;
-	       exit when Gts.String_Value /= "sec";
-	       Token := Gts.Next_Token;
-	       exit when Token /= Gts.Caret;
-	       Token := Gts.Next_Token;
-	       exit when Token /= Gts.Number;
-	       exit when Gts.String_Value /= "2";
+	       exit when Gts.String_Value /= "sec2";
 	       Done := True;
 	       exit;
 	    end loop;
 	    if not Done then
 	       Accel := 0.0;
-	      Gct.Trace 
-		    (Stream1, 
-		     "error in gmac.text-Machine." & Axis & "axis.Acceleration: " & 
-		       "expected 'm/sec^2' or 'inch/sec^2'");
+	       Report_Error 
+		 ("gmac.text: Machine." & Axis & "axis.Acceleration: " & 
+		    "expected 'm/sec2' or 'inch/sec2'");
 	    end if;
 	 end M_Convert;
 	 
@@ -382,21 +377,15 @@ package body Silmaril.Param is
 	       exit when Token /= Gts.Fwd_Slash;
 	       Token := Gts.Next_Token;
 	       exit when Token /= Gts.Id;
-	       exit when Gts.String_Value /= "sec";
-	       Token := Gts.Next_Token;
-	       exit when Token /= Gts.Caret;
-	       Token := Gts.Next_Token;
-	       exit when Token /= Gts.Number;
-	       exit when Gts.String_Value /= "2";
+	       exit when Gts.String_Value /= "sec2";
 	       Done := True;
 	       exit;
 	    end loop;
 	    if not Done then
 	       Angle := 0.0;
-	       Gct.Trace 
-		    (Stream1, 
-		     "error in gmac.text-Machine." & Axis & "axis.Acceleration: " & 
-		       "expected 'deg/sec^2' or 'rad/sec^2'");
+	       Report_Error 
+		 ("gmac.text: Machine." & Axis & "axis.Acceleration: " & 
+		    "expected 'deg/sec2' or 'rad/sec2'");
 	    end if;
 	 end Rad_Convert;
 	 
@@ -408,20 +397,19 @@ package body Silmaril.Param is
 	    when Gts.Float  =>
 	       A := Long_float'Value (Gts.String_Value);
 	    when others     =>
-	       Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Machine." & Axis & "axis.Acceleration: " & 
+	       Report_Error 
+		 ("gmac.text: Machine." & Axis & "axis.Acceleration: " & 
 		    "expected number or float");
 	 end case;
 	 case Axis is
 	    when 'X' | 'Y' | 'Z' => 
 	       M_Convert (A);
 	       Gct.Trace (Debug_Str, "Acceleration " & Axis & " is " &
-			    Long_Float'Image (A) & " m / sec^2");
+			    Long_Float'Image (A) & " m / sec2");
 	    when 'A' | 'B' | 'C' => 
 	       Rad_Convert (A);
 	       Gct.Trace (Debug_Str, "Acceleration " & Axis & " is " &
-			    Long_Float'Image (A) & " rad / sec^2");
+			    Long_Float'Image (A) & " rad / sec2");
 	    when others          => null;
 	 end case;
 	 Parameter_Table.Set_Machpar (I => Accel_Param, Val => A);
@@ -453,10 +441,8 @@ package body Silmaril.Param is
 	    when Gts.Float  =>
 	       T := Long_float'Value (Gts.String_Value);
 	    when others     =>
-	       Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Machine." & Axis & "axis.JerkTime: " & 
-		    "expected number or float");
+	       Report_Error ("gmac.text: Machine." & Axis & "axis.JerkTime: " & 
+			       "expected number or float");
 	 end case;
 	 Token := Gts.Next_Token;
 	 loop
@@ -466,12 +452,12 @@ package body Silmaril.Param is
 	    exit;
 	 end loop;
 	 if not Done then
-	    Gct.Trace 
-		 (Stream1, 
-		  "error in gmac.text-Machine." & Axis & "axis.JerkTime: " & 
-		    "expected 'secs'.");
+	    Report_Error ("gmac.text: Machine." & Axis & "axis.JerkTime: " & 
+			    "expected 'secs'.");
 	 else
 	    Parameter_Table.Set_Machpar (I => Jerk_Param, Val => T);
+	    Gct.Trace (Debug_Str, "Jerk time " & Axis & " is " &
+			 Long_Float'Image (T) & " secs");
 	 end if;
       end Get_Jrk_Time;
       
@@ -485,15 +471,18 @@ package body Silmaril.Param is
    end Get_Jerk_Time;
    
    
-   procedure Read_Parameters
+   function Read_Parameters return Boolean
    is
+      Error : Boolean := False;
    begin
       Get_Tightness;
       Get_Max_Angle;
       Get_Maximum_Feed;
       Get_Acceleration;
       Get_Jerk_Time;
-      null;
+      Error          := Error_Reported;
+      Error_Reported := False;
+      return not Error; -- indicate success to calling realtime thread.
    end Read_Parameters;
    
 begin

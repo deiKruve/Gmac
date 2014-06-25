@@ -30,15 +30,20 @@
 -- and also a reportback task
 --
 
+with Text_Io; 
 with Silmaril.File_Selector;
+with Silmaril.Param;
+with Silmaril.Reader;
 
 package body Silmaril.tasks is
    
    package Astc renames Ada.Synchronous_Task_Control;
-
-   Err_Flag : Astc.Suspension_Object;
+   package Tio  renames Text_Io; 
    
-   
+   -----------------------------
+   -- result reporting        --
+   -- to the real time thread --
+   -----------------------------
    protected body Load_Result is
       
       function Get return Ld_Result_Type 
@@ -56,34 +61,43 @@ package body Silmaril.tasks is
    end Load_Result;
    
    
-   task type Pushed_Loadp_Button_Type (Pri : System.Priority) is
+   ------------------------------------
+   -- activation of post file reader --
+   -- from the realtime thread       --
+   ------------------------------------
+   task type Pushed_Button_Type (Pri    : System.Priority; 
+				 Button : access Astc.Suspension_Object) is
       pragma Priority (Pri);
       ----waits for Button_Push; 
       -- initiates the reading operation by 
       -- calling Silmaril.File_Selector.Start
-   end Pushed_Loadp_Button_Type;
+   end Pushed_Button_Type;
    
-   task body Pushed_Loadp_Button_Type
+   task body Pushed_Button_Type
       is
       Fin : Boolean := False;
    begin
       loop
-	 Astc.Suspend_Until_True (Button_Push);
-	 Astc.Set_False (Button_Push);
+	 Astc.Suspend_Until_True (Button.all);
+	 Astc.Set_False (Button.all);
 	 Load_Result.Set (Working);
-	 Fin := Silmaril.File_Selector.Start;
-	 --Fin := Silmaril.File_Selector.Read_Entire_File;
+	 if Button.all in Prog_Button_Push then
+	    Fin := Silmaril.File_Selector.Start;
+	 elsif Button.all in Param_Button_Push then
+	    Fin := Silmaril.Param.Read_Parameters;
+	 end if;
 	 if Fin then Load_Result.Set (Done); end if;
 	 Fin := False;
 	 -- must be aborted!!!!!!
 	 -- note the race condition: done is set until the slow thread starts
       end loop;
-   end Pushed_Loadp_Button_Type;
+   end Pushed_Button_Type;
    
-   T1 : Pushed_Loadp_Button_Type (Pushed_Loadp_Button_Priority); 
+   T1 : Pushed_Button_Type (Pushed_Loadp_Button_Priority, Prog_Button_Push'access); 
    --this is a slow thread
+   T3 : Pushed_Button_Type (Pushed_Loadp_Button_Priority, Param_Button_Push'access);
 
-   
+  
    task type Err_Check_Type (Pri : System.Priority) is
       pragma Priority (Pri);
       -- checks the error flag perhaps returned by the app process
@@ -106,10 +120,12 @@ package body Silmaril.tasks is
    -- this is called by a Proview thread
    
    
-   procedure Report_Error (Err : Boolean := True)
+   procedure Report_Error (Err_Str : String)
    is
    begin
       Astc.Set_True (Err_Flag);
+      Tio.Put_Line (Err_Str); -- take out when proview
+      ---   notify the Proview error handling system  ---  ?!!!!!!!!!!!!!!!!!!
    end Report_Error;
    
    
@@ -121,7 +137,10 @@ package body Silmaril.tasks is
    end Finalize;
    
 begin
-   Astc.Set_False (Button_Push);
+   Astc.Set_False (Prog_Button_Push);
+   Astc.Set_False (Param_Button_Push);
    Astc.Set_False (Err_Flag);
+   Silmaril.Reader.M_Report_Error        := Report_Error'access;
    Silmaril.File_Selector.M_Report_Error := Report_Error'access;
+   Silmaril.Param.M_Report_Error         := Report_Error'access;
 end Silmaril.tasks;

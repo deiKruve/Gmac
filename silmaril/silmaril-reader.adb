@@ -123,6 +123,20 @@ package body Silmaril.Reader is
       Fini        => +"FINI",
       EOF         => +"");
    
+      
+   -------------------
+   -- handle errors --
+   -------------------
+   --Error_Reported : Boolean := False;
+   
+   procedure Report_Error (Err_Str : String)
+   is
+   begin
+      M_Report_Error (Err_Str);
+      Gct.Trace (Stream1, Err_Str);
+   end Report_Error;
+   pragma Inline (Report_Error);
+
    
    -- print a line for debug purposes --
    procedure Debug_Line (Pos : Dll.Posvec_Class_Access_Type)
@@ -235,6 +249,7 @@ package body Silmaril.Reader is
 	 Comment_Delim    => Scan.Comment_Like (Scan.Shell_Like),
 	 Scan             => False);
       
+      -- next token --
       function Next_Tok return Extended_Token_Type
       is
       begin
@@ -252,7 +267,9 @@ package body Silmaril.Reader is
 	 Token := Scanner.Next_Token;
 	 if Scanner.At_Eof or Token = EOF then return EOF;
 	 elsif Token in Cmd_Token_Type then return Token;
-	 else return Error; 
+	 else 
+	    Report_Error ("program file: could not find next command.");
+	    return Error; 
 	 end if;
       end Find_Command;
       
@@ -267,9 +284,14 @@ package body Silmaril.Reader is
 	    if Token = Float then
 	       Val := Long_Float'Value (Scanner.String_Value);
 	       return Ok;
-	    else return Error; 
+	    else 
+	       Report_Error ("program file: malformed float value.");
+	       return Error; 
 	    end if;
-	 else return Error;
+	 else 
+	    Report_Error ("program file: premature end of file, " & 
+			    "while looking for float value.");
+	    return Error;
 	 end if;
       end Find_Val_Tok;
       
@@ -283,9 +305,14 @@ package body Silmaril.Reader is
 	    Token := Scanner.Next_Token;
 	    if Token = On or Token = Tru then B := True; return Ok;
 	    elsif Token = Off or Token = Flse then B := False; return Ok;
-	    else return Error; 
+	    else 
+	       Report_Error ("program file: malformed boolean value.");
+	       return Error; 
 	    end if;
-	 else return Error;
+	 else 
+	    Report_Error ("program file: premature end of file, " & 
+			    "while looking for boolean value");
+	    return Error;
 	 end if;
       end Find_Bool_Tok;
       
@@ -297,9 +324,14 @@ package body Silmaril.Reader is
 	 if not Scanner.At_Eof then
 	    Token := Scanner.Next_Token;
 	    if Token = Percent then return Ok;
-	    else return Error; 
+	    else 
+	       Report_Error ("program file: missing '%' symbol.");
+	       return Error; 
 	    end if;
-	 else return Error;
+	 else 
+	    Report_Error ("program file: premature end of file, " & 
+			    "while looking for '%' symbol.");
+	    return Error;
 	 end if;
       end Find_Percent_Tok;
       
@@ -371,6 +403,7 @@ package body Silmaril.Reader is
 	    Last_Istop := Truth;
 	    return Ok;
 	 end loop;
+	 Report_Error ("program file: malformed position spec.");
 	 return Error;
       end Find_Pos;
       
@@ -390,10 +423,12 @@ package body Silmaril.Reader is
 	       when X => Posc.Ax := Dll.X;
 	       when Y => Posc.Ax := Dll.Y;
 	       when Z => Posc.Ax := Dll.Z;
-	       when others => null;
+	       when others => 
+		  null;
 	    end case;
 	    return Ok;
 	 end loop;
+	 Report_Error ("program file: malformed axis spec.");
 	 return Error;
       end Find_Axis;
       
@@ -411,6 +446,7 @@ package body Silmaril.Reader is
 	    Posc.Val := Val;
 	    return Ok;
 	 end loop;
+	 Report_Error ("program file: malformed time spec.");
 	 return Error;
       end Find_Time;
       
@@ -435,11 +471,12 @@ package body Silmaril.Reader is
 	    end if;
 	    return Ok;
 	 end loop;
+	 Report_Error ("program file: malformed beam spec.");
 	 return Error;
       end Find_Beam;
       
       -- the main body starts here --
-   begin
+   begin  -- Scanit
       if Prog_Anchor /= null then
 	 Prog_Q.Finalize (Prog_Anchor);
 	 Prog_Anchor := null;
@@ -576,11 +613,14 @@ package body Silmaril.Reader is
       if Curtok = EOF then
 	 return True;  -- must have been EOF.
       else
+	 Report_Error ("program file: the scanner did not reach the end of file.");
 	 return False; -- return false if eof was not reached
       end if;
    exception
       when E : others =>
 	 Gct.Trace (Stream2, Ada.Exceptions.Exception_Information (E));
+	 Report_Error ("program file: there was an unexpected error,");
+	 Report_Error ("look in the log for details.");
 	 return False;
    end Scanit;
    

@@ -74,6 +74,10 @@ package Silmaril.Param is
       Open: Boolean := True;
    end Parameter_Table_Type;
    
-   procedure Read_Parameters;
+   function Read_Parameters return Boolean;
+   
+   -- so we can report errors to the real time thread.
+   type Error_Reporter_Type is access procedure (Err_Str : String);
+   M_Report_Error : Error_Reporter_Type;
    
 end Silmaril.Param;
