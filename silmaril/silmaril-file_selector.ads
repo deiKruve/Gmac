@@ -40,6 +40,9 @@ package Silmaril.File_Selector is
    
    function Start return Boolean;
    
+   -- error upcall machinery
    type Error_Reporter_Type is access procedure (Err_Str : String);
    M_Report_Error : Error_Reporter_Type;
 end Silmaril.File_Selector;
+
+  
