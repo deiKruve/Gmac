@@ -1,4 +1,6 @@
 with "florist";
+with "gtkada";
+with "gtkada_gl";
 Project Silmatest is
   for Languages use ("Ada", "c");
   for Main use ("silmatest.adb");
@@ -14,6 +16,7 @@ Project Silmatest is
       for Default_Switches ("Ada") use ("-E");
   end Binder;
   package Linker is
-     for Default_Switches ("Ada") use ("/home/jan/MMS/programs-PC/obj/gnatcoll_support.o", "-Wl,--gc-sections");
+     for Default_Switches ("Ada") use ("/home/jan/MMS/programs-PC/obj/gnatcoll_support.o", "-Wl,--gc-sections", "-lX11");
   end Linker;
 end Silmatest;
+--for Default_Switches ("Ada") use ("-lgtkglada", "-lX11");

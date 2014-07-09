@@ -42,7 +42,7 @@ package Silmaril.tasks is
    -- this defines the ceiling priority of 'protected Load_Result'
    -- it must match the calling thread.
    
-   type Ld_Result_Type is (Done, Error, Working);
+   type Ld_Result_Type is (Done, Not_Done, Error, Working);
    
    
    -----------------------------

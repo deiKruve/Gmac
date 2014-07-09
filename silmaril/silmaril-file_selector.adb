@@ -60,10 +60,10 @@ with POSIX.IO;
 with POSIX.Memory_Mapping;
 with System.Storage_Elements;
 -- with Interfaces.C.Strings;
--- with Silmaril.Reader;
+with Silmaril.Reader;
 
 ---------------------
-package body Test1 is
+package body Silmaril.File_Selector is
 
    
    ------------
@@ -85,10 +85,10 @@ package body Test1 is
    --------------
    -- globals  --
    --------------
-   Builder      : Gtkada.Builder.Gtkada_Builder; 
-   Editor       : access Ed_Record'Class;
-   Errflag      : Boolean := False;
-   
+   Builder       : Gtkada.Builder.Gtkada_Builder; 
+   Editor        : access Ed_Record'Class;
+   Doneflag       : Boolean := False;
+   Progsel_Glade : String := "progselect.glade";
    
    -------------------------
    -- about box constants --
@@ -153,7 +153,7 @@ package body Test1 is
       X := Gtk.Dialog.Run
 	(Dialog    => Gtk.Dialog.Gtk_Dialog (Dialog));
       Gtk.Widget.Destroy (Gtk.Widget.Gtk_Widget (Dialog));  
-      Errflag := True;
+      Doneflag := False;
    end Error_Message;
    
    
@@ -479,13 +479,16 @@ package body Test1 is
 	    Start                => Start,
 	    The_End              => The_End,
 	    Include_Hidden_Chars => True);
-	 File : Ada.Text_IO.File_Type;
+	 File           : Ada.Text_IO.File_Type;
+	 Reading_Result : Boolean := True;
       begin
 	 -- call the text scanner here.
 	 Reading_Result := Silmaril.Reader.Start_Reading (S);
 	 if not Reading_Result then
 	    M_Report_Error ("Silmaril.Reader: could not interpret the program");
 	    Error_Message ("syntax error in the program.");
+	 else 
+	    Info_Message ("File successfully transferred for execution.");
 	 end if;
 	 null;
       exception
@@ -504,7 +507,7 @@ package body Test1 is
 	(Statusbar   => Gtk.Status_Bar.Gtk_Status_Bar (Editor.Statusbar),
 	 Context     => Editor.Statusbar_Context_Id);
       Reset_Default_Status (Editor   => Editor);
-      Errflag := False;
+      Doneflag := True;
    exception
       when others => 
 	 Error_Message ("There was no file name");
@@ -714,6 +717,8 @@ package body Test1 is
 	       Write_File
 		 (Editor  => Editor,
 		  Name    => File_Name);
+	    else
+	       Error_Message ("There was no file name.");
 	    end if;
 	    Execute_File (Editor  => Editor,
 			  Name    => File_Name);
@@ -832,7 +837,9 @@ package body Test1 is
       Gtk.Main.Init;
       Gtkada.Builder.Gtk_New (Builder);
       Error := Gtk.Builder.Add_From_File (Gtk.Builder.Gtk_Builder (Builder), 
-					  "file1.glade");
+					  -- "file1.glade");
+					  Progsel_Glade);
+					  
       if Error /= null then
 	 Error_Message (Glib.Error.Get_Message (Error));
 	 Glib.Error.Error_Free (Error);
@@ -936,81 +943,8 @@ package body Test1 is
    is
    begin
       Main;
-      return Errflag;
+      return Doneflag;
    end Start;
    
-end Test1;
+end Silmaril.File_Selector;
 
---------------------------------------------------------------
--- from here:
--- http://rosettacode.org/wiki/Read_entire_file
---------------------------------------------------------------
--- read a file with Ada.Direct_IO
--- Using Ada.Directories to first ask for the file size 
--- and then Ada.Direct_IO to read the whole file in one chunk: 
---------------------------------------------------------------
-      --  declare
-      --  	 File_Size : Natural := Natural (Ada.Directories.Size (Name.all));
-      --  	 subtype File_String    is String (1 .. File_Size);
-      --  	 package File_String_IO is new Ada.Direct_IO (File_String);
-      --  	 File     : File_String_IO.File_Type;
-      --  	 Contents : File_String;	 
-      --  begin
-      --  	 File_String_IO.Open  
-      --  	   (File        => File, 
-      --  	    Mode        => File_String_IO.In_File,
-      --  	    Name        => Name.all);
-      --  	 File_String_IO.Read  
-      --  	   (File        => File, 
-      --  	    Item        => Contents);
-      --  	 File_String_IO.Close (File  => File);
-      --  	 Gtk.Text_Buffer.Set_Text
-      --  	   (Buffer	=> Buffer,
-      --  	    Text        => Contents);
-      --  exception
-      --  	 when File_String_IO.Name_Error                            =>
-      --  	    Error_Message ("Open: No File of That Name");
-      --  	 when File_String_IO.Data_Error | File_String_IO.End_Error =>
-      --  	    Error_Message ("Open: corrupt data");
-      --  	 when others                                               =>
-      --  	    Error_Message ("Open: an error occured");
-      --  end;      
-
------------------------------------------------------------------------
--- read a file with POSIX 
--- Mapping the whole file into the address space of your process 
--- and then overlaying the file with a String object. 
-------------------------------------------------------------------------
-      --  declare
-      --  	 Text_File    : POSIX.IO.File_Descriptor;
-      --  	 Text_Size    : System.Storage_Elements.Storage_Offset;
-      --  	 Text_Address : System.Address;
-      --  begin
-      --  	 Text_File := POSIX.IO.Open 
-      --  	   (Name => POSIX.To_POSIX_String (Str => Name.all),
-      --  	    Mode => POSIX.IO.Read_Only);
-      --  	 Text_Size    := System.Storage_Elements.Storage_Offset (POSIX.IO.File_Size (Text_File));
-      --  	 Text_Address := POSIX.Memory_Mapping.Map_Memory 
-      --  	   (Length     => Text_Size,
-      --  	    Protection => POSIX.Memory_Mapping.Allow_Read,
-      --  	    Mapping    => POSIX.Memory_Mapping.Map_Shared,
-      --  	    File       => Text_File,
-      --  	    Offset     => 0);
-      --  	 declare
-      --  	    Text : String (1 .. Natural (Text_Size));
-      --  	    for Text'Address use Text_Address;
-      --  	 begin
-      --  	    Gtk.Text_Buffer.Set_Text  -- copy the text into some editor buffer
-      --  	      (Buffer	=> Buffer,
-      --  	       Text     => Text);
-      --  	 end;
-      --  	 POSIX.Memory_Mapping.Unmap_Memory 
-      --  	   (First  => Text_Address,
-      --  	    Length => Text_Size);
-      --  	 POSIX.IO.Close (File => Text_File);
-      --  exception
-      --  	 when POSIX.POSIX_Error  =>
-      --  	    Error_Message ("POSIX Error on Open: " & POSIX.Image (POSIX.Get_Error_Code));
-      --  	 when others             =>
-      --  	    Error_Message ("Open: an error occured");
-      --  end;    

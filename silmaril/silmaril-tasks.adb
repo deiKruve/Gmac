@@ -86,7 +86,9 @@ package body Silmaril.tasks is
 	 elsif Button.all in Param_Button_Push then
 	    Fin := Silmaril.Param.Read_Parameters;
 	 end if;
-	 if Fin then Load_Result.Set (Done); end if;
+	 if Fin then Load_Result.Set (Done); 
+	 else Load_Result.Set (Not_Done);
+	 end if;
 	 Fin := False;
 	 -- must be aborted!!!!!!
 	 -- note the race condition: done is set until the slow thread starts

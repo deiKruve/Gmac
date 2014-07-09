@@ -1,13 +1,12 @@
+-- Compile command: gnatmake -o silmatest silmatest -P"/home/jan/MMS/programs-PC/silmatest.gpr" -g -cargs -gnatq -gnatQ -bargs  -largs 
+-- M-x customize-variable
+-- ada-prj-default-gpr-file
+-- "/home/jan/MMS/programs-PC/silmatest.gpr"
 with Text_Io; 
---with Ada.Command_Line;
---with Ada.Characters.Handling;
 with Ada.Characters.Latin_1;
 with Ada.Text_IO;
 with Ada.Text_IO.Text_Streams;
---with Ada.Strings.Unbounded;
---with Gnat.Strings;
 with System;
---with Silmaril.File_Selector;
 with Silmaril.Reader;
 with Silmaril.Tasks;
 with Silmaril.Dll;
@@ -38,7 +37,7 @@ procedure Silmatest is
    
    
    Ch            : Character;
-   Errres,
+   --Errres,
    Available     : Boolean;
    
    Res, Last_Res : St.Ld_Result_Type;
@@ -164,6 +163,9 @@ begin
 	 when St.Done    => 
 	    Text_Io.Put_Line ("done reading the param file");
 	    exit;
+	 when St.Not_Done =>
+	    Text_Io.Put_Line ("no parameter file has been read.");
+	    exit;
 	 when St.Error   => 
 	    Text_Io.Put_Line ("an error occurred reading the param file");
 	    exit;
@@ -184,13 +186,15 @@ begin
    	 end loop;
    	 Last_Res := Res;
    	 case Res is
-   	    when St.Done    => 
+   	    when St.Done     => 
    	       Text_Io.Put_Line ("done reading the post file");
    	       exit;
-   	    when St.Error   => 
+	    when St.Not_Done =>
+	       Text_Io.Put_Line ("no post file has been read.");
+	       exit;
+   	    when St.Error    => 
    	       Text_Io.Put_Line ("an error occurred reading the post file");
-   	       exit;
-   	    when St.Working => 
+   	    when St.Working  => 
    	       Text_Io.Put_Line ("waiting . . . .");
    	 end case;
       end loop;
