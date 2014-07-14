@@ -1,8 +1,9 @@
-with "florist";
-Project Silmatest is
+--with "florist";
+Project Sonja3test is
   for Languages use ("Ada", "c");
-  for Main use ("silmatest.adb");
-  for Source_Dirs use (".", "./silmaril", "./gnatcoll", "./gmactextscan");
+  for Main use ("sonja3test.adb");
+for Source_Dirs use (".", "./luthien", "./silmaril", "./gmactextscan");
+  --for Source_Dirs use (".", "./luthien", "./silmaril", "./gnatcoll", "./gmactextscan");
   for Object_Dir use "obj";
   for Exec_Dir use ".";
   package Compiler is
@@ -14,6 +15,7 @@ Project Silmatest is
       for Default_Switches ("Ada") use ("-E");
   end Binder;
   package Linker is
-     for Default_Switches ("Ada") use ("/home/jan/MMS/programs-PC/obj/gnatcoll_support.o", "-Wl,--gc-sections");
+     for Default_Switches ("Ada") use ("-Wl,--gc-sections");
+     --for Default_Switches ("Ada") use ("/home/jan/MMS/programs-PC/obj/gnatcoll_support.o", "-Wl,--gc-sections");
   end Linker;
-end Silmatest;
+end Sonja3test;

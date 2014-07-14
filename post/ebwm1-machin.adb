@@ -66,8 +66,7 @@ package body Ebwm1.Machin is
    Stream2   : constant Gct.Trace_Handle := Gct.Create ("POSTP.EXCEPTIONS");
    Debug_Str : constant Gct.Trace_Handle := Gct.Create ("POSTP.DEBUG");
 
-   --type Mystr is new String;
-   --type Mystr_Access_Type is access all Mystr;
+
    type Fedratunit_Type is (Mmpm, Ipm);
    -- anything distance --
    subtype Posvec1_Type is Long_Float;
