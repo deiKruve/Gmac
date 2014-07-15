@@ -5,7 +5,7 @@ digraph "fig 3.5" {
 		fontcolor = "black"
 		ratio = "1.7"
 		labelloc = "t"
-		label = "figure 5.4"
+		label = "figure 3.5"
 	]
 	node [
 		fontsize = "14"
@@ -37,6 +37,15 @@ digraph "fig 3.5" {
 		shape = "egg"
 		style = "filled"
 	]
+   subgraph "cluster-mathin" {
+	"n39" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "calculate\n  D := |p2 - p1|\n Dmin (Eq. 3.20)\n  dsmin (Eq. 3.22)\n xx"
+		shape = "box"
+		style = "solid"
+	]
 	"n2" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -53,6 +62,10 @@ digraph "fig 3.5" {
 		shape = "box"
 		style = "solid"
 	]
+	label = "procedure Math_in"
+	style = "solid"
+	color = "blue"
+    }
 	"n4" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -193,8 +206,9 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "calculate\n sa (3.12)\n sb (3.13)\n D1 (3.14)"
+		label = "procedure Math312_314\n sa (3.12)\n sb (3.13)\n D1 (3.14)"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n24" [
@@ -210,8 +224,9 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "calculate\n D2 (3.15)\n D3 (3.16)"
+		label = "procedure Math315_316\n D2 (3.15)\n D3 (3.16)"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n26" [
@@ -226,8 +241,9 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "reduce\n sb (3.17)\n s2 (3.18)"
+		label = "procedure Math317_318\n reduce sb (3.17) s2 (3.18)"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n28" [
@@ -250,24 +266,27 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "calculate\n dt (3.24)\n apeak (3.25)"
+		label = "procedure Math324_325\n calculate\n dt (3.24) apeak (3.25)"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n31" [
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "calculate\n dt (3.24)\n apeak (3.25)"
+		label = "procedure Math324_325\n calculate\n dt (3.24) apeak (3.25)"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n32" [
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "calculate\n dt (3.26)\n apeak (3.25)"
+		label = "procedure Math326_325\n calculate dt (3.26)\n apeak (3.25)"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n33" [
@@ -320,28 +339,22 @@ digraph "fig 3.5" {
 		shape = "box"
 		style = "solid"
 	]
-	"n39" [
-		fontsize = "14"
-		fontname = "Times-Roman"
-		fontcolor = "black"
-		label = "calculate\n  D := |p2 - p1|\n Dmin (Eq. 3.20)\n  dsmin (Eq. 3.22)\n xx"
-		shape = "box"
-		style = "solid"
-	]
 	"n40" [
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "calculate \n slimit (3.29)\n Db (3.32)\n Da (3.12-16)(3.31)\n Dlimit (3.30)\n d_smin (3.22)\n yy"
+		label = "procedure Math_Yy\n calculate \n slimit (3.29)\n Db (3.32)\n Da (3.12-16)(3.31)\n Dlimit (3.30)\n d_smin (3.22)"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n41" [
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "calculate\n Dx, Dz\n s2 <= smax, s1 <= s1\n do B.1-5\n Dx := D1 + D2 + D3\n s2 <= smax, s1 <= s2\n do B.1-5\n Dy := D1 + D2 + D3\n"
+		label = "Math_Bii_A1\ncalculate\n Dx, Dz\n s2 <= smax, s1 <= s1\n do B.1-5\n Dx := D1 + D2 + D3\n s2 <= smax, s1 <= s2\n do B.1-5\n Dy := D1 + D2 + D3\n"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n42" [
@@ -364,8 +377,9 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "calculate\n speak (D.1)\n sbx, sbz (D.2)\n D2x (D.3)\n D3x (D.4)\n D2z (D.5)\n D3z (D.6)\n zz "
+		label = "procedure Math_Bii_A2\n calculate\n speak (D.1)\n sbx, sbz (D.2)\n D2x (D.3)\n D3x (D.4)\n D2z (D.5)\n D3z (D.6)"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n45" [

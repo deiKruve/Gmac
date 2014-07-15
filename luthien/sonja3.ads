@@ -68,17 +68,23 @@ package Sonja3 is
 	 P2   : Pos_Vector_Type;  -- end position
 	 S1   : Mpsec_Type;       -- start speed
 	 S2   : Mpsec_Type;       -- end speed
-	 Ift1 : Sec_Type;         -- start inverse feed time
-	 Ift2 : Sec_Type;         -- end inverse feed time
+	 Smax : Mpsec_Type;       -- max speed
+	 Amax : Mpsec2_Type;      -- max accel
+	 Jmax : Mpsec3_Type;      -- max jerk
+	 --Ift1 : Sec_Type;         -- start inverse feed time
+	 --Ift2 : Sec_Type;         -- end inverse feed time
       end record;
    
 private
    
    type Lin_Move_Record_Type is
       record	 
+	 Sinv_Flag : Boolean; -- indicates that s1 and s2 are reversed for
+			      -- algorithm purposes
 	 D,                   -- Euclidian distance between two points.
 	 Dmin,                -- minimum distance required to use the SAP
-			      -- algorithm.                
+			      -- algorithm. (3.20)
+			      -- (with startspeed 0, but this is immaterial)
 	 Dlimit,              -- minimum distance required to be able to use 
 			      -- the SAP when ramping from s1 to speak and
 			      -- then from speak to s2.
@@ -101,8 +107,11 @@ private
 	 Da,                  -- distance covered during a SAP used to ramp
 			      -- from s1 to slimit (=D1a + D2a + D3a).
 	 D1a,
-	 D2a,
+	 D1x,
+         D2a,
+	 D2x,  
 	 D3a,
+	 D3x,
 	 Db,                  -- distance covered during an acceleration pulse
 			      -- from s2 to slimit.
 	 D1b,
@@ -116,18 +125,20 @@ private
 	 Dz,
 	 Delta_D : M_Type;    -- distance remaining after an acceleration pulse 
 			      -- (used in the speed-limited case)
-	 Jmax : Mpsec3_Type;  -- maximum allowable jerk.
+	 Jmax : Mpsec3_Type;  -- maximum allowable jerk. (MMAJ)
 	 S,
 	 S1,                  -- speed at start of this traject
 	 S2,                  -- speed at the end of this traject
 	 Sa,                  -- speed attained at the end of a ramp 
 			      -- from zero acceleration to maximum acceleration 
 			      -- in the SAP algorithm.
+	 Sax,
 	 Saz,                 -- speed attained at the end of a ramp from 
 			      -- zero acceleration to maximum acceleration in
 			      -- the SAP algorithm for the case z.
 	 Sb,                  -- speed attained at the end of the acceleration 
 			      -- cruise in the SAP algorithm.
+	 Sbx,
 	 Sbz,                 -- speed attained at the end of the acceleration 
 			      -- cruise in the SAP algorithm for the case z.
 	 Si,                  -- speed at point i.
@@ -146,6 +157,8 @@ private
 			      -- (MMAA).
 	 Apeak : Mpsec2_Type; -- peak acceleration reached during a point to 
 			      -- point motion (<= amax).
+	 Ax,
+	 Az,
 	 T,                   -- time.
 	 Ts1,                 -- time required to carry out a given straight
 			      -- line motion.
@@ -154,13 +167,17 @@ private
 	 Delta_Tmax : Sec_Type; -- time required for a ramp up to amax from 
 			      -- zero acceleration while respecting jmax.
       end record;
-	 
+   
+   procedure Math_In (Invec : Sonja3_In_Type);
    procedure Math312_314;
    procedure Math315_316;
    procedure Math317_318;
    procedure Math324_325;
    procedure Math326_325;
    procedure Math_Yy;
+   procedure Math_Bii_A1;
+   procedure Math_Bii_A2;
+   procedure Math_Bii_B;
    
    --subtype Move_Record_Type is Silmaril.Dll.Posvec9_Type;
    --subtype Move_Record_Access_Type is Silmaril.Dll.Posvec9_Access_Type;
