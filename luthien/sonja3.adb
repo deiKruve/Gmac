@@ -68,14 +68,17 @@ package body Sonja3 is
       Lm.D := Math.Sqrt (Dx ** 2 + Dy ** 2 + Dz ** 2 + Da ** 2 + Db ** 2 + Dc ** 2);
       Lm.Delta_Tmax := (Num.Pi * Lm.Amax) / (2.0 * Lm.Jmax); --(3.4)
       Lm.Dmin := Lm.Amax * Lm.Delta_Tmax ** 2 + 2.0 * Lm.S1 * Lm.Delta_Tmax; -- (3.20)
-      Lm.Dv := Lm.Dmin; -- I hope this is right???
+      --Lm.Dv := Lm.Dmin; -- I hope this is right???
       Lm.Delta_Smin := Lm.Delta_Tmax * Lm.Amax; -- (3.22)
    exception
       when others => null;
    end Math_In;
    
    
+   -- Sustained Acceleration Pulse Algorithm
    procedure Math312_314 
+     -- takes: Lm.S1, Lm.S2, Lm.Amax, Lm.Delta_Tmax
+     -- gives: Lm.Sa, Lm.Sb, Lm.D1
    is
       Tmp : Long_Float;
    begin
@@ -89,7 +92,10 @@ package body Sonja3 is
    end Math312_314;
    
    
+   -- Sustained Acceleration Pulse Algorithm
    procedure Math315_316 
+     -- takes: Lm.Sa, Lm.Sb, Lm.Amax, Lm.Delta_Tmax
+     -- gives: Lm.D2, Lm.D3
    is
    begin
       Lm.D2 := (Lm.Sb ** 2 - Lm.Sa ** 2) / 2.0 * Lm.Amax; -- (3.15)
@@ -101,6 +107,8 @@ package body Sonja3 is
    
    
    procedure Math317_318 
+     -- takes: Lm.D, Lm.S1, Lm.Sa, Lm.Amax, Lm.Delta_Tmax, 
+     -- gives: Lm.Sb, Lm.S2
    is
    begin
       Lm.Sb := - Lm.Amax * Lm.Delta_Tmax + 
@@ -114,7 +122,11 @@ package body Sonja3 is
    end Math317_318;
    
    
+   -- Acceleration Pulse Algorithm
+   --  D < Dmin 
    procedure Math324_325 
+     -- takes: Lm.S1, Lm.D, Lm.Jmax, 
+     -- gives: Lm.Delta_T, Lm.Apeak
    is
       L, U, V : Long_Float;
       function "**" (Left, Right : Long_Float) return Long_Float Renames  Math."**";
@@ -133,7 +145,11 @@ package body Sonja3 is
    end Math324_325;
    
    
+   -- Acceleration Pulse Algorithm
+   --  ds < dsmin 
    procedure Math326_325 
+     -- takes: Lm.S1, Lm.S2, Lm.Jmax
+     -- gives: Lm.Apeak, Lm.Delta_T
    is
    begin
       Lm.Delta_T := Math.Sqrt ((Num.Pi * (Lm.S2 - Lm.S1)) / (2.0 * Lm.Jmax)); -- (3.26)
@@ -143,6 +159,30 @@ package body Sonja3 is
    end Math326_325;
    
    
+   -- calculates the upramp from S1 to S2
+   procedure Math_B_Dv
+     -- takes: Lm.S1, Lm.S2, Lm.Amax, Lm.Delta_Tmax, Lm.Jmax
+     -- gives: Lm.Dv
+   is
+   begin
+      if Lm.S2 - Lm.S1 > Lm.Delta_Smin then
+	 Math312_314;
+	 Math315_316;
+	 Lm.Dv := Lm.D1 + Lm.D2 + Lm.D3;
+      else
+	 Math326_325; -- gives dT and Apeak
+	 Lm.Sbx := Lm.S2 - (Lm.Apeak * Lm.Delta_T) / 2.0; -- (D.2)
+	 Lm.D1x := Lm.Apeak * Lm.Delta_T ** 2 * 
+	(1.0 / 4.0 - 1.0 / Num.Pi ** 2) + Lm.S1 * Lm.Delta_T; -- (3.14)
+	 Lm.D3x := Lm.Apeak * Lm.Delta_T ** 2 * 
+	   (1.0 / 4.0 + 1.0 / Num.Pi ** 2) + Lm.Sbx * Lm.Delta_T; -- (D.4)
+	 Lm.Dv := Lm.D1x + Lm.D3x;
+      end if;
+   exception
+      when others => null;
+   end Math_B_Dv;
+   
+   -- d < Dv
    procedure Math_Yy 
    is
    begin
@@ -158,7 +198,10 @@ package body Sonja3 is
    end Math_Yy;
    
    
+   -- dS > dSmin & D > Dlimit
    procedure Math_Bii_A1 
+     -- takes: Lm.S1, Lm.S2, Lm.Smax, Lm.Amax, Lm.Delta_Tmax
+     -- gives: Lm.Sax, Lm.Saz, Lm.D1x, Lm.Dx, Lm.D1z, Lm.Dz
    is
       Tmp_S1 : Mpsec_Type := Lm.S1;
       Tmp_S2 : Mpsec_Type := Lm.S2;
@@ -168,25 +211,30 @@ package body Sonja3 is
       Lm.Sax := Lm.Sa;
       Math315_316;
       Lm.D1x := Lm.D1;
-      Lm.Dx := Lm.D1 + Lm.D2 + Lm.D3;
+      Lm.Dx := Lm.D1 + Lm.D2 + Lm.D3; -- ramp from s1 to smax
+      --
       Lm.S1 := Tmp_S2;
       Math312_314;
       Lm.Saz := Lm.Sa;
       Math315_316;
       Lm.D1z := Lm.D1;
-      Lm.Dz := Lm.D1 + Lm.D2 + Lm.D3;
+      Lm.Dz := Lm.D1 + Lm.D2 + Lm.D3; -- ramp from s2 to smax
       Lm.S1 := Tmp_S1;
       Lm.S2 := Tmp_S2;
    exception
       when others => null;
    end Math_Bii_A1;
    
-   
+   -- (dS > dSmin) & (D > Dlimit) & (D < calculated D) [in Math_Bii_A1]
    procedure Math_Bii_A2 
+     -- takes: Lm.D, Lm.D1z, Lm.D1x, Lm.S1, Lm.S2, Lm.Sax, Lm.Saz, 
+     --        Lm.Amax, Lm.Delta_Tmax
+     -- gives: Lm.D3z, Lm.D2z,  Lm.Dz, Lm.D3x, Lm.D2x, Lm.Dx, 
+     --        Lm.Speak, Lm.Sbz, Lm.Sbx
    is
    begin
       Lm.Speak := - (Lm.Amax * Lm.Delta_Tmax) / 2.0 + 
-	Math.Sqrt (Lm.Amax * Lm.D + (Lm.Ax ** 2 + Lm.Az ** 2) / 2.0 - 
+	Math.Sqrt (Lm.Amax * Lm.D + (Lm.Sax ** 2 + Lm.Saz ** 2) / 2.0 - 
 		     (Lm.Amax * Lm.Delta_Tmax) * (Lm.S1 + Lm.S2)); -- (D.1)
       Lm.Sbz := Lm.Speak - (Lm.Amax * Lm.Delta_Tmax) / 2.0; -- (D.2)
       Lm.Sbx := Lm.Sbz; -- (D.2)
@@ -197,32 +245,77 @@ package body Sonja3 is
       Lm.D2z := (Lm.Sbz ** 2 - Lm.Saz ** 2) / (2.0 * Lm.Amax); -- (D.5)
       Lm.D3z := Lm.Amax * Lm.Delta_Tmax ** 2 * 
 	(1.0 / 4.0 + 1.0 / Num.Pi ** 2) + Lm.Sbz * Lm.Delta_Tmax; -- (D.6)
-      Lm.Dx := Lm.D1 + Lm.D2 + Lm.D3;
+      Lm.Dz := Lm.D1z + Lm.D2z + Lm.D3z;
    exception
       when others => null;
    end Math_Bii_A2;
    
    
+   
+   
    procedure Math_Bii_B 
    is
-     Drampup : Mpsec_Type := 0.0; 
+      -- Drampup : M_Type     := 0.0;-- is dv now
+      Dtmp    : M_Type     := Lm.D;
+      S1tmp   : Mpsec_Type := Lm.S1;
+      S2tmp   : Mpsec_Type := Lm.S2;
    begin
-      if Lm.S2 - Lm.S1 > Lm.Delta_Smin then
+      -- D is greater than Dv here, so calculate the bubble in fig 3.8
+      Lm.D := (Dtmp - Lm.Dv) / 2.0;
+      Lm.S1 := S2tmp;
+      Math324_325;
+      Lm.Speak := Lm.Apeak * Lm.Delta_T + S2tmp; -- (3.6)
+      
+      -- now calculate the real profile
+      -- 1st the upramp
+      Lm.S1 := S1tmp;
+      Lm.S2 := Lm.Speak;
+      if Lm.S2 - Lm.S1 > Lm.Delta_Smin then -- SAP
 	 Math312_314;
 	 Math315_316;
-	 Drampup := Lm.D1 + Lm.D2 + Lm.D3;
-      else
+	 Lm.Sax := Lm.Sa;
+	 Lm.Sbx := Lm.Sb;
+	 Lm.D1x := Lm.D1;
+	 Lm.D2x := Lm.D2;
+	 Lm.D3x := Lm.D3;
+	 Lm.Dx := Lm.D1 + Lm.D2 + Lm.D3;
+      else -- AP
 	 Math326_325; -- gives dT and Apeak
 	 Lm.Sbx := Lm.S2 - (Lm.Apeak * Lm.Delta_T) / 2.0; -- (D.2)
 	 Lm.D1x := Lm.Apeak * Lm.Delta_T ** 2 * 
-	(1.0 / 4.0 - 1.0 / Num.Pi ** 2) + Lm.S1 * Lm.Delta_T; -- (3.14)
+	   (1.0 / 4.0 - 1.0 / Num.Pi ** 2) + Lm.S1 * Lm.Delta_T; -- (3.14)
 	 Lm.D3x := Lm.Apeak * Lm.Delta_T ** 2 * 
 	   (1.0 / 4.0 + 1.0 / Num.Pi ** 2) + Lm.Sbx * Lm.Delta_T; -- (D.4)
-	 Drampup := Lm.D1x + Lm.D3x;
+	 Lm.D2x := 0.0;
+	 Lm.Dx := Lm.D1x + Lm.D3x;
       end if;
-      if Drampup > Lm.D then
-	 raise Exception;
+      if Lm.Dx > Dtmp then
+	 null; --raise Exception;!!!!!!!!!!!!!!!!!!!!!!!!!!!
       else
+	 null;
+	 -- and now the downramp
+	 Lm.S1 := S2tmp;
+	 Lm.S2 := Lm.Speak;
+	 if Lm.S2 - Lm.S1 > Lm.Delta_Smin then -- SAP
+	    Math312_314;
+	    Math315_316;
+	    Lm.Saz := Lm.Sa;
+	    Lm.Sbz := Lm.Sb;
+	    Lm.D1z := Lm.D1;
+	    Lm.D2z := Lm.D2;
+	    Lm.D3z := Lm.D3;
+	    Lm.Dz  := Lm.D1 + Lm.D2 + Lm.D3;
+	 else -- AP
+	    Math326_325; -- gives dT and Apeak
+	    Lm.Sbz := Lm.S2 - (Lm.Apeak * Lm.Delta_T) / 2.0; -- (D.2)
+	    Lm.D1z := Lm.Apeak * Lm.Delta_T ** 2 * 
+	      (1.0 / 4.0 - 1.0 / Num.Pi ** 2) + Lm.S1 * Lm.Delta_T; -- (3.14)
+	    Lm.D3z := Lm.Apeak * Lm.Delta_T ** 2 * 
+	      (1.0 / 4.0 + 1.0 / Num.Pi ** 2) + Lm.Sbz * Lm.Delta_T; -- (D.4)
+	    Lm.D2z := 0.0;
+	    Lm.Dz := Lm.D1z + Lm.D3z;
+	 end if;
+	 Lm.Dy := Dtmp - Lm.Dx - Lm.Dz;
 	 
       end if;
    exception
