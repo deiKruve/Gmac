@@ -162,21 +162,18 @@ private
    procedure Math_Bii_A2;
    procedure Math_Bii_B;
    procedure Math_Biii_1;
-   procedure Qcp_Sap_B1 (Anchor : in out Luthien.Dll.Dllist_Access_Type; 
+   procedure Qcp_Sap_B1 (Anchor          : in out Luthien.Dll.Dllist_Access_Type; 
+			 Sinv_Flag           : in Boolean;
 			 D1, D2, D3, Delta_D : in M_Type; 
-			 S1, Sa, Sb, S2 : in Mpsec_Type; 
-			 Amax : in Mpsec2_Type; 
-			 Delta_Tmax : in Sec_Type);
+			 S1, Sa, Sb, S2      : in Mpsec_Type; 
+			 Amax                : in Mpsec2_Type; 
+			 Delta_Tmax          : in Sec_Type);
    
-   procedure Qcp_Ap_B2 (Anchor : in out Luthien.Dll.Dllist_Access_Type; 
-			 D1, D2, D3, Delta_D : in M_Type; 
-			 S1, Sa, Sb, S2 : in Mpsec_Type; 
-			 Amax : in Mpsec2_Type; 
-			 Delta_Tmax : in Sec_Type);
-   
-   --procedure Sap_Up4 (D, D1, D2, D3 : in M_Type; S1, Sa, Sb, S2 : in Mpsec_Type; Amax : in Mpsec2_Type; Delta_Tmax : Sec_Type; Qpc :  out Qcp_Table_Type);
-   
-   --subtype Move_Record_Type is Silmaril.Dll.Posvec9_Type;
-   --subtype Move_Record_Access_Type is Silmaril.Dll.Posvec9_Access_Type;
-   
+   procedure Qcp_Ap_B2 (Anchor    : in out Luthien.Dll.Dllist_Access_Type; 
+			Sinv_Flag : in Boolean;
+			 Delta_D  : in M_Type; 
+			 S1       : in Mpsec_Type; 
+			 Apeak    : in Mpsec2_Type; 
+			 Delta_T  : in Sec_Type);
+     
 end Luthien.Sonja3;

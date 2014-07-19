@@ -417,11 +417,12 @@ package body Luthien.Sonja3 is
    end Math_Biii_1;
    
    
-   procedure Qcp_Sap_B1 (Anchor : in out Dll.Dllist_Access_Type; 
+   procedure Qcp_Sap_B1 (Anchor              : in out Dll.Dllist_Access_Type; 
+			 Sinv_Flag           : in Boolean;
 			 D1, D2, D3, Delta_D : in M_Type; 
-			 S1, Sa, Sb, S2 : in Mpsec_Type; 
-			 Amax : in Mpsec2_Type; 
-			 Delta_Tmax : in Sec_Type) 
+			 S1, Sa, Sb, S2      : in Mpsec_Type; 
+			 Amax                : in Mpsec2_Type; 
+			 Delta_Tmax          : in Sec_Type) 
    is
       Dtmp : M_Type;
       Qcp1,
@@ -429,54 +430,132 @@ package body Luthien.Sonja3 is
       Qcp3,
       Qcp4  : access Dqcp.Qcp_Type := new Dqcp.Qcp_Type;
    begin
-      Qcp1.Tqi := 0.0;
-      Qcp1.Pqi := 0.0;
-      Qcp1.Vqi := S1;
-      Qcp1.Aqi := 0.0;
-      Dll.Pars_Q.Insert_Pv_Before (This => Qcp1, Next => Anchor);
-      Qcp2.Tqi := Delta_Tmax;
-      Qcp2.Pqi := D1;
-      Qcp2.Vqi := Sa;
-      Qcp2.Aqi := Amax;
-      Dll.Pars_Q.Insert_Pv_Before (This => Qcp2, Next => Anchor);
-      Qcp3.Tqi := Qcp2.Tqi + (Sb - Sa) / Amax;
-      Dtmp := D1 + D2;
-      Qcp3.Vqi := Dtmp;
-      Qcp3.Aqi := Sb;
-      Qcp3.Aqi := Amax;
-      Dll.Pars_Q.Insert_Pv_Before (This => Qcp3, Next => Anchor);
-      Qcp4.Tqi := Qcp3.Tqi + Delta_Tmax;
-      Dtmp := Dtmp + D3;
-      Qcp4.Pqi := Dtmp;
-      Qcp4.Vqi := S2;
-      Qcp4.Aqi := 0.0;
-      Dll.Pars_Q.Insert_Pv_Before (This => Qcp4, Next => Anchor);
-      Dtmp := Delta_D - Dtmp;
-      if Dtmp > 0.0 then
-	 declare
-	    Qcp5 : access Dqcp.Qcp_Type := new Dqcp.Qcp_Type;
-	 begin
-	    Qcp5.Tqi := Qcp4.Tqi + Dtmp / S2;
-	    Qcp5.Pqi := Delta_D;
-	    Qcp5.Vqi := S2;
-	    Qcp5.Aqi := 0.0;
-	    Dll.Pars_Q.Insert_Pv_Before (This => Qcp5, Next => Anchor);
-	 end;
+      if Sinv_Flag = True then
+	 Qcp1.Tqi := 0.0;
+	 Qcp1.Pqi := 0.0;
+	 Qcp1.Vqi := S2;
+	 Qcp1.Aqi := 0.0;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp1, Next => Anchor);
+	 Qcp2.Tqi := Delta_Tmax;
+	 Qcp2.Pqi := D3;
+	 Qcp2.Vqi := Sb;
+	 Qcp2.Aqi := Amax;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp2, Next => Anchor);
+	 Qcp3.Tqi := Delta_Tmax + (Sb - Sa) / Amax;
+	 Dtmp := D3 + D2;
+	 Qcp3.Pqi := Dtmp;
+	 Qcp3.Vqi := Sa;
+	 Qcp3.Aqi := Amax;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp3, Next => Anchor);
+	 Qcp4.Tqi := Qcp3.Tqi + Delta_Tmax;
+	 Dtmp := Dtmp + D1;
+	 Qcp4.Pqi := Dtmp;
+	 Qcp4.Vqi := S1;
+	 Qcp4.Aqi := 0.0;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp4, Next => Anchor);
+      else
+	 Qcp1.Tqi := 0.0;
+	 Qcp1.Pqi := 0.0;
+	 Qcp1.Vqi := S1;
+	 Qcp1.Aqi := 0.0;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp1, Next => Anchor);
+	 Qcp2.Tqi := Delta_Tmax;
+	 Qcp2.Pqi := D1;
+	 Qcp2.Vqi := Sa;
+	 Qcp2.Aqi := Amax;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp2, Next => Anchor);
+	 Qcp3.Tqi := Qcp2.Tqi + (Sb - Sa) / Amax;
+	 Dtmp := D1 + D2;
+	 Qcp3.Pqi := Dtmp;
+	 Qcp3.Vqi := Sb;
+	 Qcp3.Aqi := Amax;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp3, Next => Anchor);
+	 Qcp4.Tqi := Qcp3.Tqi + Delta_Tmax;
+	 Dtmp := Dtmp + D3;
+	 Qcp4.Pqi := Dtmp;
+	 Qcp4.Vqi := S2;
+	 Qcp4.Aqi := 0.0;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp4, Next => Anchor);
+	 Dtmp := Delta_D - Dtmp;
+	 if Dtmp > 0.0 then
+	    declare
+	       Qcp5 : access Dqcp.Qcp_Type := new Dqcp.Qcp_Type;
+	    begin
+	       Qcp5.Tqi := Qcp4.Tqi + Dtmp / S2;
+	       Qcp5.Pqi := Delta_D;
+	       Qcp5.Vqi := S2;
+	       Qcp5.Aqi := 0.0;
+	       Dll.Pars_Q.Insert_Pv_Before (This => Qcp5, Next => Anchor);
+	    end;
+	 end if;
       end if;
    exception
       when others => null;
    end Qcp_Sap_B1;
    
    
-   procedure Qcp_Ap_B2 (Anchor : in out Luthien.Dll.Dllist_Access_Type; 
-			 D1, D2, D3, Delta_D : in M_Type; 
-			 S1, Sa, Sb, S2 : in Mpsec_Type; 
-			 Amax : in Mpsec2_Type; 
-			 Delta_Tmax : in Sec_Type) 
+   procedure Qcp_Ap_B2 (Anchor    : in out Luthien.Dll.Dllist_Access_Type; 
+			Sinv_Flag : Boolean;
+			Delta_D   : in M_Type; 
+			S1        : in Mpsec_Type; 
+			Apeak     : in Mpsec2_Type; 
+			Delta_T   : in Sec_Type) 
    is
-      
+      Sa : Mpsec_Type := S1 + (Apeak * Delta_T) / 2.0;
+      S2 : Mpsec_Type := S1 + (Apeak * Delta_T);
+      D1 : M_Type := Apeak * Delta_T ** 2 * 
+	(1.0 / 4.0 - 1.0 / Num.Pi ** 2) + S1 * Delta_T; -- (3.14)
+      D2 : M_Type := Apeak * Delta_T ** 2 * 
+	(1.0 / 4.0 + 1.0 / Num.Pi ** 2) + Sa * Delta_T; -- (D.4)
+      Dtmp : M_Type := Delta_D - (S1 + S1) * Delta_T;
+      Qcp1,
+      Qcp2,
+      Qcp3  : access Dqcp.Qcp_Type := new Dqcp.Qcp_Type;
    begin
-      null;
+      if Sinv_Flag = True then
+	 Qcp1.Tqi := 0.0;
+	 Qcp1.Pqi := 0.0;
+	 Qcp1.Vqi := S2;
+	 Qcp1.Aqi := 0.0;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp1, Next => Anchor);
+	 Qcp2.Tqi := Delta_T;
+	 Qcp2.Pqi := D2;
+	 Qcp2.Vqi := Sa;
+	 Qcp2.Aqi := Apeak;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp2, Next => Anchor);
+	 Qcp3.Tqi :=  Delta_T + Delta_T;
+	 Qcp3.Pqi := D1 + D2;
+	 Qcp3.Vqi := S1;
+	 Qcp3.Aqi := 0.0;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp3, Next => Anchor);
+      else
+	 Qcp1.Tqi := 0.0;
+	 Qcp1.Pqi := 0.0;
+	 Qcp1.Vqi := S1;
+	 Qcp1.Aqi := 0.0;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp1, Next => Anchor);
+	 Qcp2.Tqi := Delta_T;
+	 Qcp2.Pqi := D1;
+	 Qcp2.Vqi := Sa;
+	 Qcp2.Aqi := Apeak;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp2, Next => Anchor);
+	 Qcp3.Tqi :=  Delta_T + Delta_T;
+	 Qcp3.Pqi := D1 + D2;
+	 Qcp3.Vqi := S2;
+	 Qcp3.Aqi := 0.0;
+	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp3, Next => Anchor);
+	 if Dtmp > 0.0 then
+	    declare
+	       Qcp4 : access Dqcp.Qcp_Type := new Dqcp.Qcp_Type;
+	    begin
+	       Qcp4.Tqi := Dtmp / S2;
+	       Qcp4.Pqi := Delta_D;
+	       Qcp4.Vqi := S2;
+	       Qcp4.Aqi := 0.0;
+	       Dll.Pars_Q.Insert_Pv_Before (This => Qcp4, Next => Anchor);
+	    end;
+	 end if;
+      end if;
    exception
       when others => null;
    end Qcp_Ap_B2;

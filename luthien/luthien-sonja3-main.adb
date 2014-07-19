@@ -34,6 +34,15 @@
 
 package body Luthien.Sonja3.Main is
    
+   type State is {
+   
+   procedure Fsm (Inp : in  Sonja3_In_Type)
+   is
+   begin
+      
+   end Fsm;
+   
+   
    procedure Start (Inp : in  Sonja3_In_Type; Outp : out Qcp.Qcp_Type) 
    is
       
