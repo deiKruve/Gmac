@@ -13,3 +13,5 @@ edit-gscan:
 	emacs testgscan.adb ./gmactextscan/gmactextscan.ads ./gmactextscan/gmactextscan.adb ./gmactextscan/generic_scanner.ads ./gnatcoll/gnatcoll-traces.ads
 edit-silmaril:
 	emacs silmatest.adb ./silmaril/silmaril-dll.adb ./silmaril/silmaril-dll.ads ./silmaril/silmaril-file_selector.adb ./silmaril/silmaril-file_selector.ads ./silmaril/silmaril-reader.adb ./silmaril/silmaril-reader.ads ./silmaril/silmaril-tasks.adb ./silmaril/silmaril-tasks.ads ./silmaril/silmaril.ads ./gmactextscan/generic_scanner.ads
+edit-luthien:
+	emacs ./silmaril/silmaril-dll.ads ./luthien/luthien.ads ./luthien/luthien-dll.adb ./luthien/luthien-dll.ads ./luthien/luthien-dll-bcp.adb ./luthien/luthien-dll-bcp.ads ./luthien/luthien-dll-qcp.adb ./luthien/luthien-dll-qcp.ads ./luthien/luthien-sonja3.adb ./luthien/luthien-sonja3.ads ./luthien/luthien-sonja3-main.adb ./luthien/luthien-sonja3-main.ads sonja3test.adb

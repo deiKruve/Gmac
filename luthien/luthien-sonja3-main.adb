@@ -32,9 +32,9 @@
 --
 -- this package has the main entry and data preparation
 
-package body Sonja3.Main is
+package body Luthien.Sonja3.Main is
    
-   procedure Start (Inp : in  Sonja3_In_Type; Outp : out Qcp_Type) 
+   procedure Start (Inp : in  Sonja3_In_Type; Outp : out Qcp.Qcp_Type) 
    is
       
    begin
@@ -43,4 +43,4 @@ package body Sonja3.Main is
       when others => null;
    end Start;
    
-end Sonja3.Main;
+end Luthien.Sonja3.Main;

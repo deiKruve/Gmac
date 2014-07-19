@@ -44,6 +44,7 @@ package Silmaril.Dll is
       null;
    end record;
    
+   
    --------------------------------------
    -- the list item for a 3 axis entry --
    --------------------------------------
@@ -132,6 +133,7 @@ package Silmaril.Dll is
      
    type Dllist_Type is tagged record
       Pos            : access Posvec_Type'Class;
+      Luth           : Dllist_Access_Type       := null;
       Prev, Next,
 	Mprev, Mnext : Dllist_Access_Type       := null;
    end record;

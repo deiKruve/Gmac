@@ -34,12 +34,14 @@
 with Ada.Numerics.Generic_Elementary_Functions;
 --with Ada.Numerics.Generic_Real_Arrays;
 
-package body Sonja3 is
+package body Luthien.Sonja3 is
    
-  Package Num renames Ada.Numerics;
-  package Math is new Ada.Numerics.Generic_Elementary_Functions 
-    (Float_Type => Long_Float);
-  --package Vm is new Ada.Numerics.Generic_Real_Arrays (Real => Long_Float);
+   package Dll  renames Luthien.Dll;
+   package Dqcp renames Luthien.Dll.Qcp;
+   package Num  renames Ada.Numerics;
+   package Math is new Ada.Numerics.Generic_Elementary_Functions 
+     (Float_Type => Long_Float);
+   --package Vm is new Ada.Numerics.Generic_Real_Arrays (Real => Long_Float);
   
    Lm : Lin_Move_Record_Type := (Sinv_Flag => False, others => 0.0);
    
@@ -251,11 +253,129 @@ package body Sonja3 is
    end Math_Bii_A2;
    
    
-   
-   
-   procedure Math_Bii_B 
+   procedure Math_Camel (S1, S2, Speak : in Mpsec_Type; 
+			 Saw, Sbw, Say, Sby : out Mpsec_Type; 
+			 D1w, D2w, D3w, D1y, D2y, D3y : out M_Type) 
    is
-      -- Drampup : M_Type     := 0.0;-- is dv now
+   begin
+      Lm.S1 := S1;
+      Lm.S2 := Speak;
+      if Lm.S2 - Lm.S1 > Lm.Delta_Smin then -- SAP
+	 Math312_314;
+	 Math315_316;
+	 Saw := Lm.Sa;
+	 Sbw := Lm.Sb;
+	 D1w := Lm.D1;
+	 D2w := Lm.D2;
+	 D3w := Lm.D3;
+      else
+	 Math326_325; -- gives dT and Apeak
+	 Sbw := Lm.S2 - (Lm.Apeak * Lm.Delta_T) / 2.0; -- (D.2)
+	 Saw := Sbw;
+	 D1w := Lm.Apeak * Lm.Delta_T ** 2 * 
+	   (1.0 / 4.0 - 1.0 / Num.Pi ** 2) + Lm.S1 * Lm.Delta_T; -- (3.14)
+	 D3w := Lm.Apeak * Lm.Delta_T ** 2 * 
+	   (1.0 / 4.0 + 1.0 / Num.Pi ** 2) + Lm.Sbw * Lm.Delta_T; -- (D.4)
+	 D2w := 0.0;
+      end if;
+      -- and now the downramp
+      Lm.S1 := S2;
+      Lm.S2 := Speak;
+      if Lm.S2 - Lm.S1 > Lm.Delta_Smin then -- SAP
+	 Math312_314;
+	 Math315_316;
+	 Say := Lm.Sa;
+	 Sby := Lm.Sb;
+	 D1y := Lm.D1;
+	 D2y := Lm.D2;
+	 D3y := Lm.D3;
+      else -- AP
+	 Math326_325; -- gives dT and Apeak
+	 Sby := Lm.S2 - (Lm.Apeak * Lm.Delta_T) / 2.0; -- (D.2)
+	 Saw := Sbw;
+	 D1y := Lm.Apeak * Lm.Delta_T ** 2 * 
+	      (1.0 / 4.0 - 1.0 / Num.Pi ** 2) + Lm.S1 * Lm.Delta_T; -- (3.14)
+	 D3y := Lm.Apeak * Lm.Delta_T ** 2 * 
+	      (1.0 / 4.0 + 1.0 / Num.Pi ** 2) + Lm.Sby * Lm.Delta_T; -- (D.4)
+	 D2y := 0.0;
+	    ---Lm.Dz := Lm.D1z + Lm.D3z;
+	 end if;
+   exception
+      when others => null;
+   end Math_Camel;
+   
+   
+   --procedure Math_Bii_B 
+   --is
+   --     -- Drampup : M_Type     := 0.0;-- is dv now
+   --     Dtmp    : M_Type     := Lm.D;
+   --     S1tmp   : Mpsec_Type := Lm.S1;
+   --     S2tmp   : Mpsec_Type := Lm.S2;
+   --  begin
+   --     -- D is greater than Dv here, so calculate the bubble in fig 3.8
+   --     Lm.D := (Dtmp - Lm.Dv) / 2.0;
+   --     Lm.S1 := S2tmp;
+   --     Math324_325;
+   --     Lm.Speak := Lm.Apeak * Lm.Delta_T + S2tmp; -- (3.6)
+      
+   --     -- now calculate the real profile
+   --     -- 1st the upramp
+   --     Lm.S1 := S1tmp;
+   --     Lm.S2 := Lm.Speak;
+   --     if Lm.S2 - Lm.S1 > Lm.Delta_Smin then -- SAP
+   --  	 Math312_314;
+   --  	 Math315_316;
+   --  	 Lm.Sax := Lm.Sa;
+   --  	 Lm.Sbx := Lm.Sb;
+   --  	 Lm.D1x := Lm.D1;
+   --  	 Lm.D2x := Lm.D2;
+   --  	 Lm.D3x := Lm.D3;
+   --  	 Lm.Dx := Lm.D1 + Lm.D2 + Lm.D3;
+   --     else -- AP
+   --  	 Math326_325; -- gives dT and Apeak
+   --  	 Lm.Sbx := Lm.S2 - (Lm.Apeak * Lm.Delta_T) / 2.0; -- (D.2)
+   --  	 Lm.D1x := Lm.Apeak * Lm.Delta_T ** 2 * 
+   --  	   (1.0 / 4.0 - 1.0 / Num.Pi ** 2) + Lm.S1 * Lm.Delta_T; -- (3.14)
+   --  	 Lm.D3x := Lm.Apeak * Lm.Delta_T ** 2 * 
+   --  	   (1.0 / 4.0 + 1.0 / Num.Pi ** 2) + Lm.Sbx * Lm.Delta_T; -- (D.4)
+   --  	 Lm.D2x := 0.0;
+   --  	 Lm.Dx := Lm.D1x + Lm.D3x;
+   --     end if;
+   --     if Lm.Dx > Dtmp then
+   --  	 null; --raise Exception;!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   --     else
+   --  	 null;
+   --  	 -- and now the downramp
+   --  	 Lm.S1 := S2tmp;
+   --  	 Lm.S2 := Lm.Speak;
+   --  	 if Lm.S2 - Lm.S1 > Lm.Delta_Smin then -- SAP
+   --  	    Math312_314;
+   --  	    Math315_316;
+   --  	    Lm.Saz := Lm.Sa;
+   --  	    Lm.Sbz := Lm.Sb;
+   --  	    Lm.D1z := Lm.D1;
+   --  	    Lm.D2z := Lm.D2;
+   --  	    Lm.D3z := Lm.D3;
+   --  	    Lm.Dz  := Lm.D1 + Lm.D2 + Lm.D3;
+   --  	 else -- AP
+   --  	    Math326_325; -- gives dT and Apeak
+   --  	    Lm.Sbz := Lm.S2 - (Lm.Apeak * Lm.Delta_T) / 2.0; -- (D.2)
+   --  	    Lm.D1z := Lm.Apeak * Lm.Delta_T ** 2 * 
+   --  	      (1.0 / 4.0 - 1.0 / Num.Pi ** 2) + Lm.S1 * Lm.Delta_T; -- (3.14)
+   --  	    Lm.D3z := Lm.Apeak * Lm.Delta_T ** 2 * 
+   --  	      (1.0 / 4.0 + 1.0 / Num.Pi ** 2) + Lm.Sbz * Lm.Delta_T; -- (D.4)
+   --  	    Lm.D2z := 0.0;
+   --  	    Lm.Dz := Lm.D1z + Lm.D3z;
+   --  	 end if;
+   --  	 Lm.Dy := Dtmp - Lm.Dx - Lm.Dz;
+	 
+   --     end if;
+   --  exception
+   --     when others => null;
+   --  end Math_Bii_B;
+      
+   procedure Math_Bii_B  
+   is
       Dtmp    : M_Type     := Lm.D;
       S1tmp   : Mpsec_Type := Lm.S1;
       S2tmp   : Mpsec_Type := Lm.S2;
@@ -265,63 +385,100 @@ package body Sonja3 is
       Lm.S1 := S2tmp;
       Math324_325;
       Lm.Speak := Lm.Apeak * Lm.Delta_T + S2tmp; -- (3.6)
-      
-      -- now calculate the real profile
-      -- 1st the upramp
-      Lm.S1 := S1tmp;
-      Lm.S2 := Lm.Speak;
-      if Lm.S2 - Lm.S1 > Lm.Delta_Smin then -- SAP
-	 Math312_314;
-	 Math315_316;
-	 Lm.Sax := Lm.Sa;
-	 Lm.Sbx := Lm.Sb;
-	 Lm.D1x := Lm.D1;
-	 Lm.D2x := Lm.D2;
-	 Lm.D3x := Lm.D3;
-	 Lm.Dx := Lm.D1 + Lm.D2 + Lm.D3;
-      else -- AP
-	 Math326_325; -- gives dT and Apeak
-	 Lm.Sbx := Lm.S2 - (Lm.Apeak * Lm.Delta_T) / 2.0; -- (D.2)
-	 Lm.D1x := Lm.Apeak * Lm.Delta_T ** 2 * 
-	   (1.0 / 4.0 - 1.0 / Num.Pi ** 2) + Lm.S1 * Lm.Delta_T; -- (3.14)
-	 Lm.D3x := Lm.Apeak * Lm.Delta_T ** 2 * 
-	   (1.0 / 4.0 + 1.0 / Num.Pi ** 2) + Lm.Sbx * Lm.Delta_T; -- (D.4)
-	 Lm.D2x := 0.0;
-	 Lm.Dx := Lm.D1x + Lm.D3x;
-      end if;
-      if Lm.Dx > Dtmp then
-	 null; --raise Exception;!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      else
-	 null;
-	 -- and now the downramp
-	 Lm.S1 := S2tmp;
-	 Lm.S2 := Lm.Speak;
-	 if Lm.S2 - Lm.S1 > Lm.Delta_Smin then -- SAP
-	    Math312_314;
-	    Math315_316;
-	    Lm.Saz := Lm.Sa;
-	    Lm.Sbz := Lm.Sb;
-	    Lm.D1z := Lm.D1;
-	    Lm.D2z := Lm.D2;
-	    Lm.D3z := Lm.D3;
-	    Lm.Dz  := Lm.D1 + Lm.D2 + Lm.D3;
-	 else -- AP
-	    Math326_325; -- gives dT and Apeak
-	    Lm.Sbz := Lm.S2 - (Lm.Apeak * Lm.Delta_T) / 2.0; -- (D.2)
-	    Lm.D1z := Lm.Apeak * Lm.Delta_T ** 2 * 
-	      (1.0 / 4.0 - 1.0 / Num.Pi ** 2) + Lm.S1 * Lm.Delta_T; -- (3.14)
-	    Lm.D3z := Lm.Apeak * Lm.Delta_T ** 2 * 
-	      (1.0 / 4.0 + 1.0 / Num.Pi ** 2) + Lm.Sbz * Lm.Delta_T; -- (D.4)
-	    Lm.D2z := 0.0;
-	    Lm.Dz := Lm.D1z + Lm.D3z;
-	 end if;
-	 Lm.Dy := Dtmp - Lm.Dx - Lm.Dz;
-	 
-      end if;
+	 -- and now the true profile
+      Math_Camel (S1 => S1tmp, S2 => S2tmp, Speak => Lm.Speak,
+		  Saw => Lm.Sax, Sbw => Lm.Sbx, Say => Lm.Saz, Sby => Lm.Sbz,
+		  D1w => Lm.D1x , D2w => Lm.D2x, D3w => Lm.D3x, 
+		  D1y => Lm.D1z, D2y => Lm.D2z, D3y => Lm.D3z);
+      Lm.Dx := Lm.D1x + Lm.D2x + Lm.D3x; -- upramp
+      Lm.Dz := Lm.D1z + Lm.D2z + Lm.D3z; -- downramp
+      Lm.Dy := Dtmp - Lm.Dx - Lm.Dz; -- cruise if any
+      Lm.D  := Dtmp; -- total distance, i hope
+      Lm.S1 := S1tmp; -- start speed
+      Lm.S2 := S2tmp; -- stop speed
    exception
       when others => null;
    end Math_Bii_B;
    
    
+   procedure Math_Biii_1 
+   is   
+   begin
+      Math_Camel (S1 => Lm.S1, S2 => Lm.S2, Speak => Lm.Smax,
+		  Saw => Lm.Saw, Sbw => Lm.Sbw, Say => Lm.Say, Sby => Lm.Sby,
+		  D1w => Lm.D1w, D2w => Lm.D2w, D3w => Lm.D3w, 
+		  D1y => Lm.D1y, D2y => Lm.D2y, D3y => Lm.D3y);
+      Lm.Dw := Lm.D1w + Lm.D2w + Lm.D3w; -- upramp
+      Lm.Dy := Lm.D1y + Lm.D2y + Lm.D3y; -- downramp
+      Lm.Dx := Lm.D - Lm.Dw - Lm.Dy;  -- cruise if any 
+				      -- (if negative choose the other algorithm)
+   exception
+      when others => null;
+   end Math_Biii_1;
    
-end Sonja3;
+   
+   procedure Qcp_Sap_B1 (Anchor : in out Dll.Dllist_Access_Type; 
+			 D1, D2, D3, Delta_D : in M_Type; 
+			 S1, Sa, Sb, S2 : in Mpsec_Type; 
+			 Amax : in Mpsec2_Type; 
+			 Delta_Tmax : in Sec_Type) 
+   is
+      Dtmp : M_Type;
+      Qcp1,
+      Qcp2,
+      Qcp3,
+      Qcp4  : access Dqcp.Qcp_Type := new Dqcp.Qcp_Type;
+   begin
+      Qcp1.Tqi := 0.0;
+      Qcp1.Pqi := 0.0;
+      Qcp1.Vqi := S1;
+      Qcp1.Aqi := 0.0;
+      Dll.Pars_Q.Insert_Pv_Before (This => Qcp1, Next => Anchor);
+      Qcp2.Tqi := Delta_Tmax;
+      Qcp2.Pqi := D1;
+      Qcp2.Vqi := Sa;
+      Qcp2.Aqi := Amax;
+      Dll.Pars_Q.Insert_Pv_Before (This => Qcp2, Next => Anchor);
+      Qcp3.Tqi := Qcp2.Tqi + (Sb - Sa) / Amax;
+      Dtmp := D1 + D2;
+      Qcp3.Vqi := Dtmp;
+      Qcp3.Aqi := Sb;
+      Qcp3.Aqi := Amax;
+      Dll.Pars_Q.Insert_Pv_Before (This => Qcp3, Next => Anchor);
+      Qcp4.Tqi := Qcp3.Tqi + Delta_Tmax;
+      Dtmp := Dtmp + D3;
+      Qcp4.Pqi := Dtmp;
+      Qcp4.Vqi := S2;
+      Qcp4.Aqi := 0.0;
+      Dll.Pars_Q.Insert_Pv_Before (This => Qcp4, Next => Anchor);
+      Dtmp := Delta_D - Dtmp;
+      if Dtmp > 0.0 then
+	 declare
+	    Qcp5 : access Dqcp.Qcp_Type := new Dqcp.Qcp_Type;
+	 begin
+	    Qcp5.Tqi := Qcp4.Tqi + Dtmp / S2;
+	    Qcp5.Pqi := Delta_D;
+	    Qcp5.Vqi := S2;
+	    Qcp5.Aqi := 0.0;
+	    Dll.Pars_Q.Insert_Pv_Before (This => Qcp5, Next => Anchor);
+	 end;
+      end if;
+   exception
+      when others => null;
+   end Qcp_Sap_B1;
+   
+   
+   procedure Qcp_Ap_B2 (Anchor : in out Luthien.Dll.Dllist_Access_Type; 
+			 D1, D2, D3, Delta_D : in M_Type; 
+			 S1, Sa, Sb, S2 : in Mpsec_Type; 
+			 Amax : in Mpsec2_Type; 
+			 Delta_Tmax : in Sec_Type) 
+   is
+      
+   begin
+      null;
+   exception
+      when others => null;
+   end Qcp_Ap_B2;
+   
+end Luthien.Sonja3;

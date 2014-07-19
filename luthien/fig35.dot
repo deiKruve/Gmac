@@ -37,7 +37,7 @@ digraph "fig 3.5" {
 		shape = "egg"
 		style = "filled"
 	]
-   subgraph "cluster-mathin" {
+   subgraph "cluster_1" {
 	"n39" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -246,6 +246,7 @@ digraph "fig 3.5" {
 		color = "blue"
 		style = "solid"
 	]
+   subgraph "cluster_3" {
 	"n28" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -254,6 +255,26 @@ digraph "fig 3.5" {
 		shape = "box"
 		style = "solid"
 	]
+	"n53" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = " If\n D-(D1+D2+D3) > 0"
+		shape = "octagon"
+		style = "solid"
+	]
+	"n54" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "calculate 5th qcp\n Quintps := 5"
+		shape = "box"
+		style = "solid"
+	]
+	label = "procedure Qcp_B1"
+	style = "solid"
+	color = "blue"
+    }
 	"n29" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -315,6 +336,7 @@ digraph "fig 3.5" {
 		shape = "egg"
 		style = "filled"
 	]
+   subgraph "cluster_2" {
 	"n36" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -339,6 +361,10 @@ digraph "fig 3.5" {
 		shape = "box"
 		style = "solid"
 	]
+	label = "procedure Qcp_B2"
+	style = "solid"
+	color = "blue"
+    }
 	"n40" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -444,22 +470,6 @@ digraph "fig 3.5" {
 		fontname = "Times-Roman"
 		fontcolor = "black"
 		label = "cruise at speak"
-		shape = "box"
-		style = "solid"
-	]
-	"n53" [
-		fontsize = "14"
-		fontname = "Times-Roman"
-		fontcolor = "black"
-		label = " If\n D-(D1+D2+D3) > 0"
-		shape = "octagon"
-		style = "solid"
-	]
-	"n54" [
-		fontsize = "14"
-		fontname = "Times-Roman"
-		fontcolor = "black"
-		label = "calculate 5th qcp\n Quintps := 5"
 		shape = "box"
 		style = "solid"
 	]

@@ -32,35 +32,8 @@
 
 --with Silmaril;
 --with Silmaril.Dll;
-
-package Sonja3 is
-   
-   subtype Sec_Type is Long_Float;
-   subtype M_Type is Long_Float; -- this is disingenious, 
-				 --rads are now also called meters.
-   subtype Rad_Type is Long_Float;
-   subtype Mpsec_Type is Long_Float;  -- speed type
-   subtype Mpsec2_Type is Long_Float; -- acc type
-   subtype Mpsec3_Type is Long_Float; -- jerk type
-   
-   type Qcp_Type is 
-      record
-	 Tqi : Sec_Type; -- time
-	 Pqi : M_Type; -- position (D)
-	 Vqi : Mpsec_Type; -- velocity (s)
-	 Aqi : Mpsec2_Type; -- acceleration (s)
-      end record;
-   type Qcp_Table_Type is array (Positive range <>) of Qcp_Type;
-   
-   type Pos_Vector_Type is
-      record
-	 X,
-	 Y,
-	 Z  : M_Type;
-	 A,
-	 B,
-	 C  : M_Type;
-      end record;
+with Luthien.Dll.Qcp;
+package Luthien.Sonja3 is
    
    type Sonja3_In_Type is
       record
@@ -106,12 +79,18 @@ private
 
 	 Da,                  -- distance covered during a SAP used to ramp
 			      -- from s1 to slimit (=D1a + D2a + D3a).
-	 D1a,
-	 D1x,
-         D2a,
-	 D2x,  
-	 D3a,
-	 D3x,
+	   D1a,
+	   D1w,
+	   D1x,
+	   D1y,
+	   D2a, 
+	   D2w,
+	   D2x,  
+	   D2y,
+	   D3a,
+	   D3w,
+	   D3x,
+	   D3y,
 	 Db,                  -- distance covered during an acceleration pulse
 			      -- from s2 to slimit.
 	 D1b,
@@ -132,13 +111,17 @@ private
 	 Sa,                  -- speed attained at the end of a ramp 
 			      -- from zero acceleration to maximum acceleration 
 			      -- in the SAP algorithm.
+	 Saw,
 	 Sax,
+	 Say,
 	 Saz,                 -- speed attained at the end of a ramp from 
 			      -- zero acceleration to maximum acceleration in
 			      -- the SAP algorithm for the case z.
 	 Sb,                  -- speed attained at the end of the acceleration 
 			      -- cruise in the SAP algorithm.
+	 Sbw,
 	 Sbx,
+	 Sby,
 	 Sbz,                 -- speed attained at the end of the acceleration 
 			      -- cruise in the SAP algorithm for the case z.
 	 Si,                  -- speed at point i.
@@ -178,8 +161,22 @@ private
    procedure Math_Bii_A1;
    procedure Math_Bii_A2;
    procedure Math_Bii_B;
+   procedure Math_Biii_1;
+   procedure Qcp_Sap_B1 (Anchor : in out Luthien.Dll.Dllist_Access_Type; 
+			 D1, D2, D3, Delta_D : in M_Type; 
+			 S1, Sa, Sb, S2 : in Mpsec_Type; 
+			 Amax : in Mpsec2_Type; 
+			 Delta_Tmax : in Sec_Type);
+   
+   procedure Qcp_Ap_B2 (Anchor : in out Luthien.Dll.Dllist_Access_Type; 
+			 D1, D2, D3, Delta_D : in M_Type; 
+			 S1, Sa, Sb, S2 : in Mpsec_Type; 
+			 Amax : in Mpsec2_Type; 
+			 Delta_Tmax : in Sec_Type);
+   
+   --procedure Sap_Up4 (D, D1, D2, D3 : in M_Type; S1, Sa, Sb, S2 : in Mpsec_Type; Amax : in Mpsec2_Type; Delta_Tmax : Sec_Type; Qpc :  out Qcp_Table_Type);
    
    --subtype Move_Record_Type is Silmaril.Dll.Posvec9_Type;
    --subtype Move_Record_Access_Type is Silmaril.Dll.Posvec9_Access_Type;
    
-end Sonja3;
+end Luthien.Sonja3;

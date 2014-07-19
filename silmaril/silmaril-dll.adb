@@ -84,6 +84,7 @@ package body Silmaril.Dll is
       when Open is
 	 P : Dllist_Access_Type := 
 	   new Dllist_Type'(Pos   => Posvec_Class_Access_Type (This), 
+			    Luth  => null,
 			    Prev  => Next.prev, 
 			    Next  => Dllist_Access_Type (Next),
 			    Mprev => null, Mnext => null);
@@ -100,6 +101,7 @@ package body Silmaril.Dll is
       when Open is
 	 P : Dllist_Access_Type := 
 	   new Dllist_Type'(Pos   => Posvec_Class_Access_Type (This), 
+			    Luth  => null,
 			    Prev  => Dllist_Access_Type (Prev), 
 			    Next  => Prev.Next,
 			    Mprev => null, Mnext => null);
@@ -137,6 +139,7 @@ package body Silmaril.Dll is
       when Open is
 	 P : Dllist_Access_Type := 
 	   new Dllist_Type'(Pos  => Posvec_Class_Access_Type (This), 
+			    Luth => null,
 			    Prev => Next.prev, Next => Dllist_Access_Type (Next),
 			    Mprev => Mnext.Mprev, 
 			    Mnext => Dllist_Access_Type (Mnext)); 
@@ -154,6 +157,7 @@ package body Silmaril.Dll is
       when Open is
 	 P : Dllist_Access_Type := 
 	   new Dllist_Type'(Pos => Posvec_Class_Access_Type (This), 
+			    Luth => null,
 			    Prev => Dllist_Access_Type (Prev), Next => Prev.Next,
 			    Mprev => Dllist_Access_Type (Mprev), 
 			    Mnext => Mprev.mnext);
