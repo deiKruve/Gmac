@@ -43,7 +43,7 @@ package body Luthien.Sonja3 is
      (Float_Type => Long_Float);
    --package Vm is new Ada.Numerics.Generic_Real_Arrays (Real => Long_Float);
   
-   Lm : Lin_Move_Record_Type := (Sinv_Flag => False, others => 0.0);
+   -- Lm : Lin_Move_Record_Type := (Sinv_Flag => False, others => 0.0);
    
    
    procedure Math_In (Invec : Sonja3_In_Type)
@@ -203,7 +203,8 @@ package body Luthien.Sonja3 is
    -- dS > dSmin & D > Dlimit
    procedure Math_Bii_A1 
      -- takes: Lm.S1, Lm.S2, Lm.Smax, Lm.Amax, Lm.Delta_Tmax
-     -- gives: Lm.Sax, Lm.Saz, Lm.D1x, Lm.Dx, Lm.D1z, Lm.Dz
+     -- gives: Lm.Sax, Lm.Sbx, Lm.D1x, Lm.D2x, Lm.Dx, Lm.D3x,  
+     --        Lm.Saz, Lm.Sbz, Lm.D1z, Lm.D2z, Lm.D3z, Lm.Dz
    is
       Tmp_S1 : Mpsec_Type := Lm.S1;
       Tmp_S2 : Mpsec_Type := Lm.S2;
@@ -211,15 +212,21 @@ package body Luthien.Sonja3 is
       Lm.S2 := Lm.Smax; 
       Math312_314;
       Lm.Sax := Lm.Sa;
+      Lm.Sbx := Lm.Sb;
       Math315_316;
       Lm.D1x := Lm.D1;
+      Lm.D2x := Lm.D2;
+      Lm.D3x := Lm.D3;
       Lm.Dx := Lm.D1 + Lm.D2 + Lm.D3; -- ramp from s1 to smax
       --
       Lm.S1 := Tmp_S2;
       Math312_314;
       Lm.Saz := Lm.Sa;
+      Lm.Sbz := Lm.Sb;
       Math315_316;
       Lm.D1z := Lm.D1;
+      Lm.D2z := Lm.D2;
+      Lm.D3z := Lm.D3;
       Lm.Dz := Lm.D1 + Lm.D2 + Lm.D3; -- ramp from s2 to smax
       Lm.S1 := Tmp_S1;
       Lm.S2 := Tmp_S2;
@@ -254,10 +261,11 @@ package body Luthien.Sonja3 is
    
    
    procedure Math_Camel (S1, S2, Speak : in Mpsec_Type; 
-			 Saw, Sbw, Say, Sby : out Mpsec_Type; 
+			 Saw, Sbw,      Say, Sby : out Mpsec_Type; 
 			 D1w, D2w, D3w, D1y, D2y, D3y : out M_Type) 
    is
    begin
+      -- the upramp
       Lm.S1 := S1;
       Lm.S2 := Speak;
       if Lm.S2 - Lm.S1 > Lm.Delta_Smin then -- SAP
@@ -268,7 +276,7 @@ package body Luthien.Sonja3 is
 	 D1w := Lm.D1;
 	 D2w := Lm.D2;
 	 D3w := Lm.D3;
-      else
+      else -- AP
 	 Math326_325; -- gives dT and Apeak
 	 Sbw := Lm.S2 - (Lm.Apeak * Lm.Delta_T) / 2.0; -- (D.2)
 	 Saw := Sbw;
@@ -386,13 +394,13 @@ package body Luthien.Sonja3 is
       Math324_325;
       Lm.Speak := Lm.Apeak * Lm.Delta_T + S2tmp; -- (3.6)
 	 -- and now the true profile
-      Math_Camel (S1 => S1tmp, S2 => S2tmp, Speak => Lm.Speak,
+      Math_Camel (S1 => S1tmp, S2 => S2tmp, Speak => Lm.Speak, -- inputs
 		  Saw => Lm.Sax, Sbw => Lm.Sbx, Say => Lm.Saz, Sby => Lm.Sbz,
 		  D1w => Lm.D1x , D2w => Lm.D2x, D3w => Lm.D3x, 
 		  D1y => Lm.D1z, D2y => Lm.D2z, D3y => Lm.D3z);
       Lm.Dx := Lm.D1x + Lm.D2x + Lm.D3x; -- upramp
       Lm.Dz := Lm.D1z + Lm.D2z + Lm.D3z; -- downramp
-      Lm.Dy := Dtmp - Lm.Dx - Lm.Dz; -- cruise if any
+      -- Lm.Dy := Dtmp - Lm.Dx - Lm.Dz; -- cruise if any
       Lm.D  := Dtmp; -- total distance, i hope
       Lm.S1 := S1tmp; -- start speed
       Lm.S2 := S2tmp; -- stop speed
@@ -406,11 +414,11 @@ package body Luthien.Sonja3 is
    begin
       Math_Camel (S1 => Lm.S1, S2 => Lm.S2, Speak => Lm.Smax,
 		  Saw => Lm.Saw, Sbw => Lm.Sbw, Say => Lm.Say, Sby => Lm.Sby,
-		  D1w => Lm.D1w, D2w => Lm.D2w, D3w => Lm.D3w, 
-		  D1y => Lm.D1y, D2y => Lm.D2y, D3y => Lm.D3y);
-      Lm.Dw := Lm.D1w + Lm.D2w + Lm.D3w; -- upramp
-      Lm.Dy := Lm.D1y + Lm.D2y + Lm.D3y; -- downramp
-      Lm.Dx := Lm.D - Lm.Dw - Lm.Dy;  -- cruise if any 
+		  D1w => Lm.D1x, D2w => Lm.D2x, D3w => Lm.D3x, 
+		  D1y => Lm.D1z, D2y => Lm.D2z, D3y => Lm.D3z);
+      Lm.Dw := Lm.D1x + Lm.D2x + Lm.D3x; -- upramp
+      Lm.Dy := Lm.D1z + Lm.D2z + Lm.D3z; -- downramp
+      --Lm.Dx := Lm.D - Lm.Dw - Lm.Dy;  -- cruise if any 
 				      -- (if negative choose the other algorithm)
    exception
       when others => null;

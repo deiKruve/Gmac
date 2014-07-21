@@ -175,5 +175,7 @@ private
 			 S1       : in Mpsec_Type; 
 			 Apeak    : in Mpsec2_Type; 
 			 Delta_T  : in Sec_Type);
+   
+   Lm : Lin_Move_Record_Type := (Sinv_Flag => False, others => 0.0);
      
 end Luthien.Sonja3;

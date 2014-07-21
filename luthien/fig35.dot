@@ -120,7 +120,7 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "state 5\n Biii"
+		label = "state 4\n Biii"
 		fillcolor = "plum1"
 		shape = "egg"
 		style = "filled"
@@ -137,7 +137,7 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "state 7\n Biia"
+		label = "state 5\n Biia"
 		fillcolor = "plum1"
 		shape = "egg"
 		style = "filled"
@@ -146,7 +146,7 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "state 8 \n Biib"
+		label = "state 6\n Biib"
 		fillcolor = "plum1"
 		shape = "egg"
 		style = "filled"
@@ -188,7 +188,7 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "state 10\n sustained acc pulse"
+		label = "state 8\n sustained acc pulse"
 		fillcolor = "plum1"
 		shape = "egg"
 		style = "filled"
@@ -197,7 +197,7 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "state 11\n acceleration pulse"
+		label = "state 9\n acceleration pulse"
 		fillcolor = "plum1"
 		shape = "egg"
 		style = "filled"
@@ -215,7 +215,7 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "state 12"
+		label = "state 10"
 		fillcolor = "plum1"
 		shape = "egg"
 		style = "filled"
@@ -271,7 +271,7 @@ digraph "fig 3.5" {
 		shape = "box"
 		style = "solid"
 	]
-	label = "procedure Qcp_B1"
+	label = "procedure Qcp_Sap_B1"
 	style = "solid"
 	color = "blue"
     }
@@ -314,7 +314,7 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "state 13"
+		label = "state 11"
 		fillcolor = "plum1"
 		shape = "egg"
 		style = "filled"
@@ -331,7 +331,7 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "state 14"
+		label = "state 12"
 		fillcolor = "plum1"
 		shape = "egg"
 		style = "filled"
@@ -361,7 +361,7 @@ digraph "fig 3.5" {
 		shape = "box"
 		style = "solid"
 	]
-	label = "procedure Qcp_B2"
+	label = "procedure Qcp_Ap_B2"
 	style = "solid"
 	color = "blue"
     }
@@ -391,6 +391,7 @@ digraph "fig 3.5" {
 		shape = "octagon"
 		style = "solid"
 	]
+subgraph "cluster_4" {
 	"n43" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -399,6 +400,18 @@ digraph "fig 3.5" {
 		shape = "box"
 		style = "solid"
 	]
+	"n58" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "calculate quintic control points 1..5\n according table B.1(1..5)\n with Dx\n calculate qcp 6..9\n according table B.1(4..1)\n with Dz"
+		shape = "box"
+		style = "solid"
+	]
+	label = "2 x procedure Qcp_Sap_B1"
+	style = "solid"
+	color = "blue"
+    }
 	"n44" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -412,7 +425,7 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "state 6"
+		label = "state 7"
 		fillcolor = "plum1"
 		shape = "egg"
 		style = "filled"
@@ -497,14 +510,6 @@ digraph "fig 3.5" {
 		fillcolor = "plum1"
 		shape = "egg"
 		style = "filled"
-	]
-	"n58" [
-		fontsize = "14"
-		fontname = "Times-Roman"
-		fontcolor = "black"
-		label = "calculate quintic control points 1..5\n according table B.1(1..5)\n with Dx\n calculate qcp 6..9\n according table B.1(4..1)\n with Dz"
-		shape = "box"
-		style = "solid"
 	]
 	"n59" [
 		fontsize = "14"
