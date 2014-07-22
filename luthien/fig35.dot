@@ -24,7 +24,7 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "s1, s2, smax"
+		label = "p1, p2, s1, s2,\n smax, amax, jmax"
 		shape = "invhouse"
 		style = "solid"
 	]
@@ -163,8 +163,9 @@ digraph "fig 3.5" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "calculate\n constand speed traject"
+		label = "procedure Qcp_Cv\ncalculate quintics for\n constant speed traject"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n18" [
@@ -391,7 +392,7 @@ digraph "fig 3.5" {
 		shape = "octagon"
 		style = "solid"
 	]
-subgraph "cluster_4" {
+   subgraph "cluster_4" {
 	"n43" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -434,24 +435,27 @@ subgraph "cluster_4" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "calculate\n quint points"
+		label = "calculate quint points\n procedure Qcp_Sap_B1\n procedure Qcp_Ap_B2"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n47" [
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "calculate acc to s2\n calculate acc pulse to end point"
+		label = "calculate acc to s2\n calculate acc pulse to end point\n procedure Math_Bii_B"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n48" [
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "calculate \n Dw, Dy"
+		label = "calculate Dw, Dy\n procedure Math_Biii_1"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n49" [
@@ -462,6 +466,7 @@ subgraph "cluster_4" {
 		shape = "octagon"
 		style = "solid"
 	]
+   subgraph "cluster_5" {
 	"n50" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -486,6 +491,11 @@ subgraph "cluster_4" {
 		shape = "box"
 		style = "solid"
 	]
+	label = "from Math_Biii_1 above"
+	style = "solid"
+	color = "blue"
+    }
+    subgraph "cluster_6" {
 	"n55" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -502,6 +512,10 @@ subgraph "cluster_4" {
 		shape = "box"
 		style = "solid"
 	]
+	label = "done in the 'Qcp' routines above"
+	style = "solid"
+	color = "blue"
+   }
 	"n57" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -517,6 +531,7 @@ subgraph "cluster_4" {
 		fontcolor = "black"
 		label = "calculate quintic control points 1..4\n according table B.1(1..4)\n with Dx\n calculate qcp 5..8\n according table B.1(4..1)\n with Dz"
 		shape = "box"
+		color = "blue"
 		style = "solid"
 	]
 	"n0" -> "n1" [

@@ -88,8 +88,9 @@ package body Luthien.Sonja3.Main is
 		
 	     when State3  =>
 		if abs (Lm.S1 - Lm.S2) < Mpsec_Type'Epsilon then
-		   -- we dont know what to do here yet!!!!!!!!!!!!!!!!!!!!
-		   null;
+		   Qcp_Cv (Anchor  => Dll.Pq_Anchor,
+			   Delta_D => Lm.D,
+			   S1      => Lm.S1);
 		else
 		   From_Fsm_State := State3;
 		   if Lm.D > Lm.Dmin and ((Lm.S1 - Lm.S2) > Lm.Delta_Smin) then

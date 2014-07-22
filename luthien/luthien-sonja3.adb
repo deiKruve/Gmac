@@ -72,6 +72,12 @@ package body Luthien.Sonja3 is
       Lm.Dmin := Lm.Amax * Lm.Delta_Tmax ** 2 + 2.0 * Lm.S1 * Lm.Delta_Tmax; -- (3.20)
       --Lm.Dv := Lm.Dmin; -- I hope this is right???
       Lm.Delta_Smin := Lm.Delta_Tmax * Lm.Amax; -- (3.22)
+      Lm.X_Rat := Dx / Lm.D;
+      Lm.Y_Rat := Dy / Lm.D;
+      Lm.Z_Rat := Dz / Lm.D;
+      Lm.A_Rat := Da / Lm.D;
+      Lm.B_Rat := Db / Lm.D;
+      Lm.C_Rat := Dc / Lm.D;
    exception
       when others => null;
    end Math_In;
@@ -113,7 +119,7 @@ package body Luthien.Sonja3 is
      -- gives: Lm.Sb, Lm.S2
    is
    begin
-      Lm.Sb := - Lm.Amax * Lm.Delta_Tmax + 
+      Lm.Sb := - Lm.Amax * Lm.Delta_Tmax -16.0 * Mpsec_Type'Epsilon + 
 	Math.Sqrt ((Lm.Amax * Lm.Delta_Tmax) ** 2 - 2.0 * Lm.Amax * 
 		     ((Lm.Amax * Lm.Delta_Tmax ** 2) / 2.0 + 
 			Lm.S1 * Lm.Delta_Tmax - Lm.Sa ** 2 / (2.0 * Lm.Amax) - 
@@ -424,6 +430,29 @@ package body Luthien.Sonja3 is
       when others => null;
    end Math_Biii_1;
    
+   
+   
+   
+   
+   procedure Qcp_Cv (Anchor  : in out Dll.Dllist_Access_Type; 
+		     Delta_D : in M_Type; 
+		     S1      : in Mpsec_Type) 
+   is
+      Qcp1,
+      Qcp2  : access Dqcp.Qcp_Type := new Dqcp.Qcp_Type;
+   begin
+      Qcp1.Tqi := 0.0;
+      Qcp1.Pqi := 0.0;
+      Qcp1.Vqi := S1;
+      Qcp1.Aqi := 0.0;
+      Dll.Pars_Q.Insert_Pv_Before (This => Qcp1, Next => Anchor);
+      Qcp2.Tqi := Delta_D / S1;
+      Qcp2.Pqi := Delta_D;
+      Qcp2.Vqi := S1;
+      Qcp2.Aqi := 0.0;
+      Dll.Pars_Q.Insert_Pv_Before (This => Qcp2, Next => Anchor);
+   end Qcp_Cv;
+      
    
    procedure Qcp_Sap_B1 (Anchor              : in out Dll.Dllist_Access_Type; 
 			 Sinv_Flag           : in Boolean;
