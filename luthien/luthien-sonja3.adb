@@ -32,7 +32,8 @@
 -- this body holds the generally used math routines.
 
 with Ada.Numerics.Generic_Elementary_Functions;
---with Ada.Numerics.Generic_Real_Arrays;
+
+with Ada.Numerics.Generic_Real_Arrays;
 
 package body Luthien.Sonja3 is
    
@@ -41,6 +42,8 @@ package body Luthien.Sonja3 is
    package Num  renames Ada.Numerics;
    package Math is new Ada.Numerics.Generic_Elementary_Functions 
      (Float_Type => Long_Float);
+   package Mv is new Ada.Numerics.Generic_Real_Arrays 
+     (Real => Long_Float);
    --package Vm is new Ada.Numerics.Generic_Real_Arrays (Real => Long_Float);
   
    -- Lm : Lin_Move_Record_Type := (Sinv_Flag => False, others => 0.0);
@@ -48,12 +51,8 @@ package body Luthien.Sonja3 is
    
    procedure Math_In (Invec : Sonja3_In_Type)
    is
-      Dx : M_Type := Invec.P1.X - Invec.P2.X;
-      Dy : M_Type := Invec.P1.Y - Invec.P2.Y;
-      Dz : M_Type := Invec.P1.Z - Invec.P2.Z;
-      Da : M_Type := Invec.P1.A - Invec.P2.A;
-      Db : M_Type := Invec.P1.B - Invec.P2.B;
-      Dc : M_Type := Invec.P1.C - Invec.P2.C;
+      function Norm (Right : Mv.Real_Vector) return Long_Float Renames  Mv."abs";
+      Ddiff : Real_Vector_Type;
    begin
       Lm.Jmax := Invec.Jmax;
       Lm.Amax := Invec.Amax;
@@ -67,17 +66,19 @@ package body Luthien.Sonja3 is
 	 Lm.S2 := Invec.S1;
 	 Lm.Sinv_Flag := True;
       end if;
-      Lm.D := Math.Sqrt (Dx ** 2 + Dy ** 2 + Dz ** 2 + Da ** 2 + Db ** 2 + Dc ** 2);
+      Lm.P1 := Invec.P1;
+      Ddiff := Invec.P1 - Invec.P2;
+      Lm.D := Norm (Mv.Real_Vector (Ddiff));
+      Lm.Dinc := Ddiff / Lm.D;
       Lm.Delta_Tmax := (Num.Pi * Lm.Amax) / (2.0 * Lm.Jmax); --(3.4)
       Lm.Dmin := Lm.Amax * Lm.Delta_Tmax ** 2 + 2.0 * Lm.S1 * Lm.Delta_Tmax; -- (3.20)
-      --Lm.Dv := Lm.Dmin; -- I hope this is right???
       Lm.Delta_Smin := Lm.Delta_Tmax * Lm.Amax; -- (3.22)
-      Lm.X_Rat := Dx / Lm.D;
-      Lm.Y_Rat := Dy / Lm.D;
-      Lm.Z_Rat := Dz / Lm.D;
-      Lm.A_Rat := Da / Lm.D;
-      Lm.B_Rat := Db / Lm.D;
-      Lm.C_Rat := Dc / Lm.D;
+      Lm.X_Rat := Invec.P1 (1) - Invec.P2 (1) / Lm.D;
+      Lm.Y_Rat := Invec.P1 (2) - Invec.P2 (2) / Lm.D;
+      Lm.Z_Rat := Invec.P1 (3) - Invec.P2 (3) / Lm.D;
+      Lm.A_Rat := Invec.P1 (4) - Invec.P2 (4) / Lm.D;
+      Lm.B_Rat := Invec.P1 (5) - Invec.P2 (5) / Lm.D;
+      Lm.C_Rat := Invec.P1 (6) - Invec.P2 (6) / Lm.D;
    exception
       when others => null;
    end Math_In;
@@ -431,7 +432,18 @@ package body Luthien.Sonja3 is
    end Math_Biii_1;
    
    
-   
+   procedure Qratios (Qcp : access Dqcp.Qcp_Type)
+   is
+   begin
+      Qcp.P1 := Lm.P1;
+      Qcp.Dinc := Lm.Dinc;
+      --  Qcp.Xr := Lm.X_Rat;
+      --  Qcp.Yr := Lm.Y_Rat;
+      --  Qcp.Zr := Lm.Z_Rat;
+      --  Qcp.Ar := Lm.A_Rat;
+      --  Qcp.Br := Lm.B_Rat;
+      --  Qcp.Cr := Lm.C_Rat;
+   end Qratios;
    
    
    procedure Qcp_Cv (Anchor  : in out Dll.Dllist_Access_Type; 
@@ -445,11 +457,13 @@ package body Luthien.Sonja3 is
       Qcp1.Pqi := 0.0;
       Qcp1.Vqi := S1;
       Qcp1.Aqi := 0.0;
+      Qratios (Qcp1);
       Dll.Pars_Q.Insert_Pv_Before (This => Qcp1, Next => Anchor);
       Qcp2.Tqi := Delta_D / S1;
       Qcp2.Pqi := Delta_D;
       Qcp2.Vqi := S1;
       Qcp2.Aqi := 0.0;
+      Qratios (Qcp2);
       Dll.Pars_Q.Insert_Pv_Before (This => Qcp2, Next => Anchor);
    end Qcp_Cv;
       
@@ -472,46 +486,54 @@ package body Luthien.Sonja3 is
 	 Qcp1.Pqi := 0.0;
 	 Qcp1.Vqi := S2;
 	 Qcp1.Aqi := 0.0;
+	 Qratios (Qcp1);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp1, Next => Anchor);
 	 Qcp2.Tqi := Delta_Tmax;
 	 Qcp2.Pqi := D3;
 	 Qcp2.Vqi := Sb;
 	 Qcp2.Aqi := Amax;
+	 Qratios (Qcp2);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp2, Next => Anchor);
 	 Qcp3.Tqi := Delta_Tmax + (Sb - Sa) / Amax;
 	 Dtmp := D3 + D2;
 	 Qcp3.Pqi := Dtmp;
 	 Qcp3.Vqi := Sa;
 	 Qcp3.Aqi := Amax;
+	 Qratios (Qcp3);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp3, Next => Anchor);
 	 Qcp4.Tqi := Qcp3.Tqi + Delta_Tmax;
 	 Dtmp := Dtmp + D1;
 	 Qcp4.Pqi := Dtmp;
 	 Qcp4.Vqi := S1;
 	 Qcp4.Aqi := 0.0;
+	 Qratios (Qcp4);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp4, Next => Anchor);
       else
 	 Qcp1.Tqi := 0.0;
 	 Qcp1.Pqi := 0.0;
 	 Qcp1.Vqi := S1;
 	 Qcp1.Aqi := 0.0;
+	 Qratios (Qcp1);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp1, Next => Anchor);
 	 Qcp2.Tqi := Delta_Tmax;
 	 Qcp2.Pqi := D1;
 	 Qcp2.Vqi := Sa;
 	 Qcp2.Aqi := Amax;
+	 Qratios (Qcp2);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp2, Next => Anchor);
 	 Qcp3.Tqi := Qcp2.Tqi + (Sb - Sa) / Amax;
 	 Dtmp := D1 + D2;
 	 Qcp3.Pqi := Dtmp;
 	 Qcp3.Vqi := Sb;
 	 Qcp3.Aqi := Amax;
+	 Qratios (Qcp3);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp3, Next => Anchor);
 	 Qcp4.Tqi := Qcp3.Tqi + Delta_Tmax;
 	 Dtmp := Dtmp + D3;
 	 Qcp4.Pqi := Dtmp;
 	 Qcp4.Vqi := S2;
 	 Qcp4.Aqi := 0.0;
+	 Qratios (Qcp4);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp4, Next => Anchor);
 	 Dtmp := Delta_D - Dtmp;
 	 if Dtmp > 0.0 then
@@ -522,6 +544,7 @@ package body Luthien.Sonja3 is
 	       Qcp5.Pqi := Delta_D;
 	       Qcp5.Vqi := S2;
 	       Qcp5.Aqi := 0.0;
+	       Qratios (Qcp5);
 	       Dll.Pars_Q.Insert_Pv_Before (This => Qcp5, Next => Anchor);
 	    end;
 	 end if;
@@ -554,32 +577,38 @@ package body Luthien.Sonja3 is
 	 Qcp1.Pqi := 0.0;
 	 Qcp1.Vqi := S2;
 	 Qcp1.Aqi := 0.0;
+	 Qratios (Qcp1);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp1, Next => Anchor);
 	 Qcp2.Tqi := Delta_T;
 	 Qcp2.Pqi := D2;
 	 Qcp2.Vqi := Sa;
 	 Qcp2.Aqi := Apeak;
+	 Qratios (Qcp2);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp2, Next => Anchor);
 	 Qcp3.Tqi :=  Delta_T + Delta_T;
 	 Qcp3.Pqi := D1 + D2;
 	 Qcp3.Vqi := S1;
 	 Qcp3.Aqi := 0.0;
+	 Qratios (Qcp3);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp3, Next => Anchor);
       else
 	 Qcp1.Tqi := 0.0;
 	 Qcp1.Pqi := 0.0;
 	 Qcp1.Vqi := S1;
 	 Qcp1.Aqi := 0.0;
+	 Qratios (Qcp1);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp1, Next => Anchor);
 	 Qcp2.Tqi := Delta_T;
 	 Qcp2.Pqi := D1;
 	 Qcp2.Vqi := Sa;
 	 Qcp2.Aqi := Apeak;
+	 Qratios (Qcp2);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp2, Next => Anchor);
 	 Qcp3.Tqi :=  Delta_T + Delta_T;
 	 Qcp3.Pqi := D1 + D2;
 	 Qcp3.Vqi := S2;
 	 Qcp3.Aqi := 0.0;
+	 Qratios (Qcp3);
 	 Dll.Pars_Q.Insert_Pv_Before (This => Qcp3, Next => Anchor);
 	 if Dtmp > 0.0 then
 	    declare
@@ -589,6 +618,7 @@ package body Luthien.Sonja3 is
 	       Qcp4.Pqi := Delta_D;
 	       Qcp4.Vqi := S2;
 	       Qcp4.Aqi := 0.0;
+	       Qratios (Qcp4);
 	       Dll.Pars_Q.Insert_Pv_Before (This => Qcp4, Next => Anchor);
 	    end;
 	 end if;

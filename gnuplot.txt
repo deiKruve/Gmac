@@ -1,0 +1,1 @@
+gnuplot -persist -e "plot '1.dat' with lines"

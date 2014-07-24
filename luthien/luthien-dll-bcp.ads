@@ -49,9 +49,9 @@ package Luthien.Dll.Bcp is
    type Bcp_Type is new Cp_Type with
       record
 	 B1,
-	 B2  : Pos_Vector_Type;
+	 B2  : Real_Vector_Type;
 	 M1,
-	 M2  : M_Type;
+	 M2  : Real_Vector_Type;
 	 Tau : Sec_Type;
       end record;
    

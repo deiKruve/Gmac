@@ -29,6 +29,7 @@
 -- root of all parser and low level parser structures
 --
 with System;
+with Ada.Numerics.Generic_Real_Arrays;
 
 package Luthien is
    
@@ -44,14 +45,18 @@ package Luthien is
    subtype Mpsec2_Type is Long_Float; -- acc type
    subtype Mpsec3_Type is Long_Float; -- jerk type
    
-   type Pos_Vector_Type is
-      record
-	 X,
-	 Y,
-	 Z  : M_Type;
-	 A,
-	 B,
-	 C  : M_Type;
-      end record;
+   package Mv is new Ada.Numerics.Generic_Real_Arrays 
+     (Real => Long_Float);
+   
+   --  type Pos_Vector_Type is
+   --     record
+   --  	 X,
+   --  	 Y,
+   --  	 Z  : M_Type;
+   --  	 A,
+   --  	 B,
+   --  	 C  : M_Type;
+   --     end record;
+   type Real_Vector_Type is new Mv.Real_Vector (1 .. 6);
 
 end Luthien;

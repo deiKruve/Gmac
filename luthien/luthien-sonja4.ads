@@ -35,7 +35,9 @@ package Luthien.Sonja4 is
    
    type Sonja4_In_Type is
       record
-	 P1        : Pos_Vector_Type;  -- start point
+	 P0,
+	 P1,
+	 P2        : Real_Vector_Type;  -- start point, blend point, next point
 	 Tightness : M_Type;
 	 S1        : Mpsec_Type;       -- requested speed at P1
 	 
@@ -43,8 +45,11 @@ package Luthien.Sonja4 is
 	 Jmax      : Mpsec3_Type;      -- max jerk
       end record;
    
-private
-   null;
+   function Test_Bend (Inp : Sonja4_In_Type) return Mpsec_Type;
+   procedure Calc_Blend (Anchor : in out Dll.Dllist_Access_Type; 
+			 Inp : Sonja4_In_Type);
+   
+
 end Luthien.Sonja4;
 
    

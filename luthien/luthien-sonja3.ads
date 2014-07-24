@@ -37,8 +37,10 @@ package Luthien.Sonja3 is
    
    type Sonja3_In_Type is
       record
-	 P1   : Pos_Vector_Type;  -- start point
-	 P2   : Pos_Vector_Type;  -- end position
+	 --P1   : Pos_Vector_Type;  -- start point
+	 --P2   : Pos_Vector_Type;  -- end position
+	 P1,
+	 P2 : Real_Vector_Type;
 	 S1   : Mpsec_Type;       -- start speed
 	 S2   : Mpsec_Type;       -- end speed
 	 Smax : Mpsec_Type;       -- max speed
@@ -54,6 +56,9 @@ private
       record	 
 	 Sinv_Flag : Boolean; -- indicates that s1 and s2 are reversed for
 			      -- algorithm purposes
+	 P1,                  -- start point of this stretch
+	 Dinc : Real_Vector_Type; -- increment per time unit.
+
 	 D,                   -- Euclidian distance between two points.
 	 Dmin,                -- minimum distance required to use the SAP
 			      -- algorithm. (3.20)
@@ -104,6 +109,12 @@ private
 	 Dz,
 	 Delta_D : M_Type;    -- distance remaining after an acceleration pulse 
 			      -- (used in the speed-limited case)
+	 X_Rat,
+	 Y_Rat,
+	 Z_Rat,
+	 A_Rat,
+	 B_Rat,
+	 C_Rat  : Long_Float;
 	 Jmax : Mpsec3_Type;  -- maximum allowable jerk. (MMAJ)
 	 S,
 	 S1,                  -- speed at start of this traject
@@ -179,6 +190,9 @@ private
 			 Apeak    : in Mpsec2_Type; 
 			 Delta_T  : in Sec_Type);
    
-   Lm : Lin_Move_Record_Type := (Sinv_Flag => False, others => 0.0);
+   Lm : Lin_Move_Record_Type := (Sinv_Flag => False, 
+				 P1        => (others => 0.0), 
+				 Dinc      => (others => 0.0), 
+				 others    => 0.0);
      
 end Luthien.Sonja3;

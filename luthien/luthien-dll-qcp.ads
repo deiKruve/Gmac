@@ -48,6 +48,8 @@ package Luthien.Dll.Qcp is
 	 Pqi : M_Type; -- position (D)
 	 Vqi : Mpsec_Type; -- velocity (s)
 	 Aqi : Mpsec2_Type; -- acceleration (s)
+	 P1,
+	 Dinc : Real_Vector_Type;
       end record;
    
    procedure Get_Item (N   : access Dllist_Type; 
