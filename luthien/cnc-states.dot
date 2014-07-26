@@ -1,0 +1,323 @@
+digraph "g" {
+	graph [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+	]
+	node [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "ellipse"
+		style = "solid"
+	]
+	edge [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "\N"
+		shape = "point"
+		style = "solid"
+	]
+	"n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "idle state"
+		shape = "doubleoctagon"
+		style = "solid"
+	]
+	"n4" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "auto mode"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n5" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "man mode"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n6" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "semi auto mode"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n7" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = " hw mode"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n8" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "ref mode"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n9" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "init ref mode"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n10" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "init man mode"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n3" -> "n4" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "auto pb"
+		style = "solid"
+	]
+	"n3" -> "n5" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "man pb"
+		style = "solid"
+	]
+	"n5" -> "n6" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "semi auto pb"
+		style = "solid"
+	]
+	"n5" -> "n4" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "auto pb"
+		style = "solid"
+	]
+	"n6" -> "n5" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "man pb"
+		style = "solid"
+	]
+	"n6" -> "n6" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "semi auto pb"
+		style = "solid"
+	]
+	"n6" -> "n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "travel end"
+		style = "solid"
+	]
+	"n4" -> "n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "travel end"
+		style = "solid"
+	]
+	"n5" -> "n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "travel end"
+		style = "solid"
+	]
+	"n4" -> "n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "stop"
+		style = "solid"
+	]
+	"n3" -> "n6" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "semi auto pb"
+		style = "solid"
+	]
+	"n6" -> "n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "stop"
+		style = "solid"
+	]
+	"n5" -> "n7" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "hw pb"
+		style = "solid"
+	]
+	"n3" -> "n7" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "hw pb"
+		style = "solid"
+	]
+	"n7" -> "n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "travel end"
+		style = "solid"
+	]
+	"n7" -> "n4" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "auto pb"
+		style = "solid"
+	]
+	"n7" -> "n6" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "semi auto pb"
+		style = "solid"
+	]
+	"n3" -> "n8" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "ref pb"
+		style = "solid"
+	]
+	"n8" -> "n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "ref done"
+		style = "solid"
+	]
+	"n0" -> "n9" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "ref pb"
+		style = "solid"
+	]
+	"n9" -> "n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "ref done"
+		style = "solid"
+	]
+	"n9" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "travel end"
+		style = "solid"
+	]
+	"n9" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "stop"
+		style = "solid"
+	]
+	"n8" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "stop"
+		style = "solid"
+	]
+	"n8" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "travel end"
+		style = "solid"
+	]
+	"n0" -> "n10" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "man pb"
+		style = "solid"
+	]
+	"n10" -> "n9" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "ref pb"
+		style = "solid"
+	]
+	"n5" -> "n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "stop"
+		style = "solid"
+	]
+	"n4" -> "n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "man pb"
+		style = "solid"
+	]
+	"n7" -> "n5" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "man pb"
+		style = "solid"
+	]
+	"n7" -> "n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "stop"
+		style = "solid"
+	]
+	"n10" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "stop"
+		style = "solid"
+	]
+	"n9" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "man pb"
+		style = "solid"
+	]
+}

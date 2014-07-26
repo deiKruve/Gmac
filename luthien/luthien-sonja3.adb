@@ -437,12 +437,6 @@ package body Luthien.Sonja3 is
    begin
       Qcp.P1 := Lm.P1;
       Qcp.Dinc := Lm.Dinc;
-      --  Qcp.Xr := Lm.X_Rat;
-      --  Qcp.Yr := Lm.Y_Rat;
-      --  Qcp.Zr := Lm.Z_Rat;
-      --  Qcp.Ar := Lm.A_Rat;
-      --  Qcp.Br := Lm.B_Rat;
-      --  Qcp.Cr := Lm.C_Rat;
    end Qratios;
    
    

@@ -24,7 +24,7 @@ digraph "g" {
 		fontsize = "14"
 		fontname = "Times-Roman"
 		fontcolor = "black"
-		label = "i := 0"
+		label = "set silmaril\n Mnode pointer\n i := 0"
 		shape = "invhouse"
 		style = "solid"
 	]
@@ -42,8 +42,9 @@ digraph "g" {
 		fontname = "Times-Roman"
 		fontcolor = "black"
 		label = "plan traj from\n pi to pi1\n (fig 5.4)"
+		fillcolor = "beige"
 		shape = "box"
-		style = "solid"
+		style = "filled"
 	]
 	"n3" [
 		fontsize = "14"
@@ -137,6 +138,390 @@ digraph "g" {
 		shape = "invhouse"
 		style = "solid"
 	]
+	"n14" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "pi, si, pib, pi1,\n si1, pi1a, limits"
+		shape = "invhouse"
+		style = "solid"
+	]
+	"n15" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "si1=0?"
+		shape = "diamond"
+		style = "solid"
+	]
+	"n16" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "calculate blend"
+		shape = "box"
+		style = "solid"
+	]
+	"n17" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "blend ok?"
+		shape = "diamond"
+		style = "solid"
+	]
+	"n18" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "modify si1"
+		shape = "box"
+		style = "solid"
+	]
+	"n19" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "si=0?"
+		shape = "diamond"
+		style = "solid"
+	]
+	"n20" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "ps := pi"
+		shape = "box"
+		style = "solid"
+	]
+	"n21" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "ps := pib"
+		shape = "box"
+		style = "solid"
+	]
+	"n22" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "si1=0?"
+		shape = "diamond"
+		style = "solid"
+	]
+	"n23" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "pe := pi1"
+		shape = "box"
+		style = "solid"
+	]
+	"n24" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "pe := pi1a"
+		shape = "box"
+		style = "solid"
+	]
+	"n25" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "calc QRPs for ps..pe"
+		shape = "box"
+		style = "solid"
+	]
+	"n26" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "si1 gt 0?"
+		shape = "diamond"
+		style = "solid"
+	]
+	"n27" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "calc blend from\n pi1a to pi1b"
+		shape = "box"
+		style = "solid"
+	]
+	"n28" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "quintic control points\n blend parameters"
+		shape = "invhouse"
+		style = "solid"
+	]
+	"n29" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "state3"
+		fillcolor = "plum1"
+		shape = "egg"
+		style = "filled"
+	]
+	"n30" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "state 1"
+		fillcolor = "plum1"
+		shape = "egg"
+		style = "filled"
+	]
+	"n31" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "state 2"
+		fillcolor = "plum1"
+		shape = "egg"
+		style = "filled"
+	]
+	"n32" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "state 4"
+		fillcolor = "plum1"
+		shape = "egg"
+		style = "filled"
+	]
+	"n33" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "state5"
+		fillcolor = "plum1"
+		shape = "egg"
+		style = "filled"
+	]
+	"n34" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "i from fwd planning\n fig 5.8"
+		shape = "invhouse"
+		style = "solid"
+	]
+	"n35" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "replace si_soll with si_ist"
+		shape = "box"
+		style = "solid"
+	]
+	"n36" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "set silmaril\n Mnode pointer\n j := i - 1"
+		shape = "box"
+		style = "solid"
+	]
+	"n37" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "plan traj. from pj to pj1\n (fig 5.4)"
+		fillcolor = "beige"
+		shape = "box"
+		style = "filled"
+	]
+	"n38" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "sj reachable?"
+		shape = "diamond"
+		style = "solid"
+	]
+	"n39" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "replace sj"
+		shape = "box"
+		style = "solid"
+	]
+	"n40" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "j := j - 1"
+		shape = "box"
+		style = "solid"
+	]
+	"n41" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "j gt 0 ?"
+		shape = "diamond"
+		style = "solid"
+	]
+	"n42" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "back to fwd planning\n (fig 5.8)"
+		shape = "invhouse"
+		style = "solid"
+	]
+	"n43" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "state 2"
+		fillcolor = "plum1"
+		shape = "egg"
+		style = "filled"
+	]
+	"n44" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "state 3"
+		fillcolor = "plum1"
+		shape = "egg"
+		style = "filled"
+	]
+	"n45" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "state 4"
+		fillcolor = "plum1"
+		shape = "egg"
+		style = "filled"
+	]
+	"n46" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "state 1"
+		fillcolor = "plum1"
+		shape = "egg"
+		style = "filled"
+	]
+	"n47" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "state 5"
+		fillcolor = "plum1"
+		shape = "egg"
+		style = "filled"
+	]
+	"n48" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cook the limits"
+		shape = "box"
+		style = "solid"
+	]
+	"n49" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "i := j + 1"
+		shape = "box"
+		style = "solid"
+	]
+	subgraph "cluster_1" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			ratio = "1.7"
+			labelloc = "t"
+			label = "fwd planning fig 5.4"
+			style = "solid"
+			color = "blue"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"n14"
+		"n15"
+		"n16"
+		"n17"
+		"n18"
+		"n19"
+		"n20"
+		"n21"
+		"n22"
+		"n23"
+		"n24"
+		"n25"
+		"n26"
+		"n27"
+		"n28"
+		"n29"
+		"n30"
+		"n31"
+		"n32"
+		"n33"
+	}
+	subgraph "cluster_2" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			ratio = "1.7"
+			labelloc = "t"
+			label = "back planning fig 5.9"
+			style = "solid"
+			color = "blue"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"n34"
+		"n35"
+		"n36"
+		"n37"
+		"n38"
+		"n39"
+		"n40"
+		"n41"
+		"n42"
+		"n43"
+		"n44"
+		"n45"
+		"n46"
+		"n47"
+		"n49"
+	}
 	"n0" -> "n1" [
 		fontsize = "14"
 		fontname = "Times-Roman"
@@ -245,6 +630,266 @@ digraph "g" {
 		fontname = "Times-Roman"
 		fontcolor = "black"
 		label = "yes"
+		style = "solid"
+	]
+	"n15" -> "n16" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "no"
+		style = "solid"
+	]
+	"n17" -> "n18" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "no"
+		style = "solid"
+	]
+	"n19" -> "n20" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "yes"
+		style = "solid"
+	]
+	"n19" -> "n21" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "no"
+		style = "solid"
+	]
+	"n20" -> "n22" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n21" -> "n22" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n22" -> "n23" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "yes"
+		style = "solid"
+	]
+	"n22" -> "n24" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "no"
+		style = "solid"
+	]
+	"n23" -> "n25" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n24" -> "n25" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n26" -> "n27" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "yes"
+		style = "solid"
+	]
+	"n15" -> "n29" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "yes"
+		style = "solid"
+	]
+	"n29" -> "n19" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n17" -> "n29" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "yes"
+		style = "solid"
+	]
+	"n18" -> "n29" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n14" -> "n30" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n30" -> "n15" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n16" -> "n31" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n31" -> "n17" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n32" -> "n26" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n25" -> "n32" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n26" -> "n33" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "no"
+		style = "solid"
+	]
+	"n33" -> "n28" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n27" -> "n33" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n35" -> "n36" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n38" -> "n39" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "no"
+		style = "solid"
+	]
+	"n39" -> "n40" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n36" -> "n43" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n43" -> "n37" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n41" -> "n43" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "yes"
+		style = "solid"
+	]
+	"n37" -> "n44" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n44" -> "n38" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n40" -> "n45" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n45" -> "n41" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n34" -> "n46" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n46" -> "n35" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n38" -> "n47" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "yes"
+		style = "solid"
+	]
+	"n41" -> "n47" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "no"
+		style = "solid"
+	]
+	"n48" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n47" -> "n49" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n49" -> "n42" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
 		style = "solid"
 	]
 }
