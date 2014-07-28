@@ -36,7 +36,10 @@
 
 package Luthien.Sonja3.Main is
    package Qcp renames Luthien.Dll.Qcp;
-   procedure Start (Inp : in  Sonja3_In_Type; 
-		    Outp : out Qcp.Qcp_Type);
-   
+   procedure Start (Inp   : in  Sonja3_In_Type; 
+		    -- defines the stretch we need
+		    -- quintics for.
+		    Queue : in Luthien.Dll.Dllist_Access_Type
+		      -- defines the queue where the output goes
+		      );
 end Luthien.Sonja3.Main;

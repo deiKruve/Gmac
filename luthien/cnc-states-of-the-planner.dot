@@ -1,0 +1,744 @@
+digraph "g" {
+	graph [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		ratio = "1.3"
+		labelloc = "t"
+		label = "movement FSM"
+	]
+	node [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "ellipse"
+		style = "solid"
+	]
+	edge [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "idle"
+		fillcolor = "plum1"
+		shape = "egg"
+		style = "filled"
+	]
+	"n1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "interpret program"
+		fillcolor = "plum1"
+		shape = "ellipse"
+		style = "filled"
+	]
+	"n2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "search zero acc point"
+		fillcolor = "plum1"
+		shape = "octagon"
+		style = "filled"
+	]
+	"n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "build stop quint\n and attach"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n4" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "build Estop\n and attach"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n5" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "build handmove"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n6" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "interpret handmove\n and wait pb released"
+		fillcolor = "plum1"
+		shape = "octagon"
+		style = "filled"
+	]
+	"n7" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "move hand\n stop-quint"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n8" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "wait eom"
+		fillcolor = "plum1"
+		shape = "octagon"
+		style = "filled"
+	]
+	"n10" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "build hwmove"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n11" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "interpret hwmove\n and wait for eom\n or hw click"
+		fillcolor = "plum1"
+		shape = "octagon"
+		style = "filled"
+	]
+	"n12" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "in up-quint\n or 0 acc?"
+		shape = "octagon"
+		style = "solid"
+	]
+	"n14" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "extend 0 acc section by hwmove"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n15" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "run to stop\n and wait eom"
+		fillcolor = "plum1"
+		shape = "octagon"
+		style = "filled"
+	]
+	"n18" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "axis select subFSM and\n wait for hw click"
+		fillcolor = "plum1"
+		pe = "octagon"
+		shape = "octagon"
+		style = "filled"
+	]
+	"n19" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "wait for pb press"
+		fillcolor = "plum1"
+		shape = "octagon"
+		style = "filled"
+	]
+	"n17" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "down quint ends at 0?"
+		shape = "octagon"
+		style = "solid"
+	]
+	"n20" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "move stop-quint"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n21" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "\N"
+		shape = "point"
+		style = "solid"
+	]
+	"n23" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "set single-req"
+		shape = "box"
+		style = "solid"
+	]
+	"n24" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "single req?\n (and clear)"
+		shape = "octagon"
+		style = "solid"
+	]
+	"n25" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "reinterpret next step without blending"
+		shape = "box"
+		style = "solid"
+	]
+	"n26" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "wait eom"
+		fillcolor = "plum1"
+		shape = "octagon"
+		style = "filled"
+	]
+	"n27" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "wait pb"
+		fillcolor = "plum1"
+		shape = "octagon"
+		style = "filled"
+	]
+	"n28" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "reinterpret next step with blending"
+		shape = "box"
+		style = "solid"
+	]
+	"n29" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "set up prog exec"
+		shape = "box"
+		style = "solid"
+	]
+	"n30" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "set up prog exec"
+		shape = "box"
+		style = "solid"
+	]
+	"n32" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "aux off"
+		shape = "box"
+		style = "solid"
+	]
+	"n34" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "wait eom"
+		fillcolor = "plum1"
+		shape = "octagon"
+		style = "filled"
+	]
+	"n43" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "wait eom"
+		fillcolor = "plum1"
+		shape = "octagon"
+		style = "filled"
+	]
+	"n45" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "index mode"
+		fillcolor = "plum1"
+		shape = "egg"
+		style = "filled"
+	]
+	"n31" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "build handmove\n for axis"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n33" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "intepret handmove\n and wait index ls"
+		fillcolor = "plum1"
+		shape = "octagon"
+		style = "filled"
+	]
+	"n35" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "do index routine"
+		shape = "box"
+		style = "solid"
+	]
+	"n36" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "set hw mode"
+		shape = "box"
+		style = "solid"
+	]
+	"n37" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "hw mode?\n (and clear)"
+		shape = "octagon"
+		style = "solid"
+	]
+	"n1" -> "n2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "on any stop"
+		style = "solid"
+	]
+	"n2" -> "n4" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "in up-quint"
+		bel = "in up quints"
+		style = "solid"
+	]
+	"n5" -> "n6" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n6" -> "n7" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "pb released"
+		style = "solid"
+	]
+	"n3" -> "n8" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n10" -> "n11" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n11" -> "n12" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "hw click"
+		style = "solid"
+	]
+	"n12" -> "n14" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "yes"
+		style = "solid"
+	]
+	"n12" -> "n15" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "no"
+		style = "solid"
+	]
+	"n14" -> "n11" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n15" -> "n10" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "eom"
+		style = "solid"
+	]
+	"n18" -> "n10" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "hw click"
+		style = "solid"
+	]
+	"n18" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "/hw select"
+		style = "solid"
+	]
+	"n19" -> "n5" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "pb pressed"
+		style = "solid"
+	]
+	"n2" -> "n17" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "close to 0 acc"
+		style = "solid"
+	]
+	"n17" -> "n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "no"
+		style = "solid"
+	]
+	"n17" -> "n20" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "yes"
+		style = "solid"
+	]
+	"n20" -> "n8" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n2" -> "n8" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "in stop-quint"
+		style = "solid"
+	]
+	"n4" -> "n8" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n21" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n19" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "/hand select"
+		style = "solid"
+	]
+	"n6" -> "n2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "on any stop"
+		style = "solid"
+	]
+	"n11" -> "n2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "on any stop"
+		style = "solid"
+	]
+	"n1" -> "n23" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "singe block select"
+		style = "solid"
+	]
+	"n23" -> "n2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n8" -> "n24" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "eom"
+		style = "solid"
+	]
+	"n24" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "no"
+		style = "solid"
+	]
+	"n24" -> "n25" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "single req"
+		style = "solid"
+	]
+	"n25" -> "n26" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n26" -> "n2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "on any stop or \n not single mode"
+		style = "solid"
+	]
+	"n26" -> "n27" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "eom"
+		style = "solid"
+	]
+	"n27" -> "n25" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "single mode"
+		style = "solid"
+	]
+	"n27" -> "n28" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "automode"
+		style = "solid"
+	]
+	"n28" -> "n1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n29" -> "n25" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n0" -> "n29" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "single mode"
+		style = "solid"
+	]
+	"n0" -> "n30" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "automode"
+		style = "solid"
+	]
+	"n30" -> "n1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n32" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n27" -> "n32" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "eop or\n (/auto mode and /semi-auto)"
+		style = "solid"
+	]
+	"n1" -> "n34" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n34" -> "n32" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n7" -> "n43" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n43" -> "n2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "on any stop"
+		style = "solid"
+	]
+	"n43" -> "n19" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "eom"
+		style = "solid"
+	]
+	"n15" -> "n2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "on any stop"
+		style = "solid"
+	]
+	"n0" -> "n19" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "hand select"
+		style = "solid"
+	]
+	"n0" -> "n45" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "index mode"
+		style = "solid"
+	]
+	"n45" -> "n31" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "on axis select"
+		style = "solid"
+	]
+	"n31" -> "n33" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n33" -> "n2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "on any stop"
+		style = "solid"
+	]
+	"n33" -> "n35" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "on index sw"
+		style = "solid"
+	]
+	"n35" -> "n45" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "axis\n done"
+		style = "solid"
+	]
+	"n35" -> "n2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "on any stop"
+		style = "solid"
+	]
+	"n45" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n36" -> "n18" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "tightly"
+		style = "solid"
+	]
+	"n0" -> "n36" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "hw select"
+		style = "solid"
+	]
+	"n37" -> "n18" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "yes"
+		style = "solid"
+	]
+	"n11" -> "n37" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "eom"
+		style = "solid"
+	]
+	"n37" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "no"
+		style = "solid"
+	]
+	"n0" -> "n18" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "imm mode"
+		style = "solid"
+	]
+}

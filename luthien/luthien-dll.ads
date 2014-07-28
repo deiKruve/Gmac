@@ -68,7 +68,7 @@ package Luthien.Dll is
       Open : Boolean := True;
    end Parser_Queue_Type;
    
-   Pq_Anchor : Dllist_Access_Type := new Dllist_Type;
-   Pars_Q    : Parser_Queue_Type;
+   --Pq_Anchor : Dllist_Access_Type := new Dllist_Type;
+   --Pars_Q    : Parser_Queue_Type;
    
 end Luthien.Dll;

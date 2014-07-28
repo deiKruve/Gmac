@@ -54,7 +54,9 @@ package body Luthien.Sonja3.Main is
    
    --Fsm_State : State_Type := State1;
    
-   procedure Fsm (Inp : in  Sonja3_In_Type; Fsm_State : in out State_Type)
+   procedure Fsm (Inp       : in  Sonja3_In_Type; 
+		  Fsm_State : in out State_Type; 
+		  Queue     : in Dll.Dllist_Access_Type)
    is
       From_Fsm_State : State_Type;
    begin
@@ -88,7 +90,7 @@ package body Luthien.Sonja3.Main is
 		
 	     when State3  =>
 		if abs (Lm.S1 - Lm.S2) < Mpsec_Type'Epsilon then
-		   Qcp_Cv (Anchor  => Dll.Pq_Anchor,
+		   Qcp_Cv (Anchor  => Queue,
 			   Delta_D => Lm.D,
 			   S1      => Lm.S1);
 		else
@@ -111,7 +113,7 @@ package body Luthien.Sonja3.Main is
 	     when State5  =>
 		Math_Bii_A1;
 		if Lm.D > Lm.Dx + Lm.Dz then
-		   Qcp_Sap_B1 (Anchor      => Dll.Pq_Anchor,
+		   Qcp_Sap_B1 (Anchor      => Queue,
 			       Sinv_Flag   => False,
 			       D1          => Lm.D1x,
 			       D2          => Lm.D2x,
@@ -123,7 +125,7 @@ package body Luthien.Sonja3.Main is
 			       S2          => Lm.Smax,
 			       Amax        => Lm.Amax,
 			       Delta_Tmax  => Lm.Delta_Tmax);
-		   Qcp_Sap_B1 (Anchor      => Dll.Pq_Anchor,
+		   Qcp_Sap_B1 (Anchor      => Queue,
 			       Sinv_Flag   => True,
 			       D1          => Lm.D1z,
 			       D2          => Lm.D2z,
@@ -137,7 +139,7 @@ package body Luthien.Sonja3.Main is
 			       Delta_Tmax  => Lm.Delta_Tmax);
 		else
 		   Math_Bii_A2;
-		   Qcp_Sap_B1 (Anchor      => Dll.Pq_Anchor,
+		   Qcp_Sap_B1 (Anchor      => Queue,
 			       Sinv_Flag   => False,
 			       D1          => Lm.D1x,
 			       D2          => Lm.D2x,
@@ -149,7 +151,7 @@ package body Luthien.Sonja3.Main is
 			       S2          => Lm.Speak,
 			       Amax        => Lm.Amax,
 			       Delta_Tmax  => Lm.Delta_Tmax);
-		   Qcp_Sap_B1 (Anchor      => Dll.Pq_Anchor,
+		   Qcp_Sap_B1 (Anchor      => Queue,
 			       Sinv_Flag   => True,
 			       D1          => Lm.D1z,
 			       D2          => Lm.D2z,
@@ -170,14 +172,14 @@ package body Luthien.Sonja3.Main is
 		
 	     when State7  =>
 		if Lm.D2x < M_Type'Epsilon then -- AP
-		   Qcp_Ap_B2 (Anchor       => Dll.Pq_Anchor,
+		   Qcp_Ap_B2 (Anchor       => Queue,
 			      Sinv_Flag    => False,
 			      Delta_D      => Lm.D - Lm.Dz,
 			      S1           => Lm.S1,
 			      Apeak        => Lm.Apeak,
 			      Delta_T      =>Lm.Delta_T);
 		else -- SAP
-		   Qcp_Sap_B1 (Anchor      => Dll.Pq_Anchor,
+		   Qcp_Sap_B1 (Anchor      => Queue,
 			       Sinv_Flag   => False,
 			       D1          => Lm.D1x,
 			       D2          => Lm.D2x,
@@ -191,14 +193,14 @@ package body Luthien.Sonja3.Main is
 			       Delta_Tmax  => Lm.Delta_Tmax);
 		end if;
 		if Lm.D2x < M_Type'Epsilon then -- AP
-		   Qcp_Ap_B2 (Anchor       => Dll.Pq_Anchor,
+		   Qcp_Ap_B2 (Anchor       => Queue,
 			      Sinv_Flag    => True,
 			      Delta_D      => Lm.Dz,
 			      S1           => Lm.S2,
 			      Apeak        => Lm.Apeak,
 			      Delta_T      =>Lm.Delta_T);
 		else -- SAP
-		   Qcp_Sap_B1 (Anchor      => Dll.Pq_Anchor,
+		   Qcp_Sap_B1 (Anchor      => Queue,
 			       Sinv_Flag   => False,
 			       D1          => Lm.D1z,
 			       D2          => Lm.D2z,
@@ -238,7 +240,7 @@ package body Luthien.Sonja3.Main is
 		   Math317_318;
 		   Fsm_State := State10; -- watch the endless loop here;
 		else
-		   Qcp_Sap_B1 (Anchor      => Dll.Pq_Anchor,
+		   Qcp_Sap_B1 (Anchor      => Queue,
 			       Sinv_Flag   => False,
 			       D1          => Lm.D1,
 			       D2          => Lm.D2,
@@ -258,7 +260,7 @@ package body Luthien.Sonja3.Main is
 		Fsm_State := State12;
 		
 	     when State12 =>
-		Qcp_Ap_B2 (Anchor       => Dll.Pq_Anchor,
+		Qcp_Ap_B2 (Anchor       => Queue,
 			   Sinv_Flag    => False,
 			   Delta_D      => Lm.D,
 			   S1           => Lm.S1,
@@ -273,12 +275,13 @@ package body Luthien.Sonja3.Main is
    end Fsm;
    
    
-   procedure Start (Inp : in  Sonja3_In_Type; Outp : out Qcp.Qcp_Type) 
+   procedure Start (Inp : in  Sonja3_In_Type; 
+		    Queue : in Dll.Dllist_Access_Type) 
    is
       Fsm_State : State_Type := State1;
    begin
       --Fsm_State := State1;
-      Fsm (Inp => Inp, Fsm_State => Fsm_State);
+      Fsm (Inp => Inp, Fsm_State => Fsm_State, Queue => Queue);
    exception
       when others => null;
    end Start;
