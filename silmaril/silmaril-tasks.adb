@@ -2,7 +2,7 @@
 --                                                                          --
 --                            SILMARIL COMPONENTS                           --
 --                                                                          --
---                          S I L M A R I L . T A S K                       --
+--                        S I L M A R I L . T A S K S                       --
 --                                                                          --
 --                                  B o d y                                 --
 --                                                                          --

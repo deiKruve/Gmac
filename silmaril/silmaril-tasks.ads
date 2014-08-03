@@ -2,7 +2,7 @@
 --                                                                          --
 --                            SILMARIL COMPONENTS                           --
 --                                                                          --
---                          S I L M A R I L . T A S K                       --
+--                        S I L M A R I L . T A S K S                       --
 --                                                                          --
 --                                  S p e c                                 --
 --                                                                          --
@@ -30,7 +30,7 @@
 -- low priority threads.
 -- at the moment it implements the tasks to be called from a plc thread 
 -- when data input is needed. Like reading the parameter file of the program file.
--- and also a reportback task to the plc is implemented.
+--  a reportback task to the plc is implemented.
 --
 
 with System;
@@ -75,7 +75,7 @@ package Silmaril.tasks is
       -- to avoid a race condition.
    private
       pragma Priority(Load_Result_Thread_Priority); 
-      -- All callers must have priority 
+      -- Any callers must have priority 
       -- no greater than Thread_Priority
       Ld_Result : Ld_Result_Type; -- Shared data declaration
    end Load_Result;
