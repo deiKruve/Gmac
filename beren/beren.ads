@@ -30,7 +30,6 @@
 with Ada.Numerics.Generic_Real_Arrays;
 
 package Beren is
-   private
    ---------------------------
    -- for sonja and friends --
    ---------------------------
@@ -42,6 +41,10 @@ package Beren is
    subtype Mpsec2_Type is Long_Float; -- acc type
    subtype Mpsec3_Type is Long_Float; -- jerk type
    
+   type Axis_Type is (Linear, Rotary);
+   
+   private
+
    package Mv is new Ada.Numerics.Generic_Real_Arrays 
      (Real => Long_Float);
    

@@ -62,7 +62,7 @@ package body Beren.Objects is
    end Stamp;
    
    
-      ------------------
+   ------------------
    -- Handle_Dummy --
    ------------------
    procedure Handle_Dummy (Obj : in out Object; M : in out Obj_Msg'Class)
@@ -128,9 +128,50 @@ package body Beren.Objects is
 	 end if; -- falls through if none of these
       end if; -- falls through if none of these
    end Handle_Dummy;
-
    
    
+   procedure Init_Obj (Obj : Object; Name : String)
+   is   
+   begin
+      Obj.Used     := 0;
+      Obj.Name     := Obs.To_O_String (32, Name);
+      Obj.Stamp    := 0;
+      Obj.Dlink    := null;
+      Obj.Slink    := null;
+      Obj.Next     := null;
+      Obj.Ref      := 0;
+      Obj.Handle   := null;
+      New_Obj.Next := Object (Obj);
+      New_Obj      := Object (Obj);
+   end Init_Obj;
    
+   
+   procedure Broadcast (M : in out Obj_Msg'Class)
+   is
+      Frame : Object := Obj_Root.next;
+   begin
+      Frame := Obj_Root.next;
+      Stamp (M);
+      M.Res := Integer'First;
+      while Frame /= null and M.Res < 0  loop
+	 Frame.Handle (Frame, M);
+	 Frame := Frame.Next;
+      end loop;
+   end Broadcast;
+   
+   
+begin
+   Stamper := Integer'First;
+   
+   Obj_Root       := new Object_Desc;
+   Obj_Root.Used  := 0;
+   Obj_Root.Name  := Obs.To_O_String (32, "root object");
+   Obj_Root.Stamp := 0;
+   Obj_Root.Dlink := null;
+   Obj_Root.Slink := null;
+   Obj_Root.Next  := null;
+   Obj_Root.Ref   := 0;
+   Obj_Root.Handle := null;
+   New_Obj := Obj_Root;
    
 end Beren.Objects;

@@ -27,9 +27,11 @@
 ------------------------------------------------------------------------------
 --
 --
+with Ada.Text_IO.Text_Streams;
 with O_String;
+
 package Beren.Objects is
-   
+   pragma Elaborate_Body;
    
    
      -----------------------------------------------------
@@ -48,7 +50,7 @@ package Beren.Objects is
    type Object_Desc;
    
    type Object is access all Object_Desc'Class;
-   type Object_Desc is abstract tagged
+   type Object_Desc is tagged
       record
 	 Used    : Natural;
 	 Name    : Obj_name;
@@ -92,6 +94,7 @@ package Beren.Objects is
 
    type Obj_Msg is abstract tagged record
       Stamp  : T_stamp;
+      Res    : Integer;
       Dlink  : Object;
    end record;
    
@@ -109,12 +112,12 @@ package Beren.Objects is
    type Attr_Msg is new Obj_Msg with
      record
 	Id    : Op_Type;
-	Enum  : access procedure (Name :String);
+	Enum  : access procedure (Name :String; M : Attr_Msg);
 	Name  : Attr_Name;
-	Res   : Integer;
+	--Res   : Integer;
 	Class : Attr_Class;
 	I     : Integer;
-	X     : Float;
+	X     : Long_Float;
 	C     : Character;
 	B     : Boolean;
 	S     : O_String.O_String (1 .. 64);
@@ -129,7 +132,7 @@ package Beren.Objects is
 	Id    : Op_Type;
 	Enum  : access procedure (Name :String);
 	Name  : Obj_Name;
-	Res   : Integer;
+	--Res   : Integer;
 	Obj   : Object;
      end record;
    
@@ -156,10 +159,38 @@ package Beren.Objects is
       end record;
    
    ------------------------------------------------------------------------
+   -- File_Msg
+   ------------------------------------------------------------------------
+   type File_Op_Type is (Load, Store);
+   
+   type File_Msg is new Obj_Msg with
+      record
+	 Id   : File_Op_Type;
+	 --Pos  : Ada.Streams.Stream_Element_Offset;
+	 Ostr : Ada.Text_IO.Text_Streams.Stream_Access;
+      end record;
+   
+   ------------------------------------------------------------------------
    -- Time Stamp a message
    ------------------------------------------------------------------------
 
    procedure Stamp (Obj : in out Obj_Msg'Class);
    
+   ------------------------------------------------------------------------
+   -- make a new object
+   ------------------------------------------------------------------------
+   
+  -- procedure Init (Obj : in out object);
+   procedure Init_Obj (Obj : Object; Name : String);
+   
+   ------------------------------------------------------------------------
+   -- broadcast a Message
+   ------------------------------------------------------------------------
+    
+   procedure Broadcast (M : in out Obj_Msg'Class);
+   
+   
+private
+   Obj_Root : Object;
 
 end Beren.Objects;

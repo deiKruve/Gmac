@@ -29,8 +29,16 @@
 -- Template for a jog module
 --
 
+with Beren.Objects;
+
 generic
+   Name : String := "";
+   Xis : Axis_type;
 package Beren.Jog is
+   
+   ------------------------
+   -- dataflow interface --
+   ------------------------
    Jog_En           : access Boolean;
    Jog_Plus,
    Jog_Min          : access Boolean;
@@ -39,5 +47,20 @@ package Beren.Jog is
    Out_Cpos         : M_Type;
    Out_Sigma_Offset : M_Type;
    
+   -----------------------
+   -- Message interface --
+   -----------------------
+   Type Jog_Object_Type is new Beren.Objects.Object_Desc with
+   record
+     Jog_Rate : Mpsec_Type := 0.02; -- meters per second
+   end record;
+   type Jog_Object_P is access all Jog_Object_Type;
    
-end Beren.Jog;
+   -- message object --
+   Jogger : Jog_Object_P := new Jog_Object_Type;
+   
+   -- message handler --
+   procedure Handle (Obj : in out Beren.Objects.Object; 
+		     M   : in out Beren.Objects.Obj_Msg'Class);
+
+   end Beren.Jog;
