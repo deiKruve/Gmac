@@ -107,7 +107,7 @@ package Beren.Objects is
    -- Attr_Msg
    ------------------------------------------------------------------------
 
-   type Attr_Class is (Inval, Str, Int, Real, Char, Bool);   
+   type Attr_Class is (Inval, Str, Int, Real, Char, Bool); 
    
    type Attr_Msg is new Obj_Msg with
      record
