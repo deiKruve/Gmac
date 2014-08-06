@@ -37,10 +37,18 @@ generic
 package Beren.Jog is
    
    ----------------------------------
-   -- real time dataflow interface --
+   -- real time dataflow interface. 
+   -- note:
+   -- this works together with the 
+   -- scan sequence, to insure
+   -- the right dataflow through
+   -- the system.
    ----------------------------------
-   --Jog_En           : access Boolean;
-   -- enables the jog module
+   
+   E_stop           : access Boolean;
+   -- Set On An Emergency stop
+   -- after setting a disable message must be send after eom??
+   -- jogging might be reenabled after the Estop is resolved.
    Jog_Plus,
    -- initiates jog in pos dir
    -- depending on the mode it is a pulse or a duration action
@@ -49,15 +57,30 @@ package Beren.Jog is
    -- depending on the mode it is a pulse or a duration action
    In_Cpos          : access M_Type;
    -- command position in from up-stream (low level planner a.t.l.)
-   Out_Cpos         : M_Type;
+   Out_Cpos         : M_Type with Atomic;
    -- Command Position out to down-stream (motor drive a.t.l.)
    In_Rpos          : access M_Type;
    -- present position in from down-stream (motor drive a.t.l.)
-   Out_Rpos         : M_Type;
+   Out_Rpos         : M_Type with Atomic;
    -- present position out to up-stream (low level planner a.t.l.)
    
-   --In_Sigma_Offset  : access M_Type;
-   --Out_Sigma_Offset : M_Type;
+   ---------------------------------
+   -- low level parser interface  --
+   -- operates in the scan period --
+   ---------------------------------
+   Stretch_Move      : M_Type with Atomic;
+   -- stretch move requested from the llp, write this first
+   -- then handshake it.
+   Stretch_Move_Req  : Boolean with Atomic;
+   -- request the stretch move amount,
+   -- stretchers are only granted when in a 0 acc phase with not 0 speed.
+   Skipto_Stop_Quint : Boolean with Atomic;
+   -- request a normal stop, should always be granted
+   Llp_Hsk           : access Boolean;
+   -- becomes tru if granted, llp will reset it once Stretch_Move_Req
+   -- and Skipto_Stop_Quint are taken away.
+   -- When not granted in the next scan, a sonja plannner move 
+   -- must be requested.
    
    
    -----------------------
@@ -81,7 +104,8 @@ package Beren.Jog is
    -- . . Jog_Rate
    -- . . 
    -- . operation parameters
-   -- . . Enable : enables the jog module
+   -- . . Enable : enables the jog module,
+   --              disables only after eom, in order to save the offset
    -- . . Scale : from the jog scaling knob, in % of Jog_Rate
    -- . . Puls_Mod (0, 0.01, 0.1, 1, 10) mm / pulse (0 is duration mode)
    -- . . Offset: holds the present offset accumulated by the jog module
@@ -89,11 +113,11 @@ package Beren.Jog is
    -- . . 
    Type Jog_Object_Type is new Beren.Objects.Object_Desc with
    record
-      Jog_Rate : Mpsec_Type := 0.02; -- meters per second
-      Enable   : Boolean    := False;
-      Scale    : Natural    := 100;  -- 100 %
-      Puls_Mod : Beren.Jogobj.Pulse_Mode_Enumeration_Type := Beren.Jogobj.Off;
-      Offset   : M_Type     := 0.0;
+      Jog_Rate : Mpsec_Type with Atomic; -- meters per second
+      Enable   : Boolean with Atomic;
+      Scale    : Natural with Atomic;  -- 100 %
+      Puls_Mod : Beren.Jogobj.Pulse_Mode_Enumeration_Type with Atomic;
+      Offset   : M_Type  with Atomic;
       --Offs_Rst : Boolean    := False;
    end record;
    type Jog_Object_P is access all Jog_Object_Type;
@@ -104,6 +128,9 @@ package Beren.Jog is
    -- message handler --
    procedure Handle (Obj : in out Beren.Objects.Object; 
 		     M   : in out Beren.Objects.Obj_Msg'Class);
+   
+   -- must be scanned every cnc scan period;
+   procedure Scan (Scan_Period : Duration);
    
 
    end Beren.Jog;

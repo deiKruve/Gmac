@@ -37,6 +37,20 @@ package body Beren.Jog is
    package Bjo renames Beren.Jogobj;
    package Math renames Ada.Numerics;
    
+   --------------------
+   -- Scan variables --
+   --------------------
+   Lj_Plus,
+   Lj_Min           : Boolean := False;
+   Jp_Plus,
+   Jp_Min           : Boolean := False;
+   Ljog_Enable, 
+   P_Jog_Enable     : Boolean := False; 
+   C_Pos_Before_Jog : M_Type := 0.0;
+   
+   Req_Move : M_Type with Atomic;
+   -- to send to sonja on jog
+   
    -------------------------------------
    -- to radian or not to radian . .  --
    -------------------------------------
@@ -111,6 +125,14 @@ package body Beren.Jog is
 	      M.Res   := 0;
 	   elsif Obs.Eq (M.Name, "Puls_Mod") and then M.Class = Bjo.Enum then
 	      Jog_Object_Type (Obj).Puls_Mod := M.E;
+	      case Jogger.Puls_Mod is
+		 when Bjo.Off       => Req_Move := 10.0; -- all in meters
+		 when Bjo.Hundredth => Req_Move := 0.000_01;
+		 when Bjo.Tenth     => Req_Move := 0.000_1;
+		 when Bjo.Unit      => Req_Move := 0.001;
+		 when Bjo.Ten       => Req_Move := 0.010;
+		 --when others => null;
+	      end case;
 	      M.Res   := 0;
 	   elsif Obs.Eq (M.Name, "Offset") and then M.Class = Bjo.Real then
 	      Jog_Object_Type (Obj).Offset := M.X;
@@ -188,8 +210,80 @@ package body Beren.Jog is
    end Handle;
    
    
-			   
+   -------------------------------------------
+   -- Scan once per cnc scan period         --
+   -- this is executed in a priority thread --
+   -------------------------------------------
+   procedure Scan (Scan_Period : Duration)
+   is
+      JogPlus : Boolean := Jog_Plus.all;
+      JogMin  : Boolean := Jog_Min.all;
+      use type Bjo.Pulse_Mode_Enumeration_Type;
+   begin
+      -- llp handshaking
+      if Skipto_Stop_Quint then
+	 if not Llp_Hsk.all then
+	    -- ERROR!!!!
+	    null;
+	 else
+	    Skipto_Stop_Quint := False;
+	 end if;
+      elsif Stretch_Move_Req then
+	 if not Llp_Hsk.all then
+	    -- request from sonja (Stretch_Move)
+	    null;
+	 else -- stretch was granted.
+	    Skipto_Stop_Quint := False;
+	 end if;
+      end if;
+      
+      -- the buttons
+      if Jogger.Enable and not E_Stop Then
+	 if not Ljog_Enable then
+	    C_Pos_Before_jog := In_Cpos.all;
+	    Ljog_Enable      := True;
+	 end if;
+	 Jp_Plus := JogPlus xor Lj_Plus;
+	 Jp_Min  := JogMin  xor Lj_Min;
+	 Lj_Plus := JogPlus;
+	 Lj_Min  := JogMin;
+	 if Jogger.Puls_Mod = Bjo.Off then
+	    if Jp_Plus and  JogPlus then
+	       -- sonja (req_move); can be a message
+	       null;
+	    elsif Jp_Min and JogMin then
+	       -- sonja (- req_move);
+	       null;
+	    elsif (Jp_Plus and not JogPlus) or (Jp_Min and not JogMin) then
+	       Skipto_Stop_Quint := True; -- request to the llp.
+	    end if;
+	 else
+	    if Jp_Plus and JogPlus then -- note that this request can be denied.
+	       Stretch_Move     := Req_Move;
+	       Stretch_Move_Req := True;
+	    elsif Jp_Min and JogMin then
+	       Stretch_Move     := - Req_Move;
+	       Stretch_Move_Req := True;
+	    end if;
+	 end if;
+
+      else
+	 if Ljog_Enable and not E_Stop then -- save offset on disabling
+	    Jogger.Offset := Jogger.Offset + (In_Cpos.all - C_Pos_Before_Jog);
+	    Ljog_Enable := False;
+	 end if;
+	 Out_Cpos := In_Cpos.all + Jogger.Offset;
+	 Out_Rpos := In_Rpos.all - Jogger.Offset;
+      end if;
+   end Scan;
+   
 begin
    Bob.Init_Obj (Bob.Object (Jogger), Name);
    Jogger.Handle := Handle'Access;
+   Jogger.Jog_Rate := 0.02; -- meters per second
+   Jogger.Enable := False;
+   Jogger.Scale := 100; -- %
+   Jogger.Puls_Mod := Bjo.Off;
+   Jogger.Offset := 0.0; --- meters
+   Req_Move := 0.0; -- meters
 end Beren.Jog;
