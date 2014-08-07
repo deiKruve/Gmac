@@ -34,6 +34,11 @@ with Beren.Jogobj;
 generic
    Name : String := "";
    Xis : Axis_type;
+   E_Stop_Init   : Boolean := False;
+   Jog_Plus_Init : Boolean := False;
+   Jog_Min_Init  : Boolean := False;
+   In_Cpos_Init  : M_Type := 0.0;
+   In_Rpos_Init  : M_Type := 0.0;
 package Beren.Jog is
    
    ----------------------------------
@@ -57,11 +62,11 @@ package Beren.Jog is
    -- depending on the mode it is a pulse or a duration action
    In_Cpos          : access M_Type;
    -- command position in from up-stream (low level planner a.t.l.)
-   Out_Cpos         : M_Type with Atomic;
+   Out_Cpos         : aliased M_Type;
    -- Command Position out to down-stream (motor drive a.t.l.)
    In_Rpos          : access M_Type;
    -- present position in from down-stream (motor drive a.t.l.)
-   Out_Rpos         : M_Type with Atomic;
+   Out_Rpos         : aliased M_Type;
    -- present position out to up-stream (low level planner a.t.l.)
    
    ---------------------------------

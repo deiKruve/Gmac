@@ -166,6 +166,35 @@ package body Beren.Jog is
 	    M.X     := Jogger.all.Offset;
 	    M.Enum (Name, M);
 	    
+	    M.Name  := Obs.To_O_String (32, "-> E_stop");
+	    M.Class := Bjo.Bool;
+	    M.B := E_Stop.all;
+	    M.Enum (Name, M);
+	    M.Name  := Obs.To_O_String (32, "-> Jog_Plus");
+	    M.Class := Bjo.Bool;
+	    M.B := Jog_Plus.all;
+	    M.Enum (Name, M);
+	    M.Name  := Obs.To_O_String (32, "-> Jog_Min");
+	    M.Class := Bjo.Bool;
+	    M.B := Jog_Min.all;
+	    M.Enum (Name, M);
+	    M.Name  := Obs.To_O_String (32, "-> In_Cpos");
+	    M.Class := Bjo.Real;
+	    M.X     := In_Cpos.all;
+	    M.Enum (Name, M);
+	    M.Name  := Obs.To_O_String (32, "-> In_Rpos");
+	    M.Class := Bjo.Real;
+	    M.X     := In_Rpos.all;
+	    M.Enum (Name, M);
+	    M.Name  := Obs.To_O_String (32, "<- Out_Cpos");
+	    M.Class := Bjo.Real;
+	    M.X     := Out_Cpos;
+	    M.Enum (Name, M);
+	    M.Name  := Obs.To_O_String (32, "<- Out_Rpos");
+	    M.Class := Bjo.Real;
+	    M.X     := Out_Rpos;
+	    M.Enum (Name, M);
+	    
 	 end if;
       end Handle_Attr_M;
       -------------
@@ -278,13 +307,27 @@ package body Beren.Jog is
       -- reset flqags on Estop!
    end Scan;
    
+   -- input defaults
+   E_Stop_Xf   : aliased Boolean := E_Stop_Init;
+   Jog_Plus_Xf : aliased Boolean := Jog_Plus_Init;
+   Jog_Min_Xf  : aliased Boolean := Jog_Min_Init;
+   In_Cpos_Xf  : aliased M_Type  := In_Cpos_Init;
+   In_Rpos_Xf  : aliased M_Type  := In_Rpos_Init;
+   
 begin
    Bob.Init_Obj (Bob.Object (Jogger), Name);
-   Jogger.Handle := Handle'Access;
+   Jogger.Handle   := Handle'Access;
    Jogger.Jog_Rate := 0.02; -- meters per second
-   Jogger.Enable := False;
-   Jogger.Scale := 100; -- %
+   Jogger.Enable   := False;
+   Jogger.Scale    := 100; -- %
    Jogger.Puls_Mod := Bjo.Off;
-   Jogger.Offset := 0.0; --- meters
-   Req_Move := 0.0; -- meters
+   Jogger.Offset   := 0.0; --- meters
+   Req_Move        := 0.0; -- meters
+   
+   -- connect inputs to the defaults
+   E_Stop   := E_Stop_Xf'Access;
+   Jog_Plus := Jog_Plus_Xf'Access;
+   Jog_Min  := Jog_Min_Xf'Access;
+   In_Cpos  := In_Cpos_Xf'Access;
+   In_Rpos  := In_Rpos_Xf'Access;
 end Beren.Jog;

@@ -128,7 +128,7 @@ package body Beren.Hw is
 	   elsif Obs.Eq (M.Name, "Puls_Mod") and then M.Class = Bjo.Enum then
 	      Jog_Object_Type (Obj).Puls_Mod := M.E;
 	      case Jogger.Puls_Mod is
-		 when Bjo.Off       => Req_Move := 10.0; -- all in meters
+		 when Bjo.Off       => Req_Move := 1.0; -- all in meters
 		 when Bjo.Hundredth => Req_Move := 0.000_01;
 		 when Bjo.Tenth     => Req_Move := 0.000_1;
 		 when Bjo.Unit      => Req_Move := 0.001;
@@ -167,7 +167,30 @@ package body Beren.Hw is
 	    M.Class := Bjo.Real;
 	    M.X     := Jogger.all.Offset;
 	    M.Enum (Name, M);
-	    
+	    M.Name  := Obs.To_O_String (32, "-> E_stop");
+	    M.Class := Bjo.Bool;
+	    M.B := E_Stop.all;
+	    M.Enum (Name, M);
+	    M.Name  := Obs.To_O_String (32, "-> In_Hwpos");
+	    M.Class := Bjo.Real;
+	    M.X     := In_Hwpos.all;
+	    M.Enum (Name, M);
+	    M.Name  := Obs.To_O_String (32, "-> In_Cpos");
+	    M.Class := Bjo.Real;
+	    M.X     := In_Cpos.all;
+	    M.Enum (Name, M);
+	    M.Name  := Obs.To_O_String (32, "-> In_Rpos");
+	    M.Class := Bjo.Real;
+	    M.X     := In_Rpos.all;
+	    M.Enum (Name, M);
+	    M.Name  := Obs.To_O_String (32, "<- Out_Cpos");
+	    M.Class := Bjo.Real;
+	    M.X     := Out_Cpos;
+	    M.Enum (Name, M);
+	    M.Name  := Obs.To_O_String (32, "<- Out_Rpos");
+	    M.Class := Bjo.Real;
+	    M.X     := Out_Rpos;
+	    M.Enum (Name, M);
 	 end if;
       end Handle_Attr_M;
       -------------
@@ -216,7 +239,7 @@ package body Beren.Hw is
    -- Scan once per cnc scan period         --
    -- this is executed in a priority thread --
    -------------------------------------------
-   procedure Scan (Scan_Period : Duration)
+   procedure Down_Scan
    is
       --JogPlus : Boolean := Jog_Plus.all;
       --JogMin  : Boolean := Jog_Min.all;
@@ -246,12 +269,26 @@ package body Beren.Hw is
 	    Jogger.Offset := Jogger.Offset + (In_Cpos.all - C_Pos_Before_Jog);
 	    Ljog_Enable := False;
 	 end if;
-	 Out_Cpos := In_Cpos.all + Jogger.Offset;
-	 Out_Rpos := In_Rpos.all - Jogger.Offset;
+	 --Out_Cpos := In_Cpos.all + Jogger.Offset;
+	 --Out_Rpos := In_Rpos.all - Jogger.Offset;
       end if;
+      Out_Cpos := In_Cpos.all + Jogger.Offset; -- the command data
       -- reset flqags on Estop!
       null;
-   end Scan;
+   end Down_Scan;
+   
+   
+   procedure Up_Scan
+   is
+   begin
+      Out_Rpos := In_Rpos.all - Jogger.Offset; -- the feedback data
+   end Up_Scan;
+   
+   -- input defaults
+   E_Stop_Xf   : aliased Boolean := E_Stop_Init;
+   In_Hwpos_Xf : aliased M_Type  := In_Hwpos_Init;
+   In_Cpos_Xf  : aliased M_Type  := In_Cpos_Init;
+   In_Rpos_Xf  : aliased M_Type  := In_Rpos_Init;
    
 begin
    Bob.Init_Obj (Bob.Object (Jogger), Name);
@@ -259,8 +296,14 @@ begin
    Jogger.Jog_Rate := 0.02; -- meters per second
    Jogger.Enable := False;
    Jogger.Scale := 100; -- %
-   Jogger.Puls_Mod := Bjo.Off;
+   Jogger.Puls_Mod := Bjo.tenth;
    Jogger.Offset := 0.0; --- meters
    Lhw_Pos  := 0.0; -- pulses
    Req_Move := 0.0; -- meters
+   
+   -- connect inputs to the defaults
+   E_Stop   := E_Stop_Xf'Access;
+   In_Hwpos := In_Hwpos_Xf'Access;
+   In_Cpos  := In_Cpos_Xf'Access;
+   In_Rpos  := In_Rpos_Xf'Access;
 end Beren.Hw;

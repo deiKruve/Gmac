@@ -34,6 +34,10 @@ with Beren.Jogobj;
 generic
    Name : String := "";
    Xis : Axis_type;
+   E_Stop_Init   : Boolean := False;
+   In_Hwpos_Init : M_Type := 0.0;
+   In_Cpos_Init  : M_Type := 0.0;
+   In_Rpos_Init  : M_Type := 0.0;
 package Beren.Hw is
    
    ----------------------------------
@@ -53,11 +57,11 @@ package Beren.Hw is
    -- handwheel position input.
    In_Cpos          : access M_Type;
    -- command position in from up-stream (low level planner a.t.l.)
-   Out_Cpos         : M_Type with Atomic;
+   Out_Cpos         : aliased M_Type;
    -- Command Position out to down-stream (motor drive a.t.l.)
    In_Rpos          : access M_Type;
    -- present position in from down-stream (motor drive a.t.l.)
-   Out_Rpos         : M_Type with Atomic;
+   Out_Rpos         : aliased M_Type;
    -- present position out to up-stream (low level planner a.t.l.)
    
    ---------------------------------
@@ -101,7 +105,8 @@ package Beren.Hw is
    -- . . Enable : enables the jog module,
    --              disables only after eom, in order to save the offset
    -- . . Scale : from the jog scaling knob, in % of Jog_Rate
-   -- . . Puls_Mod (0, 0.01, 0.1, 1, 10) mm / pulse (0 is duration mode)
+   -- . . Puls_Mod (0, 0.01, 0.1, 1, 10) mm / pulse (0 is immediate mode
+   --                                          the multiplier will be 1)
    -- . . Offset: holds the present offset accumulated by the jog module
    -- . . Offs_Rst: pulse: resets the Offset Attribute
    -- . . 
@@ -125,7 +130,13 @@ package Beren.Hw is
 		     M   : in out Beren.Objects.Obj_Msg'Class);
    
    -- must be scanned every cnc scan period;
-   procedure Scan (Scan_Period : Duration);
+   -- with the flow of the data from llp to motors
+   -- so the data travels in 1 scan period to the motor drive
+   procedure Down_Scan;
    
-
+   -- must be scanned every cnc scan period;
+   -- with the flow of the data from motors to llp 
+   -- so the encoder data travels in 1 scan period to the llp.
+   procedure Up_Scan;
+   
 end Beren.Hw;
