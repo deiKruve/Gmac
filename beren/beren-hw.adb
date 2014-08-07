@@ -2,7 +2,7 @@
 --                                                                          --
 --                             BEREN COMPONENTS                             --
 --                                                                          --
---                             B E R E N . J O G                            --
+--                              B E R E N . H W                             --
 --                                                                          --
 --                                  B o d y                                 --
 --                                                                          --
@@ -26,12 +26,12 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --
--- Template for a jog module
+-- Template for a hand wheel module
 --
 with Ada.Numerics;
 with O_String;
 
-package body Beren.Jog is
+package body Beren.Hw is
    package Obs renames O_String;
    package Bob renames Beren.Objects;
    package Bjo renames Beren.Jogobj;
@@ -40,15 +40,17 @@ package body Beren.Jog is
    --------------------
    -- Scan variables --
    --------------------
-   Lj_Plus,
-   Lj_Min           : Boolean := False;
-   Jp_Plus,
-   Jp_Min           : Boolean := False;
+   --Lj_Plus,
+   --Lj_Min           : Boolean := False;
+   --Jp_Plus,
+   --Jp_Min           : Boolean := False;
+   Lhw_Pos          : Long_Float with Atomic; -- in pulses, to be multiplied with 
+                                              -- Pulse_Mod factor
    Ljog_Enable, 
    P_Jog_Enable     : Boolean := False; 
    C_Pos_Before_Jog : M_Type := 0.0;
    
-   Req_Move : M_Type with Atomic;
+   Req_Move         : M_Type with Atomic;
    -- to send to sonja on jog
    
    -------------------------------------
@@ -216,19 +218,12 @@ package body Beren.Jog is
    -------------------------------------------
    procedure Scan (Scan_Period : Duration)
    is
-      JogPlus : Boolean := Jog_Plus.all;
-      JogMin  : Boolean := Jog_Min.all;
+      --JogPlus : Boolean := Jog_Plus.all;
+      --JogMin  : Boolean := Jog_Min.all;
       use type Bjo.Pulse_Mode_Enumeration_Type;
    begin
       -- llp handshaking
-      if Skipto_Stop_Quint then
-	 if not Llp_Hsk.all then
-	    -- ERROR!!!!
-	    null;
-	 else
-	    Skipto_Stop_Quint := False;
-	 end if;
-      elsif Stretch_Move_Req then
+      if Stretch_Move_Req then
 	 if not Llp_Hsk.all then
 	    -- request from sonja (Stretch_Move)
 	    null;
@@ -243,30 +238,9 @@ package body Beren.Jog is
 	    C_Pos_Before_jog := In_Cpos.all;
 	    Ljog_Enable      := True;
 	 end if;
-	 Jp_Plus := JogPlus xor Lj_Plus;
-	 Jp_Min  := JogMin  xor Lj_Min;
-	 Lj_Plus := JogPlus;
-	 Lj_Min  := JogMin;
-	 if Jogger.Puls_Mod = Bjo.Off then
-	    if Jp_Plus and  JogPlus then
-	       -- sonja (req_move); can be a message
-	       null;
-	    elsif Jp_Min and JogMin then
-	       -- sonja (- req_move);
-	       null;
-	    elsif (Jp_Plus and not JogPlus) or (Jp_Min and not JogMin) then
-	       Skipto_Stop_Quint := True; -- request to the llp.
-	    end if;
-	 else
-	    if Jp_Plus and JogPlus then -- note that this request can be denied.
-	       Stretch_Move     := Req_Move;
-	       Stretch_Move_Req := True;
-	    elsif Jp_Min and JogMin then
-	       Stretch_Move     := - Req_Move;
-	       Stretch_Move_Req := True;
-	    end if;
-	 end if;
-
+	 Stretch_Move := (In_HwPos.all - Lhw_Pos) * Req_Move;
+	 Lhw_Pos := In_HwPos.all;
+	 Stretch_Move_Req := True;
       else
 	 if Ljog_Enable and not E_Stop.all then -- save offset on disabling
 	    Jogger.Offset := Jogger.Offset + (In_Cpos.all - C_Pos_Before_Jog);
@@ -276,6 +250,7 @@ package body Beren.Jog is
 	 Out_Rpos := In_Rpos.all - Jogger.Offset;
       end if;
       -- reset flqags on Estop!
+      null;
    end Scan;
    
 begin
@@ -286,5 +261,6 @@ begin
    Jogger.Scale := 100; -- %
    Jogger.Puls_Mod := Bjo.Off;
    Jogger.Offset := 0.0; --- meters
+   Lhw_Pos  := 0.0; -- pulses
    Req_Move := 0.0; -- meters
-end Beren.Jog;
+end Beren.Hw;
