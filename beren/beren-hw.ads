@@ -30,6 +30,8 @@
 --
 
 with Beren.Objects;
+with Beren.Thread;
+
 with Beren.Jogobj;
 generic
    Name : String := "";
@@ -139,4 +141,11 @@ package Beren.Hw is
    -- so the encoder data travels in 1 scan period to the llp.
    procedure Up_Scan;
    
+private
+   ----------------------------
+   -- beren.thread interface --
+   ----------------------------
+   Ds : Beren.Thread.Scan_Proc_P_Type := Down_Scan'Access;
+   Us : Beren.Thread.Scan_Proc_P_Type := Up_Scan'Access;
+
 end Beren.Hw;

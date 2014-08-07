@@ -35,6 +35,7 @@ package body Beren.Hw is
    package Obs renames O_String;
    package Bob renames Beren.Objects;
    package Bjo renames Beren.Jogobj;
+   package Bth renames Beren.Thread;
    package Math renames Ada.Numerics;
    
    --------------------
@@ -306,4 +307,8 @@ begin
    In_Hwpos := In_Hwpos_Xf'Access;
    In_Cpos  := In_Cpos_Xf'Access;
    In_Rpos  := In_Rpos_Xf'Access;
+   
+   -- connect the scan routines in the scan thread.
+   Bth.Insert_Down_Scan (Ds);
+   Bth.Insert_Up_Scan (Us);
 end Beren.Hw;

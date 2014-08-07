@@ -35,6 +35,7 @@ package body Beren.Jog is
    package Obs renames O_String;
    package Bob renames Beren.Objects;
    package Bjo renames Beren.Jogobj;
+   package Bth renames Beren.Thread;
    package Math renames Ada.Numerics;
    
    --------------------
@@ -243,7 +244,7 @@ package body Beren.Jog is
    -- Scan once per cnc scan period         --
    -- this is executed in a priority thread --
    -------------------------------------------
-   procedure Scan (Scan_Period : Duration)
+   procedure Down_Scan
    is
       JogPlus : Boolean := Jog_Plus.all;
       JogMin  : Boolean := Jog_Min.all;
@@ -302,10 +303,15 @@ package body Beren.Jog is
 	    Ljog_Enable := False;
 	 end if;
 	 Out_Cpos := In_Cpos.all + Jogger.Offset;
-	 Out_Rpos := In_Rpos.all - Jogger.Offset;
       end if;
       -- reset flqags on Estop!
-   end Scan;
+   end Down_Scan;
+   
+   procedure Up_Scan
+   is
+   begin
+      Out_Rpos := In_Rpos.all - Jogger.Offset; -- the feedback data
+   end Up_Scan;
    
    -- input defaults
    E_Stop_Xf   : aliased Boolean := E_Stop_Init;
@@ -330,4 +336,8 @@ begin
    Jog_Min  := Jog_Min_Xf'Access;
    In_Cpos  := In_Cpos_Xf'Access;
    In_Rpos  := In_Rpos_Xf'Access;
+   
+   -- connect the scan routines in the scan thread.
+   Bth.Insert_Down_Scan (Ds);
+   Bth.Insert_Up_Scan (Us);
 end Beren.Jog;

@@ -31,6 +31,8 @@
 
 with Beren.Objects;
 with Beren.Jogobj;
+with Beren.Thread;
+
 generic
    Name : String := "";
    Xis : Axis_type;
@@ -135,7 +137,20 @@ package Beren.Jog is
 		     M   : in out Beren.Objects.Obj_Msg'Class);
    
    -- must be scanned every cnc scan period;
-   procedure Scan (Scan_Period : Duration);
+   -- with the flow of the data from llp to motors
+   -- so the data travels in 1 scan period to the motor drive
+   procedure Down_Scan;
    
-
-   end Beren.Jog;
+   -- must be scanned every cnc scan period;
+   -- with the flow of the data from motors to llp 
+   -- so the encoder data travels in 1 scan period to the llp.
+   procedure Up_Scan;
+   
+private
+   ----------------------------
+   -- beren.thread interface --
+   ----------------------------
+   Ds : Beren.Thread.Scan_Proc_P_Type := Down_Scan'Access;
+   Us : Beren.Thread.Scan_Proc_P_Type := Up_Scan'Access;
+   
+end Beren.Jog;
