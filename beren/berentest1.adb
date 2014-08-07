@@ -39,7 +39,9 @@ package body Berentest1 is
       end if;
    end Enumerate_Attr;
    
+
 begin
+
    --connect the hi-speed data flow interface
    X_Jog.In_Cpos := X_Hw.Out_Cpos'Access;
    X_Hw.In_Rpos  := X_Jog.Out_Rpos'Access;
