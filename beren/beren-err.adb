@@ -48,9 +48,11 @@ package body Beren.Err is
    procedure Report_Error (Err_Str : String)
    is
    begin
-      M_Report_Error (Err_Str);
+      --M_Report_Error (Err_Str);
       Gct.Trace (Stream1, Err_Str);
    end Report_Error;
    pragma Inline (Report_Error);
-
+   
+begin
+   Gct.Parse_Config_File;   --  parses default ./.gnatdebug
 end Beren.Err;

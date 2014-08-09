@@ -113,6 +113,8 @@ package body Beren.Jog is
 	      M.X     := Jog_Object_Type (Obj).Offset;
 	      M.Res := 0;
 	   else
+	      Ber.Report_Error 
+		("get param: " & Name & "no such attribute");
 	      M.Res := 1; -- attr. name not known
 	   end if;
 	 elsif M.Id = Bob.Set then
@@ -144,6 +146,8 @@ package body Beren.Jog is
 	      Jog_Object_Type (Obj).Offset := 0.0;
 	      M.Res := 0;
 	   else
+	      Ber.Report_Error 
+		("set param: " & Name & "no such attribute");
 	      M.Res := 1; -- attr. name not known
 	   end if;
 	   
@@ -155,7 +159,6 @@ package body Beren.Jog is
 		  J, K : Integer := 0;
 		  Tmp_Val : Long_Float := 0.0;
 	       begin
-		  --Tio.Put_Line ("we are here 1");
 		  for I in M.S'Range loop
 		     J := I;
 		     exit when M.S (I) = '.';
@@ -185,13 +188,17 @@ package body Beren.Jog is
 			   Jogger.Jog_Rate := Tmp_Val / 60.0;
 			   M.Res := 0; -- success
 			elsif Xis = Rotary and then 
-			  String (M.S) (J .. J + 4) = "deg/min" then
+			  String (M.S) (J .. J + 6) = "deg/min" then
 			   Jogger.Jog_Rate := To_Radians (Tmp_Val / 60.0);
 			   M.Res := 0; -- success
 			else
+			   Ber.Report_Error 
+			     ("set param: " & Name & ".Jog_Rate -> wrong units.");
 			   M.Res := 2; -- units wrong
 			end if;
 		     else
+			Ber.Report_Error 
+			     ("set param: " & Name & "no such attribute");
 			M.Res := 1; -- no such attribute
 		     end if;
 		  else
@@ -199,6 +206,9 @@ package body Beren.Jog is
 		  end if;
 	       exception
 		  when others =>
+		     Ber.Report_Error 
+		       ("set param: " & Name & 
+			  ".Jog_Rate -> expected a float value.");
 		     M.Res := 3; -- exception in conversion
 	       end;
 	    end if;

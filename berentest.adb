@@ -51,6 +51,12 @@ begin
    Bob.Broadcast (M);
    Tio.Put_Line (Integer'Image (M.Res));
    
+   M.Id := Bob.Setpar;
+   M.Class := Bjo.Str;
+   M.S := Obs.To_O_String (64, "A_Jog.Jog_Rate = 5.0 deg/min");
+   Bob.Broadcast (M);
+   Tio.Put_Line (Integer'Image (M.Res));
+   
    -- file message to see we loaded properly.
    -- writes to std out
    Mf.Id := Bob.Store;
