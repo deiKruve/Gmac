@@ -112,12 +112,8 @@ package body Beren.Jog is
 	      M.Class := Bjo.Real;
 	      M.X     := Jog_Object_Type (Obj).Offset;
 	      M.Res := 0;
-	   --  elsif Obs.Eq (M.Name, "Offs_Rst" then
-	   --     M.Class := Bjo.Boolean;
-	   --     M.B := Jog_Object_Type (Obj).Offs_Rst;
-	   --     M.Res := 0;
 	   else
-	      M.Res := 1;
+	      M.Res := 1; -- attr. name not known
 	   end if;
 	 elsif M.Id = Bob.Set then
 	   if Obs.Eq (M.Name, "Jog_Rate") and then M.Class = Bjo.Real then
@@ -148,8 +144,65 @@ package body Beren.Jog is
 	      Jog_Object_Type (Obj).Offset := 0.0;
 	      M.Res := 0;
 	   else
-	      M.Res := 1;
+	      M.Res := 1; -- attr. name not known
 	   end if;
+	   
+	 elsif M.Id = Bob.Setpar then
+	    -- dissect the string 
+	    --   <Name> ".Jog_Rate = " <floatValue> [" m/min"|" deg/min"] 
+	    if M.Class = Bjo.Str then
+	       declare
+		  J, K : Integer := 0;
+		  Tmp_Val : Long_Float := 0.0;
+	       begin
+		  --Tio.Put_Line ("we are here 1");
+		  for I in M.S'Range loop
+		     J := I;
+		     exit when M.S (I) = '.';
+		     exit when M.S (I) /= Name (I);
+		  end loop;
+		  
+		  if M.S (J) = '.' then -- module name found
+		     for I in J + 1 .. M.S'Length loop
+			exit when M.S (I) in ' ' | '=';
+			K := I;
+		     end loop;
+		     if String (M.S) (J + 1 .. K) = "Jog_Rate" then
+			K := K + 1;
+			while M.S (K) in ' ' | '=' loop
+			   K := K + 1;
+			end loop;
+			J := K;
+			while M.S (J) in '0' .. '9' | '.' | '-' | '+' loop
+			   J := J + 1;
+			end loop;
+			Tmp_Val := Long_Float'Value (String (M.S) (K .. J - 1));
+			while M.S (J) = ' ' loop
+			   J := J + 1;
+			end loop;
+			if Xis = Linear and then 
+			  String (M.S) (J .. J + 4) = "m/min" then
+			   Jogger.Jog_Rate := Tmp_Val / 60.0;
+			   M.Res := 0; -- success
+			elsif Xis = Rotary and then 
+			  String (M.S) (J .. J + 4) = "deg/min" then
+			   Jogger.Jog_Rate := To_Radians (Tmp_Val / 60.0);
+			   M.Res := 0; -- success
+			else
+			   M.Res := 2; -- units wrong
+			end if;
+		     else
+			M.Res := 1; -- no such attribute
+		     end if;
+		  else
+		     M.Res := -4; -- name not found, this is not an error
+		  end if;
+	       exception
+		  when others =>
+		     M.Res := 3; -- exception in conversion
+	       end;
+	    end if;
+
 	 elsif M.Id = Bob.Enum then
 	    M.Name  := Obs.To_O_String (32, "Jog_Rate");
 	    M.Class := Bjo.Real;
@@ -241,35 +294,36 @@ package body Beren.Jog is
 	    case Token is
 	       when Gts.Float =>
 		  Ljograte := Mpsec_Type'Value (Gts.String_Value);
+		  Token := Gts.Next_Token;
+		  loop
+		     exit when Token /= Gts.Id;
+		     if Gts.String_Value = "inch" then
+			exit when Xis /= Linear;
+			Ljograte := Ljograte * 0.0254 / 60.0;
+		     elsif Gts.String_Value = "m" then
+			exit when Xis /= Linear;
+			Ljograte := Ljograte / 60.0;
+		     elsif Gts.String_Value = "deg" then
+			exit when Xis /= Rotary;
+			Ljograte := To_Radians (Ljograte) / 60.0;
+		     elsif Gts.String_Value = "rad" then
+			exit when Xis /= Rotary;
+			Ljograte := Ljograte / 60.0;
+		     else exit;
+		     end if;
+		     Token := Gts.Next_Token;
+		     exit when Token /= Gts.Fwd_Slash;
+		     Token := Gts.Next_Token;
+		     exit when Token /= Gts.Id;
+		     exit when Gts.String_Value /= "min";
+		     Done := True;
+		     exit;
+		  end loop;
 	       when others    =>
 		  Ber.Report_Error 
 		    ("gmac.text: " & Name & ".Jog_Rate -> expected a float value.");
 	    end case;
-	    Token := Gts.Next_Token;
-	    loop
-	       exit when Token /= Gts.Id;
-	       if Gts.String_Value = "inch" then
-		  exit when Xis /= Linear;
-		  Ljograte := Ljograte * 0.0254 / 60.0;
-	       elsif Gts.String_Value = "m" then
-		  exit when Xis /= Linear;
-		  Ljograte := Ljograte / 60.0;
-	       elsif Gts.String_Value = "deg" then
-		  exit when Xis /= Rotary;
-		  Ljograte := To_Radians (Ljograte) / 60.0;
-	       elsif Gts.String_Value = "rad" then
-		  exit when Xis /= Rotary;
-		  Ljograte := Ljograte / 60.0;
-	       else exit;
-	       end if;
-	       Token := Gts.Next_Token;
-	       exit when Token /= Gts.Fwd_Slash;
-	       Token := Gts.Next_Token;
-	       exit when Token /= Gts.Id;
-	       exit when Gts.String_Value /= "min";
-	       Done := True;
-	       exit;
-	    end loop;
+
 	    if not Done then
 	       Ljograte := 0.0;
 	       if Xis = Linear then
@@ -281,8 +335,11 @@ package body Beren.Jog is
 		    ("gmac.text: " & Name & 
 		       ".Jog_Rate -> expected deg/min or rad/min.");
 	       end if;
+	       M.Res := 1; -- error - not Done
+	    else
+	       Jogger.Jog_Rate := Ljograte;
+	       M.Res := 0;
 	    end if;
-	      Jogger.Jog_Rate := Ljograte;
 	 end if;	 
       end Handle_File_M;
       ------------------

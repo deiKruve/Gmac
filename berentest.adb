@@ -27,22 +27,33 @@ begin
    -- print out all attributes
    M.Id := Bob.Enum;
    M.Enum := Berentest1.Enumerate_Attr'access;
-   Bob.Stamp (M);
    Bob.Broadcast (M);
    
-   -- test file message
+   -- test f-- writes to std outile message
+   
    Mf.Id := Bob.Store;
    Mf.Ostr := Ostr;
-   Bob.Stamp (Mf);
    Bob.Broadcast (Mf);
    
+   -- loads from file
    Mf.Id := Bob.Load;
-   Bob.Stamp (Mf);
    Bob.Broadcast (Mf);
    
--- test file message to see we loaded properly.
+   -- file message to see we loaded properly.
+   -- writes to std out
    Mf.Id := Bob.Store;
    Mf.Ostr := Ostr;
-   Bob.Stamp (Mf);
+   Bob.Broadcast (Mf);
+   
+   M.Id := Bob.Setpar;
+   M.Class := Bjo.Str;
+   M.S := Obs.To_O_String (64, "X_Hw.Jog_Rate = 4.0 m/min");
+   Bob.Broadcast (M);
+   Tio.Put_Line (Integer'Image (M.Res));
+   
+   -- file message to see we loaded properly.
+   -- writes to std out
+   Mf.Id := Bob.Store;
+   Mf.Ostr := Ostr;
    Bob.Broadcast (Mf);
 end Berentest;

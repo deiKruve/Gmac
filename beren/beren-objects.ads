@@ -94,7 +94,7 @@ package Beren.Objects is
 
    type Obj_Msg is abstract tagged record
       Stamp  : T_stamp;
-      Res    : Integer;
+      Res    : Integer := Integer'First;
       Dlink  : Object;
    end record;
    

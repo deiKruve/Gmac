@@ -27,8 +27,10 @@
 ------------------------------------------------------------------------------
 --
 --
+--with Ada.Text_Io;
+
 package body Beren.Objects is
-   
+   --package Tio renames Ada.Text_Io;
    package Obs renames O_String;
    
    subtype Gen_Name is Obs.O_String (1 .. 32);
@@ -153,7 +155,11 @@ package body Beren.Objects is
       Frame := Obj_Root.next;
       Stamp (M);
       M.Res := Integer'First;
+      --Tio.Put_Line ("broadcast00");
       while Frame /= null and M.Res < 0  loop
+
+	    --Tio.Put_Line ("broadcast");
+
 	 Frame.Handle (Frame, M);
 	 Frame := Frame.Next;
       end loop;
