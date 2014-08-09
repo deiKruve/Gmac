@@ -100,7 +100,7 @@ package Beren.Objects is
    
    
    
-   type Op_Type is (Enum, Get, Set);
+   type Op_Type is (Enum, Get, Set, Setpar);
    -- for Attr_Msg and Link_Msg
 
    ------------------------------------------------------------------------

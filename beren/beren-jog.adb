@@ -29,13 +29,18 @@
 -- Template for a jog module
 --
 with Ada.Numerics;
+with Gmactextscan;
 with O_String;
+with Beren.Err;
 
 package body Beren.Jog is
+   
+   package Gts renames Gmactextscan;
    package Obs renames O_String;
    package Bob renames Beren.Objects;
    package Bjo renames Beren.Jogobj;
    package Bth renames Beren.Thread;
+   package Ber renames Beren.Err;
    package Math renames Ada.Numerics;
    
    --------------------
@@ -203,7 +208,11 @@ package body Beren.Jog is
 			       M : in out Bob.File_Msg)
 	with Inline
       is
+	 Token     : Gts.Extended_Token_Type;
+	 Ljograte  : Mpsec_Type := 0.0;
+	 Done      : Boolean    := False;
 	 use type Bob.File_Op_Type;
+	 use type Gts.Extended_Token_Type;
       begin
 	 if M.Id = Bob.Store then
 	    String'Write (M.Ostr, "" & Name & " = {");
@@ -225,8 +234,56 @@ package body Beren.Jog is
 		       Ustr);
 	       end;
 	    end if;
-	     String'Write (M.Ostr, "}" & ASCII.LF);
-	 end if;
+	    String'Write (M.Ostr, "}" & ASCII.LF);
+	 elsif M.Id = Bob.Load then
+	    Token := Gts.Find_Parameter ("Machine." & Name & ".Jog_Rate");
+	    --Tio.Put_Line ("debugger" & Gts.String_Value);
+	    case Token is
+	       when Gts.Float =>
+		  Ljograte := Mpsec_Type'Value (Gts.String_Value);
+	       when others    =>
+		  Ber.Report_Error 
+		    ("gmac.text: " & Name & ".Jog_Rate -> expected a float value.");
+	    end case;
+	    Token := Gts.Next_Token;
+	    loop
+	       exit when Token /= Gts.Id;
+	       if Gts.String_Value = "inch" then
+		  exit when Xis /= Linear;
+		  Ljograte := Ljograte * 0.0254 / 60.0;
+	       elsif Gts.String_Value = "m" then
+		  exit when Xis /= Linear;
+		  Ljograte := Ljograte / 60.0;
+	       elsif Gts.String_Value = "deg" then
+		  exit when Xis /= Rotary;
+		  Ljograte := To_Radians (Ljograte) / 60.0;
+	       elsif Gts.String_Value = "rad" then
+		  exit when Xis /= Rotary;
+		  Ljograte := Ljograte / 60.0;
+	       else exit;
+	       end if;
+	       Token := Gts.Next_Token;
+	       exit when Token /= Gts.Fwd_Slash;
+	       Token := Gts.Next_Token;
+	       exit when Token /= Gts.Id;
+	       exit when Gts.String_Value /= "min";
+	       Done := True;
+	       exit;
+	    end loop;
+	    if not Done then
+	       Ljograte := 0.0;
+	       if Xis = Linear then
+		  Ber.Report_Error 
+		    ("gmac.text: " & Name & 
+		       ".Jog_Rate -> expected m/min or inch/min.");
+	       elsif Xis = Rotary then
+		  Ber.Report_Error 
+		    ("gmac.text: " & Name & 
+		       ".Jog_Rate -> expected deg/min or rad/min.");
+	       end if;
+	    end if;
+	      Jogger.Jog_Rate := Ljograte;
+	 end if;	 
       end Handle_File_M;
       ------------------
    begin

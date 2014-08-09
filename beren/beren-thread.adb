@@ -43,6 +43,19 @@ package body Beren.Thread is
       Scan_List.Next := Scan_Entry;
    end Insert_Down_Scan;
    
+   procedure Insert_Down_Scan (Scan_List : in out Scan_Entry_P_Type; 
+			       Ds        : Scan_Proc_P_Type)
+   is
+      Scan_Entry : Scan_Entry_P_Type := new Scan_Entry_Type;
+   begin
+      Scan_Entry.Scan := Ds;
+      Scan_List.Next.Prev := Scan_Entry;
+      Scan_Entry.Prev := Scan_List;
+      Scan_Entry.Next := Scan_List.Next;
+      Scan_List.Next := Scan_Entry;
+   end Insert_Down_Scan;
+   
+    
    procedure Insert_Up_Scan (Us : Scan_Proc_P_Type)
    is
       Scan_Entry : Scan_Entry_P_Type := new Scan_Entry_Type;
@@ -54,17 +67,41 @@ package body Beren.Thread is
       Scan_List.Prev := Scan_Entry;
    end Insert_Up_Scan;
       
+    
+   procedure Insert_Up_Scan (Scan_List : in out Scan_Entry_P_Type; 
+			     Us        : Scan_Proc_P_Type)
+   is
+      Scan_Entry : Scan_Entry_P_Type := new Scan_Entry_Type;
+   begin
+      Scan_Entry.Scan := Us;
+      Scan_List.Prev.Next := Scan_Entry;
+      Scan_Entry.Next := Scan_List;
+      Scan_Entry.Prev := Scan_List.Prev;
+      Scan_List.Prev := Scan_Entry;
+   end Insert_Up_Scan;
+      
+   
+   procedure Scan
+   is
+      Qq : Scan_Entry_P_Type := Scan_List;
+   begin
+      while Qq.Scan /= null loop
+	 Qq.Scan.all;
+	 Qq := Qq.Next;
+      end loop;
+   end Scan;
+   
    
    procedure Scan (Q : Scan_Entry_P_Type)
    is
       Qq : Scan_Entry_P_Type := Q;
    begin
       while Qq.Scan /= null loop
-	 Q.Scan.all;
+	 Qq.Scan.all;
 	 Qq := Qq.Next;
       end loop;
    end Scan;
-   
+  
 begin
    Scan_List.Prev := Scan_List;
    Scan_List.Next := Scan_List;

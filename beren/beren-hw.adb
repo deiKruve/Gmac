@@ -28,14 +28,22 @@
 --
 -- Template for a hand wheel module
 --
+--with Ada.Text_Io;
+
 with Ada.Numerics;
+with Gmactextscan;
 with O_String;
+with Beren.Err;
 
 package body Beren.Hw is
+   --package Tio renames Ada.Text_Io;
+   
+   package Gts renames Gmactextscan;
    package Obs renames O_String;
    package Bob renames Beren.Objects;
    package Bjo renames Beren.Jogobj;
    package Bth renames Beren.Thread;
+   package Ber renames Beren.Err;
    package Math renames Ada.Numerics;
    
    --------------------
@@ -53,6 +61,7 @@ package body Beren.Hw is
    
    Req_Move         : M_Type with Atomic;
    -- to send to sonja on jog
+   
    
    -------------------------------------
    -- to radian or not to radian . .  --
@@ -147,6 +156,30 @@ package body Beren.Hw is
 	   else
 	      M.Res := 1;
 	   end if;
+	 elsif M.Id = Bob.Setpar then
+	    if M.Class = Bjo.Str then
+	       declare
+		  J, K : Integer := 0;
+	       begin
+		  for I in M.S'Range loop
+		     J := I;
+		     exit when M.S (I) = '.';
+		     exit when M.S (I) /= Name (I);
+		  end loop;
+		  if M.S (J) = '.' then -- module name found
+		     for I in J + 1 .. M.S'Length loop
+			K := I;
+			exit when M.S (I) in ' ' | '=';
+		     end loop;
+		     if String (M.S) (J + 1 .. K) = "Jog_Rate" then
+			while M.S (K) in ' ' | '=' loop
+			   K := K + 1;
+			end loop;
+			
+		     end if;
+		  end if;
+	       end;
+	    end if;
 	 elsif M.Id = Bob.Enum then
 	    M.Name  := Obs.To_O_String (32, "Jog_Rate");
 	    M.Class := Bjo.Real;
@@ -199,7 +232,11 @@ package body Beren.Hw is
 			       M : in out Bob.File_Msg)
 	with Inline
       is
+	 Token     : Gts.Extended_Token_Type;
+	 Ljograte  : Mpsec_Type := 0.0;
+	 Done      : Boolean    := False;
 	 use type Bob.File_Op_Type;
+	 use type Gts.Extended_Token_Type;
       begin
 	 if M.Id = Bob.Store then
 	    String'Write (M.Ostr, "" & Name & " = {");
@@ -221,7 +258,55 @@ package body Beren.Hw is
 		       Ustr);
 	       end;
 	    end if;
-	     String'Write (M.Ostr, "}" & ASCII.LF);
+	    String'Write (M.Ostr, "}" & ASCII.LF);
+	 elsif M.Id = Bob.Load then
+	    Token := Gts.Find_Parameter ("Machine." & Name & ".Jog_Rate");
+	    --Tio.Put_Line ("debugger" & Gts.String_Value);
+	    case Token is
+	       when Gts.Float =>
+		  Ljograte := Mpsec_Type'Value (Gts.String_Value);
+	       when others    =>
+		  Ber.Report_Error 
+		    ("gmac.text: " & Name & ".Jog_Rate -> expected a float value.");
+	    end case;
+	    Token := Gts.Next_Token;
+	    loop
+	       exit when Token /= Gts.Id;
+	       if Gts.String_Value = "inch" then
+		  exit when Xis /= Linear;
+		  Ljograte := Ljograte * 0.0254 / 60.0;
+	       elsif Gts.String_Value = "m" then
+		  exit when Xis /= Linear;
+		  Ljograte := Ljograte / 60.0;
+	       elsif Gts.String_Value = "deg" then
+		  exit when Xis /= Rotary;
+		  Ljograte := To_Radians (Ljograte) / 60.0;
+	       elsif Gts.String_Value = "rad" then
+		  exit when Xis /= Rotary;
+		  Ljograte := Ljograte / 60.0;
+	       else exit;
+	       end if;
+	       Token := Gts.Next_Token;
+	       exit when Token /= Gts.Fwd_Slash;
+	       Token := Gts.Next_Token;
+	       exit when Token /= Gts.Id;
+	       exit when Gts.String_Value /= "min";
+	       Done := True;
+	       exit;
+	    end loop;
+	    if not Done then
+	       Ljograte := 0.0;
+	       if Xis = Linear then
+		  Ber.Report_Error 
+		    ("gmac.text: " & Name & 
+		       ".Jog_Rate -> expected m/min or inch/min.");
+	       elsif Xis = Rotary then
+		  Ber.Report_Error 
+		    ("gmac.text: " & Name & 
+		       ".Jog_Rate -> expected deg/min or rad/min.");
+	       end if;
+	    end if;
+	       Jogger.Jog_Rate := Ljograte;
 	 end if;
       end Handle_File_M;
       ------------------

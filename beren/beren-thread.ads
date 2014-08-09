@@ -77,11 +77,21 @@ package Beren.Thread is
    
    procedure Insert_Down_Scan (Ds : Scan_Proc_P_Type);
    
+   procedure Insert_Down_Scan (Scan_List : in out Scan_Entry_P_Type;
+			       Ds        : Scan_Proc_P_Type);
+   
    procedure Insert_Up_Scan (Us : Scan_Proc_P_Type);
    
+   procedure Insert_Up_Scan (Scan_List : in out Scan_Entry_P_Type; 
+			     Us        : Scan_Proc_P_Type);
+   
+   procedure Scan;
+   
    procedure Scan (Q : Scan_Entry_P_Type);
-   -- normally Scan_list is passed as an argument to Scan, but it is possible to 
-   -- use another root. The insert porcs will have to be modified though.
+   
+   -- normally Scan scans Scan_List, 
+   -- and the insert procs work with Scan_List,
+   -- but it is possible to generate your ouwn list.
    Scan_List : Scan_Entry_P_Type := new Scan_Entry_Type;
    
 end Beren.Thread;

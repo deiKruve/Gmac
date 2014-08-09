@@ -35,4 +35,14 @@ begin
    Mf.Ostr := Ostr;
    Bob.Stamp (Mf);
    Bob.Broadcast (Mf);
+   
+   Mf.Id := Bob.Load;
+   Bob.Stamp (Mf);
+   Bob.Broadcast (Mf);
+   
+-- test file message to see we loaded properly.
+   Mf.Id := Bob.Store;
+   Mf.Ostr := Ostr;
+   Bob.Stamp (Mf);
+   Bob.Broadcast (Mf);
 end Berentest;

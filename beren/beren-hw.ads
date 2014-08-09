@@ -36,6 +36,7 @@ with Beren.Jogobj;
 generic
    Name : String := "";
    Xis : Axis_type;
+   -- type Axis_Type is (Linear, Rotary);
    E_Stop_Init   : Boolean := False;
    In_Hwpos_Init : M_Type := 0.0;
    In_Cpos_Init  : M_Type := 0.0;

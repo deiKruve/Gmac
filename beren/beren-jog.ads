@@ -36,6 +36,7 @@ with Beren.Thread;
 generic
    Name : String := "";
    Xis : Axis_type;
+   -- type Axis_Type is (Linear, Rotary);
    E_Stop_Init   : Boolean := False;
    Jog_Plus_Init : Boolean := False;
    Jog_Min_Init  : Boolean := False;

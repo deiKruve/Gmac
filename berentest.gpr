@@ -1,0 +1,19 @@
+with "florist";
+Project Berentest is
+  for Languages use ("Ada", "c");
+  for Main use ("berentest.adb");
+  for Source_Dirs use (".", "./beren", "./gnatcoll", "./gmactextscan");
+  for Object_Dir use "obj";
+  for Exec_Dir use ".";
+  package Compiler is
+     --for Default_Switches ("c")   use ("-g", "-O2");
+      for Default_Switches ("Ada") use ("-g", "-O1", "-gnatafo", "-fdata-sections", "-ffunction-sections");
+      --for Default_Switches ("Ada") use ("-g", "-O1", "-gnatafo");
+  end Compiler;
+  package Binder is
+      for Default_Switches ("Ada") use ("-E");
+  end Binder;
+  package Linker is
+     for Default_Switches ("Ada") use ("/home/jan/MMS/programs-PC/obj/gnatcoll_support.o", "-Wl,--gc-sections");
+  end Linker;
+end Berentest;
