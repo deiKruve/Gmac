@@ -1,8 +1,8 @@
 ------------------------------------------------------------------------------
 --                                                                          --
---                             BEREN COMPONENTS                             --
+--                            EARENDIL COMPONENTS                           --
 --                                                                          --
---                         B E R E N . O B J E C T S                        --
+--                       E A R E N D I L . O B J E C T S                    --
 --                                                                          --
 --                                  S p e c                                 --
 --                                                                          --
@@ -21,7 +21,7 @@
 -- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
 -- <http://www.gnu.org/licenses/>.                                          --
 --                                                                          --
---                 Beren is maintained by J de Kruijf Engineers             --
+--               Earendil is maintained by J de Kruijf Engineers            --
 --                     (email: jan.de.kruyf@hotmail.com)                    --
 --                                                                          --
 ------------------------------------------------------------------------------
@@ -30,7 +30,7 @@
 with Ada.Text_IO.Text_Streams;
 with O_String;
 
-package Beren.Objects is
+package Earendil.Objects is
    pragma Elaborate_Body;
    
    
@@ -45,7 +45,7 @@ package Beren.Objects is
    subtype T_Stamp is Integer;
    -- message timestamp type
    
-   type Obj_Msg;
+   type Obj_Msg is abstract tagged;
    
    type Object_Desc;
    
@@ -191,6 +191,7 @@ package Beren.Objects is
    
    
 private
+
    Obj_Root : Object;
 
-end Beren.Objects;
+end Earendil.Objects;

@@ -1,8 +1,8 @@
 ------------------------------------------------------------------------------
 --                                                                          --
---                             BEREN COMPONENTS                             --
+--                             EARENDIL COMPONENTS                             --
 --                                                                          --
---                         B E R E N . O B J E C T S                        --
+--                     E A R E N D I L . O B J E C T S                      --
 --                                                                          --
 --                                  B o d y                                 --
 --                                                                          --
@@ -21,7 +21,7 @@
 -- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
 -- <http://www.gnu.org/licenses/>.                                          --
 --                                                                          --
---                 Beren is maintained by J de Kruijf Engineers             --
+--                 Earendil is maintained by J de Kruijf Engineers             --
 --                     (email: jan.de.kruyf@hotmail.com)                    --
 --                                                                          --
 ------------------------------------------------------------------------------
@@ -29,7 +29,7 @@
 --
 --with Ada.Text_Io;
 
-package body Beren.Objects is
+package body Earendil.Objects is
    --package Tio renames Ada.Text_Io;
    package Obs renames O_String;
    
@@ -180,4 +180,4 @@ begin
    Obj_Root.Handle := null;
    New_Obj := Obj_Root;
    
-end Beren.Objects;
+end Earendil.Objects;

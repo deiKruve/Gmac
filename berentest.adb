@@ -1,13 +1,16 @@
-with Beren.Objects;
+with Earendil.Objects;
 with Beren.Jogobj;
+with Beren.Despatch;
 with Text_Io;
 with Ada.Text_IO.Text_Streams;
 with O_String;
 with Berentest1; -- realizes the jog template
 
+with earendil.Client1;
+
 procedure Berentest is
    package Tio renames Text_Io;
-   package Bob renames Beren.Objects;
+   package Bob renames Earendil.Objects;
    package Bjo renames Beren.Jogobj;
    package Obs renames O_String;
    package Tiots renames Ada.Text_IO.Text_Streams;

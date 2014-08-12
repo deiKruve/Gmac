@@ -29,7 +29,7 @@
 -- Template for a hand wheel module
 --
 
-with Beren.Objects;
+with Earendil.Objects;
 with Beren.Thread;
 
 with Beren.Jogobj;
@@ -113,7 +113,7 @@ package Beren.Hw is
    -- . . Offset: holds the present offset accumulated by the jog module
    -- . . Offs_Rst: pulse: resets the Offset Attribute
    -- . . 
-   Type Jog_Object_Type is new Beren.Objects.Object_Desc with
+   Type Jog_Object_Type is new Earendil.Objects.Object_Desc with
    record
       Jog_Rate : Mpsec_Type with Atomic; -- meters per second
       Enable   : Boolean with Atomic;
@@ -129,8 +129,8 @@ package Beren.Hw is
    Jogger : Jog_Object_P := new Jog_Object_Type;
    
    -- message handler --
-   procedure Handle (Obj : in out Beren.Objects.Object; 
-		     M   : in out Beren.Objects.Obj_Msg'Class);
+   procedure Handle (Obj : in out Earendil.Objects.Object; 
+		     M   : in out Earendil.Objects.Obj_Msg'Class);
    
    -- must be scanned every cnc scan period;
    -- with the flow of the data from llp to motors

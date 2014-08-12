@@ -40,7 +40,7 @@ package body Beren.Hw is
    
    package Gts renames Gmactextscan;
    package Obs renames O_String;
-   package Bob renames Beren.Objects;
+   package Bob renames Earendil.Objects;
    package Bjo renames Beren.Jogobj;
    package Bth renames Beren.Thread;
    package Ber renames Beren.Err;
@@ -86,8 +86,8 @@ package body Beren.Hw is
    -----------------------
    
    --  message handler  --
-   procedure Handle (Obj : in out Beren.Objects.Object; 
-		     M   : in out Beren.Objects.Obj_Msg'Class)
+   procedure Handle (Obj : in out Earendil.Objects.Object; 
+		     M   : in out Earendil.Objects.Obj_Msg'Class)
    is
       -------------
       procedure Handle_Attr_M (Obj : in out Jog_Object_Type; 

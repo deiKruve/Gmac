@@ -2,7 +2,7 @@
 --                                                                          --
 --                             BEREN COMPONENTS                             --
 --                                                                          --
---                          B E R E N . J O G O B J                         --
+--                       B E R E N . D E S P A T C H                        --
 --                                                                          --
 --                                  S p e c                                 --
 --                                                                          --
@@ -26,34 +26,12 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --
--- extra data definition for Beren.Jog
 
-with Earendil.Objects;
-with O_String;
-package Beren.Jogobj is
-   
-   
-   type Attr_Class is (Enum, Inval, Str, Int, Real, Char, Bool);
-   
-   -- extra jog attr.
-   type Pulse_Mode_Enumeration_Type is (Off, Hundredth, Tenth, Unit, Ten);
-   
-   -- jog attibutes message
-   type Attr_Msg is new Earendil.Objects.Obj_Msg with
-     record
-	Id    : Earendil.Objects.Op_Type;
-	Enum  : access procedure (Name :String; M : Attr_Msg);
-	Name  : Earendil.Objects.Attr_Name;
-	--Res   : Integer;
-	Class : Attr_Class;
-	E     : Pulse_Mode_Enumeration_Type;
-	I     : Integer;
-	X     : Long_Float;
-	C     : Character;
-	B     : Boolean;
-	S     : O_String.O_String (1 .. 64);
-     end record;
+--Tape.driver
 
-   type Attr_Msg_P is access all Attr_Msg;
-
-end Beren.Jogobj;
+package Beren.Despatch is 
+   --pragma Remote_Call_Interface;
+   pragma Elaborate_Body;
+  
+  
+end Beren.Despatch;

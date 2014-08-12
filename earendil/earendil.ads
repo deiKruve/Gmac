@@ -1,8 +1,8 @@
 ------------------------------------------------------------------------------
 --                                                                          --
---                             BEREN COMPONENTS                             --
+--                             EARENDIL COMPONENTS                          --
 --                                                                          --
---                          B E R E N . J O G O B J                         --
+--                               E A R E N D I L                            --
 --                                                                          --
 --                                  S p e c                                 --
 --                                                                          --
@@ -21,39 +21,29 @@
 -- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
 -- <http://www.gnu.org/licenses/>.                                          --
 --                                                                          --
---                 Beren is maintained by J de Kruijf Engineers             --
+--                 Earendil is maintained by J de Kruijf Engineers             --
 --                     (email: jan.de.kruyf@hotmail.com)                    --
 --                                                                          --
 ------------------------------------------------------------------------------
 --
--- extra data definition for Beren.Jog
 
-with Earendil.Objects;
-with O_String;
-package Beren.Jogobj is
-   
-   
-   type Attr_Class is (Enum, Inval, Str, Int, Real, Char, Bool);
-   
-   -- extra jog attr.
-   type Pulse_Mode_Enumeration_Type is (Off, Hundredth, Tenth, Unit, Ten);
-   
-   -- jog attibutes message
-   type Attr_Msg is new Earendil.Objects.Obj_Msg with
-     record
-	Id    : Earendil.Objects.Op_Type;
-	Enum  : access procedure (Name :String; M : Attr_Msg);
-	Name  : Earendil.Objects.Attr_Name;
-	--Res   : Integer;
-	Class : Attr_Class;
-	E     : Pulse_Mode_Enumeration_Type;
-	I     : Integer;
-	X     : Long_Float;
-	C     : Character;
-	B     : Boolean;
-	S     : O_String.O_String (1 .. 64);
-     end record;
+package Earendil is
+   pragma Pure(Earendil);
+     type E_Obj_Msg_Type is abstract tagged limited private;
+     -- Primitive dispatching operations where
+     -- E_Obj_Msg_Type is controlling operand
+     
+     function E_Broadcast (M : access E_Obj_Msg_Type; Str : String) 
+			  return String is abstract;
+     
+     function E_Reply (M : access E_Obj_Msg_Type) return String is abstract;
 
-   type Attr_Msg_P is access all Attr_Msg;
-
-end Beren.Jogobj;
+private
+   type E_Obj_Msg_Type is abstract tagged limited 
+      record
+	 --Stamp  : T_stamp;
+	 Res    : Integer := Integer'First;
+	 --Dlink  : Object;
+      end record;
+   
+end Earendil;

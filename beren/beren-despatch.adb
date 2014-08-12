@@ -2,9 +2,9 @@
 --                                                                          --
 --                             BEREN COMPONENTS                             --
 --                                                                          --
---                          B E R E N . J O G O B J                         --
+--                       B E R E N . D E S P A T C H                        --
 --                                                                          --
---                                  S p e c                                 --
+--                                  B o d y                                 --
 --                                                                          --
 --                     Copyright (C) 2014, Jan de Kruyf                     --
 --                                                                          --
@@ -26,34 +26,69 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --
--- extra data definition for Beren.Jog
 
+--Tape.driver -- the server
+with Earendil.Name_Server;
 with Earendil.Objects;
+with Beren.Jogobj;
 with O_String;
-package Beren.Jogobj is
+
+package body Beren.Despatch is
+   
+   package Erd renames Earendil;
+   package Ens renames Earendil.Name_Server;
+   package Bob renames Earendil.Objects;
+   package Bjo renames Beren.Jogobj;
+   package Obs renames O_String;
    
    
-   type Attr_Class is (Enum, Inval, Str, Int, Real, Char, Bool);
-   
-   -- extra jog attr.
-   type Pulse_Mode_Enumeration_Type is (Off, Hundredth, Tenth, Unit, Ten);
-   
-   -- jog attibutes message
-   type Attr_Msg is new Earendil.Objects.Obj_Msg with
-     record
-	Id    : Earendil.Objects.Op_Type;
-	Enum  : access procedure (Name :String; M : Attr_Msg);
-	Name  : Earendil.Objects.Attr_Name;
-	--Res   : Integer;
-	Class : Attr_Class;
-	E     : Pulse_Mode_Enumeration_Type;
-	I     : Integer;
-	X     : Long_Float;
-	C     : Character;
-	B     : Boolean;
+   type E_Parset_Msg_Type is new Erd.E_Obj_Msg_Type with 
+      record
 	S     : O_String.O_String (1 .. 64);
-     end record;
+      end record;
+   overriding
+   function E_Broadcast (eM : access E_Parset_Msg_Type; Str : String) return String;
+   overriding
+   function E_Reply (eM : access E_Parset_Msg_Type) return String;
+   
+   function E_Broadcast (eM : access E_Parset_Msg_Type; Str : String) return String 
+   is
+      M : Bjo.Attr_Msg;
+   begin
+      M.Id := Bob.Setpar;
+      M.Class := Bjo.Str;
+      M.S := Obs.To_O_String (64, Str);
+      Bob.Broadcast (Bjo.Attr_Msg (M));
+      if M.Res = 0 then
+      	 return "Ok";
+      else
+      	 return "Failure";
+      end if;
+      --Tio.Put_Line (Integer'Image (M.Res));
+   end E_Broadcast;
+   
+   function E_Reply (eM : access E_Parset_Msg_Type) return String 
+   is
+   begin
+      null; ----not functional
+      return "";
+   end E_Reply;
+      
+   
+   E_Parset_Msg : aliased E_Parset_Msg_Type;
 
-   type Attr_Msg_P is access all Attr_Msg;
+   --  function Enum_Attr (Str : String) return String
+   --  is
+   --     M : Bjo.Attr_Msg;
+   --  begin
+   --     M.Id := Bob.Enum;
+   --     --M.Enum := Berentest1.Enumerate_Attr'access;
+   --     Bob.Broadcast (M);
+   --     return "Ok";
+   --  end Enum_Attr;
+   
+begin
+   Earendil.Name_Server.Register 
+     ("E_Parset_Msg", E_Parset_Msg'Access);
 
-end Beren.Jogobj;
+end Beren.Despatch;

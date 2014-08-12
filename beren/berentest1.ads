@@ -1,5 +1,5 @@
 
-with Beren.Objects;
+with Earendil.Objects;
 with Beren.Jogobj;
 with Beren.Jog;
 with Beren.Hw;

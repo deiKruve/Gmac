@@ -4,7 +4,7 @@ with O_String;
 
 package body Berentest1 is
    package Tio renames Text_Io;
-   package Bob renames Beren.Objects;
+   package Bob renames Earendil.Objects;
    package Bjo renames Beren.Jogobj;
    package Obs renames O_String;
 

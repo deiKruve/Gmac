@@ -1,10 +1,10 @@
 ------------------------------------------------------------------------------
 --                                                                          --
---                             BEREN COMPONENTS                             --
+--                             EARENDIL COMPONENTS                          --
 --                                                                          --
---                          B E R E N . J O G O B J                         --
+--                        E A R E N D I L . C L I E N T 1                   --
 --                                                                          --
---                                  S p e c                                 --
+--                                  B o d y                                 --
 --                                                                          --
 --                     Copyright (C) 2014, Jan de Kruyf                     --
 --                                                                          --
@@ -21,39 +21,60 @@
 -- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
 -- <http://www.gnu.org/licenses/>.                                          --
 --                                                                          --
---                 Beren is maintained by J de Kruijf Engineers             --
+--             Earendil is maintained by J de Kruijf Engineers              --
 --                     (email: jan.de.kruyf@hotmail.com)                    --
 --                                                                          --
 ------------------------------------------------------------------------------
 --
--- extra data definition for Beren.Jog
 
-with Earendil.Objects;
+with Earendil.Name_Server;
+
 with O_String;
-package Beren.Jogobj is
+
+package body Earendil.Client1 is
    
+   package Erd renames Earendil;
+   package Ens renames Earendil.Name_Server;
    
-   type Attr_Class is (Enum, Inval, Str, Int, Real, Char, Bool);
+   M1 : Ens.E_Obj_Msg_Access_Type;
    
-   -- extra jog attr.
-   type Pulse_Mode_Enumeration_Type is (Off, Hundredth, Tenth, Unit, Ten);
+   procedure Send_Parset_Msg (S : String)
+   is
+      Reply : String := Earendil.E_Broadcast (M1, S);
+   begin
+      null;
+   end Send_Parset_Msg;
    
-   -- jog attibutes message
-   type Attr_Msg is new Earendil.Objects.Obj_Msg with
-     record
-	Id    : Earendil.Objects.Op_Type;
-	Enum  : access procedure (Name :String; M : Attr_Msg);
-	Name  : Earendil.Objects.Attr_Name;
-	--Res   : Integer;
-	Class : Attr_Class;
-	E     : Pulse_Mode_Enumeration_Type;
-	I     : Integer;
-	X     : Long_Float;
-	C     : Character;
-	B     : Boolean;
+   ------------------------
+   type E_Reply_Msg_Type is new Erd.E_Obj_Msg_Type with 
+      record
 	S     : O_String.O_String (1 .. 64);
-     end record;
-
-   type Attr_Msg_P is access all Attr_Msg;
-
-end Beren.Jogobj;
+      end record;
+   Overriding function E_Broadcast 
+     (eM : access E_Reply_Msg_Type; Str : String) return String;
+   Overriding function E_Reply 
+     (Rm : access E_Reply_Msg_Type) return String;
+   
+   function E_Broadcast (eM : access E_Reply_Msg_Type; Str : String) return String 
+   is
+   begin
+      null; ----not functional
+      return "";
+   end E_Broadcast;
+   
+   function E_Reply (Rm : access E_Reply_Msg_Type) return String 
+   is
+   begin
+      null;
+      return "";
+   end E_Reply;
+   
+   E_Reply_Msg : aliased E_Reply_Msg_Type;
+   
+   
+   
+begin
+   M1 := Ens.Find ("E_Parset_Msg");
+   Earendil.Name_Server.Register 
+     ("E_Reply_Msg", E_Reply_Msg'Access);
+end Earendil.Client1;
