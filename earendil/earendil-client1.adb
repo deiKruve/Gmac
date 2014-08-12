@@ -36,12 +36,13 @@ package body Earendil.Client1 is
    package Erd renames Earendil;
    package Ens renames Earendil.Name_Server;
    
-   M1 : Ens.E_Obj_Msg_Access_Type;
+   Mp_P, Mf_P : Ens.E_Obj_Msg_Access_Type;
    
-   procedure Send_Parset_Msg (S : String)
+   procedure Send_Parset_Msg (Str : String)
    is
-      Reply : String := Earendil.E_Broadcast (M1, S);
-   begin
+      Reply : Integer := Earendil.Handle (Em => Mp_P, S => Str);
+    begin
+      
       null;
    end Send_Parset_Msg;
    
@@ -50,31 +51,42 @@ package body Earendil.Client1 is
       record
 	S     : O_String.O_String (1 .. 64);
       end record;
-   Overriding function E_Broadcast 
-     (eM : access E_Reply_Msg_Type; Str : String) return String;
-   Overriding function E_Reply 
-     (Rm : access E_Reply_Msg_Type) return String;
+
+   Overriding function Handle (em    : access E_Reply_Msg_Type;
+			       Id    : Erd.Op_Type;
+			       Name  : String;
+			       Class : Erd.Attr_Class;
+			       I     : Integer;
+			       X     : Long_Float;
+			       C     : Character;
+			       B     : Boolean;
+			       S     : String
+			      ) return Integer;
    
-   function E_Broadcast (eM : access E_Reply_Msg_Type; Str : String) return String 
-   is
-   begin
-      null; ----not functional
-      return "";
-   end E_Broadcast;
-   
-   function E_Reply (Rm : access E_Reply_Msg_Type) return String 
+
+   function Handle (em    : access E_Reply_Msg_Type; 
+		    Id    : Erd.Op_Type;
+		    Name  : String;
+		    Class : Erd.Attr_Class;
+		    I     : Integer;
+		    X     : Long_Float;
+		    C     : Character;
+		    B     : Boolean;
+		    S     : String
+		   ) return Integer 
    is
    begin
       null;
-      return "";
-   end E_Reply;
+      return 0;
+   end Handle;
    
    E_Reply_Msg : aliased E_Reply_Msg_Type;
    
    
    
 begin
-   M1 := Ens.Find ("E_Parset_Msg");
+   Mp_P := Ens.Find ("E_Parset_Msg");
+   Mf_P := Ens.Find ("E_File_Msg");
    Earendil.Name_Server.Register 
      ("E_Reply_Msg", E_Reply_Msg'Access);
 end Earendil.Client1;

@@ -41,40 +41,90 @@ package body Beren.Despatch is
    package Bjo renames Beren.Jogobj;
    package Obs renames O_String;
    
+   --type Op_Type is (Enum, Get, Set, Setpar, Load, Store);
+   --type Attr_Class is (Inval, Str, Int, Real, Char, Bool);
    
    type E_Parset_Msg_Type is new Erd.E_Obj_Msg_Type with 
       record
-	S     : O_String.O_String (1 .. 64);
+	 --S     : O_String.O_String (1 .. 64);
+	 null;
       end record;
    overriding
-   function E_Broadcast (eM : access E_Parset_Msg_Type; Str : String) return String;
-   overriding
-   function E_Reply (eM : access E_Parset_Msg_Type) return String;
+   function Handle (eM    : access E_Parset_Msg_Type;
+		    Id    : Erd.Op_Type;
+		    Name  : String;
+		    Class : Erd.Attr_Class;
+		    I     : Integer;
+		    X     : Long_Float;
+		    C     : Character;
+		    B     : Boolean;
+		    S     : String
+		   ) return Integer;
    
-   function E_Broadcast (eM : access E_Parset_Msg_Type; Str : String) return String 
+   --type File_Op_Type is (Load, Store);
+   
+   type E_File_Msg_Type is new Erd.E_Obj_Msg_Type with 
+      record
+	 --Id   : File_Op_Type;
+	 --Name : O_String.O_String (1 .. 64);
+	 null;
+      end record;
+   
+   Overriding
+   function Handle (Em    : access E_File_Msg_Type;
+		    Id    : Erd.Op_Type;
+		    Name  : String;
+		    Class : Erd.Attr_Class;
+		    I     : Integer;
+		    X     : Long_Float;
+		    C     : Character;
+		    B     : Boolean;
+		    S     : String
+		   ) return Integer;
+   
+   function Handle (eM    : access E_Parset_Msg_Type;
+		    Id    : Erd.Op_Type;
+		    Name  : String;
+		    Class : Erd.Attr_Class;
+		    I     : Integer;
+		    X     : Long_Float;
+		    C     : Character;
+		    B     : Boolean;
+		    S     : String
+		   ) return Integer
    is
       M : Bjo.Attr_Msg;
    begin
       M.Id := Bob.Setpar;
       M.Class := Bjo.Str;
-      M.S := Obs.To_O_String (64, Str);
+      M.S := Obs.To_O_String (64, S);
       Bob.Broadcast (Bjo.Attr_Msg (M));
-      if M.Res = 0 then
-      	 return "Ok";
-      else
-      	 return "Failure";
-      end if;
-      --Tio.Put_Line (Integer'Image (M.Res));
-   end E_Broadcast;
+      return M.Res;
+   end Handle;
    
-   function E_Reply (eM : access E_Parset_Msg_Type) return String 
+   function Handle (Em    : access E_File_Msg_Type;
+		    Id    : Erd.Op_Type;
+		    Name  : String;
+		    Class : Erd.Attr_Class;
+		    I     : Integer;
+		    X     : Long_Float;
+		    C     : Character;
+		    B     : Boolean;
+		    S     : String
+		   ) return Integer
    is
+      use type Erd.Op_Type;
+      M : Bob.File_Msg;
    begin
-      null; ----not functional
-      return "";
-   end E_Reply;
+      if Id = Erd.Load then M.Id := Bob.Load;
+      elsif Id = Erd.Store then M.Id := Bob.Store;
+      end if;
+      M.Ostr := null;----------------------------------------------------ps
+      Bob.Broadcast (M);
+      return M.Res;
+   end Handle;
       
-   
+   E_File_Msg   : aliased E_File_Msg_Type;
    E_Parset_Msg : aliased E_Parset_Msg_Type;
 
    --  function Enum_Attr (Str : String) return String
@@ -90,5 +140,7 @@ package body Beren.Despatch is
 begin
    Earendil.Name_Server.Register 
      ("E_Parset_Msg", E_Parset_Msg'Access);
+   Earendil.Name_Server.Register
+     ("E_File_Msg", E_File_Msg'Access);
 
 end Beren.Despatch;

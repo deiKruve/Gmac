@@ -26,24 +26,32 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --
-
+--with O_String;
 package Earendil is
    pragma Pure(Earendil);
      type E_Obj_Msg_Type is abstract tagged limited private;
      -- Primitive dispatching operations where
      -- E_Obj_Msg_Type is controlling operand
      
-     function E_Broadcast (M : access E_Obj_Msg_Type; Str : String) 
-			  return String is abstract;
+     --function Handle (M : access E_Obj_Msg_Type) return Integer is abstract;
+     type Op_Type is (Enum, Get, Set, Setpar, Load, Store);
+     type Attr_Class is (Inval, Str, Int, Real, Char, Bool);
+     function Handle (eM    : access E_Obj_Msg_Type;
+		      Id    : Op_Type := Get;
+		      Name  : String := "";
+		      Class : Attr_Class := Inval;
+		      I     : Integer := 0;
+		      X     : Long_Float := 0.0;
+		      C     : Character := 'a';
+		      B     : Boolean := false;
+		      S     : String := ""
+		     ) return Integer is abstract;
      
-     function E_Reply (M : access E_Obj_Msg_Type) return String is abstract;
 
 private
    type E_Obj_Msg_Type is abstract tagged limited 
       record
-	 --Stamp  : T_stamp;
-	 Res    : Integer := Integer'First;
-	 --Dlink  : Object;
+	 null;
       end record;
    
 end Earendil;
