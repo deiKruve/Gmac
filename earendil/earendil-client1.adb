@@ -38,15 +38,23 @@ package body Earendil.Client1 is
    
    Mp_P, Mf_P : Ens.E_Obj_Msg_Access_Type;
    
-   procedure Send_Parset_Msg (Str : String)
-   is
-      Reply : Integer := Earendil.Handle (Em => Mp_P, S => Str);
-    begin
-      
-      null;
-   end Send_Parset_Msg;
    
-   ------------------------
+   -- to receive connect request from the despatcher
+   type E_Client1_Connect_Msg_Type is new Erd.E_Obj_Msg_Type with null record;
+   Overriding 
+   function Handle (em    : access E_Client1_Connect_Msg_Type;
+		    Id    : Erd.Op_Type;
+		    Name  : String;
+		    Class : Erd.Attr_Class;
+		    I     : Integer;
+		    X     : Long_Float;
+		    C     : Character;
+		    B     : Boolean;
+		    S     : String
+		   ) return Integer;
+     
+   
+    -- to receive replies from despatcher
    type E_Reply_Msg_Type is new Erd.E_Obj_Msg_Type with 
       record
 	S     : O_String.O_String (1 .. 64);
@@ -63,7 +71,39 @@ package body Earendil.Client1 is
 			       S     : String
 			      ) return Integer;
    
+   
+      
+   -- the local connectors
+   E_Reply_Msg    : aliased E_Reply_Msg_Type;
+   Client1_Socket : aliased E_Client1_Connect_Msg_Type;
+   
 
+   
+   -- handle a connection request
+   function Handle (em    : access E_Client1_Connect_Msg_Type;
+		    Id    : Erd.Op_Type;
+		    Name  : String;
+		    Class : Erd.Attr_Class;
+		    I     : Integer;
+		    X     : Long_Float;
+		    C     : Character;
+		    B     : Boolean;
+		    S     : String
+		   ) return Integer
+   is
+   begin
+      Earendil.Name_Server.Remove (E_Reply_Msg'Access);
+      Earendil.Name_Server.Register 
+	("E_Reply_Msg", E_Reply_Msg'Access);
+      Mp_P := Ens.Find ("E_Parset_Msg");
+      Mf_P := Ens.Find ("E_File_Msg");
+      return 0;
+   exception
+      when others => return -1;
+   end Handle;
+   
+   
+   -- handle a reply from the despatcher
    function Handle (em    : access E_Reply_Msg_Type; 
 		    Id    : Erd.Op_Type;
 		    Name  : String;
@@ -77,16 +117,28 @@ package body Earendil.Client1 is
    is
    begin
       null;
+      
       return 0;
    end Handle;
    
-   E_Reply_Msg : aliased E_Reply_Msg_Type;
-   
-   
+    
+   -------------------------------------------------
+   -- to send a message to despatcher
+   procedure Send_Parset_Msg (Str : String)
+   is
+      Reply : Integer := Earendil.Handle (Em => Mp_P, S => Str);
+    begin
+      
+      null;
+   end Send_Parset_Msg;
+
    
 begin
-   Mp_P := Ens.Find ("E_Parset_Msg");
-   Mf_P := Ens.Find ("E_File_Msg");
+   Earendil.Name_Server.Register
+     ("Client1_Socket", Client1_Socket'Access);
    Earendil.Name_Server.Register 
      ("E_Reply_Msg", E_Reply_Msg'Access);
+   
+   Mp_P := Ens.Find ("E_Parset_Msg");
+   Mf_P := Ens.Find ("E_File_Msg");    
 end Earendil.Client1;

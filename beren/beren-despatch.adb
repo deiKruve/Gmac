@@ -41,14 +41,25 @@ package body Beren.Despatch is
    package Bjo renames Beren.Jogobj;
    package Obs renames O_String;
    
-   --type Op_Type is (Enum, Get, Set, Setpar, Load, Store);
-   --type Attr_Class is (Inval, Str, Int, Real, Char, Bool);
+   Mr_P : Ens.E_Obj_Msg_Access_Type;
    
-   type E_Parset_Msg_Type is new Erd.E_Obj_Msg_Type with 
-      record
-	 --S     : O_String.O_String (1 .. 64);
-	 null;
-      end record;
+   -- to receive connect request from the client
+   type E_Client1_Connect_Msg_Type is new Erd.E_Obj_Msg_Type with null record;
+   Overriding 
+   function Handle (em    : access E_Client1_Connect_Msg_Type;
+		    Id    : Erd.Op_Type;
+		    Name  : String;
+		    Class : Erd.Attr_Class;
+		    I     : Integer;
+		    X     : Long_Float;
+		    C     : Character;
+		    B     : Boolean;
+		    S     : String
+		   ) return Integer;
+     
+   
+   -- to receive a parameter-set message from the client
+   type E_Parset_Msg_Type is new Erd.E_Obj_Msg_Type with null record;
    overriding
    function Handle (eM    : access E_Parset_Msg_Type;
 		    Id    : Erd.Op_Type;
@@ -61,15 +72,9 @@ package body Beren.Despatch is
 		    S     : String
 		   ) return Integer;
    
-   --type File_Op_Type is (Load, Store);
    
-   type E_File_Msg_Type is new Erd.E_Obj_Msg_Type with 
-      record
-	 --Id   : File_Op_Type;
-	 --Name : O_String.O_String (1 .. 64);
-	 null;
-      end record;
-   
+   -- to receive a file message from the client 
+   type E_File_Msg_Type is new Erd.E_Obj_Msg_Type with null record;
    Overriding
    function Handle (Em    : access E_File_Msg_Type;
 		    Id    : Erd.Op_Type;
@@ -81,7 +86,41 @@ package body Beren.Despatch is
 		    B     : Boolean;
 		    S     : String
 		   ) return Integer;
+  
    
+   -- the local connectors
+   E_File_Msg      : aliased E_File_Msg_Type;
+   E_Parset_Msg    : aliased E_Parset_Msg_Type;
+   Despatch_Socket : aliased E_Client1_Connect_Msg_Type;
+   
+   
+   -- handle a connection request
+   function Handle (em    : access E_Client1_Connect_Msg_Type;
+		    Id    : Erd.Op_Type;
+		    Name  : String;
+		    Class : Erd.Attr_Class;
+		    I     : Integer;
+		    X     : Long_Float;
+		    C     : Character;
+		    B     : Boolean;
+		    S     : String
+		   ) return Integer
+   is
+   begin
+      Earendil.Name_Server.Remove (E_Parset_Msg'Access);
+      Earendil.Name_Server.Remove (E_File_Msg'Access);
+      Earendil.Name_Server.Register 
+	("E_Parset_Msg", E_Parset_Msg'Access);
+      Earendil.Name_Server.Register
+	("E_File_Msg", E_File_Msg'Access);
+      Mr_P := Earendil.Name_Server.Find ("E_Reply_Msg");
+      return 0;
+   exception
+      when others => return -1;
+   end Handle;
+   
+   
+  
    function Handle (eM    : access E_Parset_Msg_Type;
 		    Id    : Erd.Op_Type;
 		    Name  : String;
@@ -124,8 +163,6 @@ package body Beren.Despatch is
       return M.Res;
    end Handle;
       
-   E_File_Msg   : aliased E_File_Msg_Type;
-   E_Parset_Msg : aliased E_Parset_Msg_Type;
 
    --  function Enum_Attr (Str : String) return String
    --  is
@@ -138,6 +175,8 @@ package body Beren.Despatch is
    --  end Enum_Attr;
    
 begin
+   Earendil.Name_Server.Register
+     ("Despatch_Socket", Despatch_Socket'Access);
    Earendil.Name_Server.Register 
      ("E_Parset_Msg", E_Parset_Msg'Access);
    Earendil.Name_Server.Register

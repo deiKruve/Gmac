@@ -33,11 +33,11 @@ package Earendil is
      -- Primitive dispatching operations where
      -- E_Obj_Msg_Type is controlling operand
      
-     --function Handle (M : access E_Obj_Msg_Type) return Integer is abstract;
-     type Op_Type is (Enum, Get, Set, Setpar, Load, Store);
+     type Op_Type is (Conn, Enum, Get, Set, Setpar, Load, Store);
      type Attr_Class is (Inval, Str, Int, Real, Char, Bool);
+     
      function Handle (eM    : access E_Obj_Msg_Type;
-		      Id    : Op_Type := Get;
+		      Id    : Op_Type := Conn;
 		      Name  : String := "";
 		      Class : Attr_Class := Inval;
 		      I     : Integer := 0;
@@ -47,6 +47,7 @@ package Earendil is
 		      S     : String := ""
 		     ) return Integer is abstract;
      
+   
 
 private
    type E_Obj_Msg_Type is abstract tagged limited 
