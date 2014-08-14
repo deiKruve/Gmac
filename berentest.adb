@@ -1,6 +1,8 @@
+with Vingilot;
 with Earendil.Objects;
 with Beren.Jogobj;
 with Beren.Despatch;
+with Beren.Despatch.Helpers;
 with Text_Io;
 with Ada.Text_IO.Text_Streams;
 with O_String;

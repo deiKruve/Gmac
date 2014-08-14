@@ -31,6 +31,7 @@
 with Earendil.Name_Server;
 with Earendil.Objects;
 with Beren.Jogobj;
+with Beren.Err;
 with O_String;
 
 package body Beren.Despatch is
@@ -39,9 +40,16 @@ package body Beren.Despatch is
    package Ens renames Earendil.Name_Server;
    package Bob renames Earendil.Objects;
    package Bjo renames Beren.Jogobj;
+   package Ber renames Beren.Err;
    package Obs renames O_String;
    
+   -- reply object pointer.
    Mr_P : Ens.E_Obj_Msg_Access_Type;
+   
+   
+   ------------------------------------------
+   -- message types this module can handle --
+   ------------------------------------------
    
    -- to receive connect request from the client
    type E_Client1_Connect_Msg_Type is new Erd.E_Obj_Msg_Type with null record;
@@ -73,6 +81,20 @@ package body Beren.Despatch is
 		   ) return Integer;
    
    
+   -- to enumerate the attributes in the system
+   type E_Enum_Msg_Type is new Erd.E_Obj_Msg_Type with null record;
+   overriding
+   function Handle (eM    : access E_Enum_Msg_Type;
+		    Id    : Erd.Op_Type;
+		    Name  : String;
+		    Class : Erd.Attr_Class;
+		    I     : Integer;
+		    X     : Long_Float;
+		    C     : Character;
+		    B     : Boolean;
+		    S     : String
+		   ) return Integer;
+   
    -- to receive a file message from the client 
    type E_File_Msg_Type is new Erd.E_Obj_Msg_Type with null record;
    Overriding
@@ -88,11 +110,18 @@ package body Beren.Despatch is
 		   ) return Integer;
   
    
-   -- the local connectors
+   -----------------------------------------
+   -- the local message connector objects --
+   -----------------------------------------
    E_File_Msg      : aliased E_File_Msg_Type;
+   E_Enum_Msg      : aliased E_Enum_Msg_Type;
    E_Parset_Msg    : aliased E_Parset_Msg_Type;
    Despatch_Socket : aliased E_Client1_Connect_Msg_Type;
    
+   
+   ----------------------
+   -- message handlers --
+   ----------------------
    
    -- handle a connection request
    function Handle (em    : access E_Client1_Connect_Msg_Type;
@@ -108,9 +137,12 @@ package body Beren.Despatch is
    is
    begin
       Earendil.Name_Server.Remove (E_Parset_Msg'Access);
+      Earendil.Name_Server.Remove (E_Enum_Msg'Access);
       Earendil.Name_Server.Remove (E_File_Msg'Access);
       Earendil.Name_Server.Register 
 	("E_Parset_Msg", E_Parset_Msg'Access);
+      Earendil.Name_Server.Register 
+	("E_Enum_Msg", E_Enum_Msg'Access);
       Earendil.Name_Server.Register
 	("E_File_Msg", E_File_Msg'Access);
       Mr_P := Earendil.Name_Server.Find ("E_Reply_Msg");
@@ -120,7 +152,7 @@ package body Beren.Despatch is
    end Handle;
    
    
-  
+   -- handle a parameter set request --
    function Handle (eM    : access E_Parset_Msg_Type;
 		    Id    : Erd.Op_Type;
 		    Name  : String;
@@ -141,6 +173,29 @@ package body Beren.Despatch is
       return M.Res;
    end Handle;
    
+   
+   -- handle an enumerate request --
+   function Handle (eM    : access E_Enum_Msg_Type;
+		    Id    : Erd.Op_Type;
+		    Name  : String;
+		    Class : Erd.Attr_Class;
+		    I     : Integer;
+		    X     : Long_Float;
+		    C     : Character;
+		    B     : Boolean;
+		    S     : String
+		   ) return Integer
+   is
+      M : Bjo.Attr_Msg;
+   begin
+      M.Id := Bob.Enum;
+      M.Enum := Enumerate;
+      Bob.Broadcast (M);
+      return 0;
+   end Handle;
+   
+   
+   -- handle a parameter read or write request --
    function Handle (Em    : access E_File_Msg_Type;
 		    Id    : Erd.Op_Type;
 		    Name  : String;
@@ -162,23 +217,79 @@ package body Beren.Despatch is
       Bob.Broadcast (M);
       return M.Res;
    end Handle;
-      
-
-   --  function Enum_Attr (Str : String) return String
-   --  is
-   --     M : Bjo.Attr_Msg;
-   --  begin
-   --     M.Id := Bob.Enum;
-   --     --M.Enum := Berentest1.Enumerate_Attr'access;
-   --     Bob.Broadcast (M);
-   --     return "Ok";
-   --  end Enum_Attr;
    
+   
+   --------------------
+   -- send a message --
+   --------------------
+   
+   -- send a reply to the client
+   procedure Send_Reply_Msg (Str : String)
+   is
+      Reply : Integer := Earendil.Handle (Em => Mr_P, Class => Erd.Str, S => Str);
+   begin
+      if Reply /= 0 then
+	 Ber.Report_Error ("Beren.Despatch.Send_Reply_Msg.Str : Error " & 
+			     Integer'Image (Reply));
+      end if;
+   end Send_Reply_Msg;
+   
+   
+   procedure Send_Reply_Msg (I : Integer)
+   is
+      Reply : Integer := Earendil.Handle (Em => Mr_P, Class => Erd.Int, I => I);
+   begin
+      if Reply /= 0 then
+	 Ber.Report_Error ("Beren.Despatch.Send_Reply_Msg.Str : Error " & 
+			     Integer'Image (Reply));
+      end if;
+   end Send_Reply_Msg;
+   
+   
+   procedure Send_Reply_Msg (X : Long_float)
+   is
+      Reply : Integer := Earendil.Handle (Em => Mr_P, Class => Erd.Real, X => X);
+    begin
+      if Reply /= 0 then
+	 Ber.Report_Error ("Beren.Despatch.Send_Reply_Msg.Float : Error " & 
+			     Integer'Image (Reply));
+      end if;
+    end Send_Reply_Msg;
+    
+   
+   procedure Send_Reply_Msg (C : Character)
+   is
+      Reply : Integer := Earendil.Handle (Em => Mr_P, Class => Erd.Char, C => C);
+   begin
+      if Reply /= 0 then
+	 Ber.Report_Error ("Beren.Despatch.Send_Reply_Msg.Char : Error " & 
+			     Integer'Image (Reply));
+      end if;
+   end Send_Reply_Msg;
+   
+   
+   procedure Send_Reply_Msg (B : Boolean)
+   is
+      Reply : Integer := Earendil.Handle (Em => Mr_P, Class => Erd.Bool, B => B);
+   begin
+      if Reply /= 0 then
+	 Ber.Report_Error ("Beren.Despatch.Send_Reply_Msg.Bool : Error " & 
+			     Integer'Image (Reply));
+      end if;
+   end Send_Reply_Msg;
+   
+    
+
+
+  
 begin
+   -- register the local message object connectors.
    Earendil.Name_Server.Register
      ("Despatch_Socket", Despatch_Socket'Access);
    Earendil.Name_Server.Register 
      ("E_Parset_Msg", E_Parset_Msg'Access);
+   Earendil.Name_Server.Register 
+     ("E_Enum_Msg", E_Enum_Msg'Access);
    Earendil.Name_Server.Register
      ("E_File_Msg", E_File_Msg'Access);
 

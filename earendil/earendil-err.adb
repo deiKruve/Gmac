@@ -1,10 +1,10 @@
 ------------------------------------------------------------------------------
 --                                                                          --
---                             EARENDIL COMPONENTS                          --
+--                            EARENDIL COMPONENTS                           --
 --                                                                          --
---                    E A R E N D I L . D E S P A T C H E R                 --
+--                          E A R E N D I L . E R R                         --
 --                                                                          --
---                                  S p e c                                 --
+--                                  B o d y                                 --
 --                                                                          --
 --                     Copyright (C) 2014, Jan de Kruyf                     --
 --                                                                          --
@@ -21,22 +21,38 @@
 -- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
 -- <http://www.gnu.org/licenses/>.                                          --
 --                                                                          --
---                 Earendil is maintained by J de Kruijf Engineers             --
+--               Earendil is maintained by J de Kruijf Engineers            --
 --                     (email: jan.de.kruyf@hotmail.com)                    --
 --                                                                          --
 ------------------------------------------------------------------------------
 --
+-- error handling for Earendil modules
 
-package Earendil.Despatcher is
-   pragma Pure(Earendil.Despatcher);
-    type Despatch is abstract tagged limited private;
-    -- Primitive dispatching operations where
-    -- despatch is controlling operand
-    
-    
-    --procedure Copy (From, To : access Tape; Num_Recs : in Natural) is abstract;
-    --procedure Rewind (T : access Tape) is abstract;
-    -- More operations
-private
-    type Despatch is function (Msg : String) return String;
-end Earendil.Despatcher;
+with GNATCOLL.Traces;
+
+package body Earendil.Err is
+   package Gct renames GNATCOLL.Traces;
+ 
+   -------------------
+   -- handle errors --
+   -------------------
+   -- logging
+   Stream1 : constant Gct.Trace_Handle := Gct.Create ("EARENDIL");
+   Stream2 : constant Gct.Trace_Handle := 
+     Gct.Create ("EARENDIL.EXCEPTIONS");
+   Debug_Str : constant Gct.Trace_Handle := Gct.Create ("EARENDIL.DEBUG");
+
+   
+   --Error_Reported : Boolean := False;
+   
+   procedure Report_Error (Err_Str : String)
+   is
+   begin
+      --M_Report_Error (Err_Str);
+      Gct.Trace (Stream1, Err_Str);
+   end Report_Error;
+   pragma Inline (Report_Error);
+   
+begin
+   Gct.Parse_Config_File;   --  parses default ./.gnatdebug
+end Earendil.Err;

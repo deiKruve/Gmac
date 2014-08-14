@@ -2,9 +2,9 @@
 --                                                                          --
 --                             BEREN COMPONENTS                             --
 --                                                                          --
---                       B E R E N . D E S P A T C H                        --
+--                         B E R E N . H E L P E R S                        --
 --                                                                          --
---                                  S p e c                                 --
+--                                  B o d y                                 --
 --                                                                          --
 --                     Copyright (C) 2014, Jan de Kruyf                     --
 --                                                                          --
@@ -27,18 +27,8 @@
 ------------------------------------------------------------------------------
 --
 
---Tape.driver
-
-with Beren.Jogobj;
-package Beren.Despatch is 
-   pragma Elaborate_Body;
-  
-private
-   procedure Send_Reply_Msg (Str : String);
-   procedure Send_Reply_Msg (I : Integer);
-   procedure Send_Reply_Msg (X : Long_float);
-   procedure Send_Reply_Msg (C : Character);
-   procedure Send_Reply_Msg (B : Boolean);
+package body Beren.Helpers is
    
-   Enumerate : access procedure (Name : String; M : Beren.Jogobj.Attr_Msg);
-end Beren.Despatch;
+   procedure Eneumerate_Attr;
+   
+end Beren.Helpers;

@@ -1,8 +1,8 @@
 ------------------------------------------------------------------------------
 --                                                                          --
---                             BEREN COMPONENTS                             --
+--                            EARENDIL COMPONENTS                           --
 --                                                                          --
---                       B E R E N . D E S P A T C H                        --
+--                          E A R E N D I L . E R R                         --
 --                                                                          --
 --                                  S p e c                                 --
 --                                                                          --
@@ -21,24 +21,19 @@
 -- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
 -- <http://www.gnu.org/licenses/>.                                          --
 --                                                                          --
---                 Beren is maintained by J de Kruijf Engineers             --
+--               Earendil is maintained by J de Kruijf Engineers            --
 --                     (email: jan.de.kruyf@hotmail.com)                    --
 --                                                                          --
 ------------------------------------------------------------------------------
 --
+-- error handling for Earendil modules
 
---Tape.driver
-
-with Beren.Jogobj;
-package Beren.Despatch is 
-   pragma Elaborate_Body;
-  
-private
-   procedure Send_Reply_Msg (Str : String);
-   procedure Send_Reply_Msg (I : Integer);
-   procedure Send_Reply_Msg (X : Long_float);
-   procedure Send_Reply_Msg (C : Character);
-   procedure Send_Reply_Msg (B : Boolean);
+package Earendil.Err is
    
-   Enumerate : access procedure (Name : String; M : Beren.Jogobj.Attr_Msg);
-end Beren.Despatch;
+   procedure Report_Error (Err_Str : String);
+      
+   -- so we can report errors to the real time thread.
+   type Error_Reporter_Type is access procedure (Err_Str : String);
+   M_Report_Error : Error_Reporter_Type;
+
+end Earendil.Err;

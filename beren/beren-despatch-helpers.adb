@@ -2,9 +2,9 @@
 --                                                                          --
 --                             BEREN COMPONENTS                             --
 --                                                                          --
---                       B E R E N . D E S P A T C H                        --
+--                B E R E N . D E S P A T C H . H E L P E R S               --
 --                                                                          --
---                                  S p e c                                 --
+--                                  B o d y                                 --
 --                                                                          --
 --                     Copyright (C) 2014, Jan de Kruyf                     --
 --                                                                          --
@@ -26,19 +26,52 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --
-
---Tape.driver
-
+with O_String;
 with Beren.Jogobj;
-package Beren.Despatch is 
-   pragma Elaborate_Body;
-  
-private
-   procedure Send_Reply_Msg (Str : String);
-   procedure Send_Reply_Msg (I : Integer);
-   procedure Send_Reply_Msg (X : Long_float);
-   procedure Send_Reply_Msg (C : Character);
-   procedure Send_Reply_Msg (B : Boolean);
+
+package body Beren.Despatch.Helpers is
+   package Bjo renames Beren.Jogobj;
+   package Obs renames O_String;
    
-   Enumerate : access procedure (Name : String; M : Beren.Jogobj.Attr_Msg);
-end Beren.Despatch;
+   procedure Enumerate_Attr (Name : String; M : Beren.Jogobj.Attr_Msg)
+   is
+      use type Bjo.Attr_Class;
+   begin
+      case M.Class is
+	 when Bjo.Str  =>  Send_Reply_Msg (Obs.To_String (M.S));
+	 when Bjo.Int  => 
+	    declare
+	       Rstr  : String := Integer'Image (M.I);
+	    begin
+	       Send_Reply_Msg 
+		 (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
+	    end;
+	 when Bjo.Real => 
+	    declare 
+	       Rstr : String := Long_Float'Image (M.X);
+	    begin
+	       Send_Reply_Msg 
+		 (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
+	    end;
+	 when Bjo.Char => Send_Reply_Msg (M.C);
+	 when Bjo.Bool => 
+	    declare
+	       Rstr  : String := Boolean'Image (M.B);
+	    begin
+	       Send_Reply_Msg 
+		 (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
+	    end;
+	 when Bjo.Enum => 
+	    declare
+	       Rstr  : String := Bjo.Pulse_Mode_Enumeration_Type'Image (M.E);
+	    begin
+	       Send_Reply_Msg 
+		 (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
+	    end;
+	 when others   => null;
+      end case;
+   end Enumerate_Attr;
+   
+begin
+   Enumerate := Enumerate_Attr'Access;   
+end Beren.Despatch.Helpers;

@@ -2,9 +2,9 @@
 --                                                                          --
 --                             EARENDIL COMPONENTS                          --
 --                                                                          --
---                               E A R E N D I L                            --
+--                               V I N G I L O T                            --
 --                                                                          --
---                                  S p e c                                 --
+--                                  B o d y                                 --
 --                                                                          --
 --                     Copyright (C) 2014, Jan de Kruyf                     --
 --                                                                          --
@@ -26,31 +26,66 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --
---
+-- This is a first try at a terminal for earendil.
 
-package Earendil is
-   pragma Pure(Earendil);
-     type E_Obj_Msg_Type is abstract tagged limited private;
-     -- Primitive dispatching operations where
-     -- E_Obj_Msg_Type is controlling operand
-     
-     type Op_Type is (Conn, Enum, Get, Set, Setpar, Load, Store);
-     type Attr_Class is (Inval, Str, Int, Real, Char, Bool);
-     
-     function Handle (eM    : access E_Obj_Msg_Type;
-		      Id    : Op_Type := Conn;
-		      Name  : String := "";
-		      Class : Attr_Class := Inval;
-		      I     : Integer := 0;
-		      X     : Long_Float := 0.0;
-		      C     : Character := 'a';
-		      B     : Boolean := false;
-		      S     : String := ""
-		     ) return Integer is abstract;
-     
+-- these must move to their own partition ultimately
+--with Beren.Despatch.Helpers;
+--with Berentest1;
+
+with Earendil.Client1;
+with Vingilot_Helpers;
+with Ada.Text_IO;
+with Ada.Characters.Latin_1;
+
+procedure Vingilot is
    
-
-private
-   type E_Obj_Msg_Type is abstract tagged limited null record;
-    
-end Earendil;
+   package Erd renames Earendil;
+   package Ec1 renames Earendil.Client1;
+   package Tio renames Ada.Text_IO;
+   package Chr renames Ada.Characters.Latin_1;
+   
+   J, K : Integer;
+begin
+   Ec1.String_Displayer := Vingilot_Helpers.Str_Display'Access;
+   loop
+      Tio.Put ("vingilot >> ");
+      declare 
+	 S : String := Tio.Get_Line;
+      begin
+	 Tio.Put_Line ("string: " & S);
+	 -- find 1st space:
+	 for I in S'First .. S'Last loop
+	    exit when S (Integer (I)) in ' ' | Chr.Cr;
+	    K := Integer (I);
+	 end loop;
+	 J := K + 1;
+	 for I in J .. S'Last loop
+	    exit when S (i) /= ' ';
+	    J := J + 1;
+	 end loop;
+	 declare 
+	    Command : String := S (S'First .. S'First + K - 1);-- & "@";
+	    Argument : String := S (J .. S'Last);-- & "@";
+	 begin
+	    Tio.Put_Line ("Command  : " & Command);
+	    Tio.Put_Line ("Argument : " & Argument);
+	    if Command = "setpar" then
+	       Ec1.Send_Parset_Msg (S (J .. S'Last));
+	       null;
+	    elsif Command = "load" then
+	       Ec1.Send_File_Msg (S (J .. S'Last), Erd.Load);
+	       null;
+	    elsif Command = "store" then
+	       Ec1.Send_File_Msg (S (J .. S'Last), Erd.Store);
+	       null;
+	    elsif Command = "enum" then
+	       Ec1.Send_Enum_Msg;
+	       null;
+	    else Tio.Put_Line ("  command syntax error.");
+	    end if; -- command
+	 end;
+      end;
+   end loop;
+exception
+   when others => Tio.Put_Line ("-------------------> No connection.");
+end Vingilot;

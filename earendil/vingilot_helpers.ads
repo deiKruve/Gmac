@@ -1,10 +1,10 @@
 ------------------------------------------------------------------------------
 --                                                                          --
---                             BEREN COMPONENTS                             --
+--                             EARENDIL COMPONENTS                          --
 --                                                                          --
---                       B E R E N . D E S P A T C H                        --
+--                       V I N G I L O T . H E L P E R S                    --
 --                                                                          --
---                                  S p e c                                 --
+--                                  B o d y                                 --
 --                                                                          --
 --                     Copyright (C) 2014, Jan de Kruyf                     --
 --                                                                          --
@@ -21,24 +21,15 @@
 -- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
 -- <http://www.gnu.org/licenses/>.                                          --
 --                                                                          --
---                 Beren is maintained by J de Kruijf Engineers             --
+--                 Earendil is maintained by J de Kruijf Engineers             --
 --                     (email: jan.de.kruyf@hotmail.com)                    --
 --                                                                          --
 ------------------------------------------------------------------------------
 --
+-- This is a first try at a terminal for earendil, the extra routines
 
---Tape.driver
-
-with Beren.Jogobj;
-package Beren.Despatch is 
-   pragma Elaborate_Body;
-  
-private
-   procedure Send_Reply_Msg (Str : String);
-   procedure Send_Reply_Msg (I : Integer);
-   procedure Send_Reply_Msg (X : Long_float);
-   procedure Send_Reply_Msg (C : Character);
-   procedure Send_Reply_Msg (B : Boolean);
+package Vingilot_Helpers is
    
-   Enumerate : access procedure (Name : String; M : Beren.Jogobj.Attr_Msg);
-end Beren.Despatch;
+   procedure Str_Display (S : String);
+   
+end Vingilot_Helpers;

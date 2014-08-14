@@ -26,7 +26,18 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --
+with Earendil;
 
-package Earendil.Client1 with Elaborate_Body Is
+package Earendil.Client1 with Elaborate_Body is
    
+   -- send a parameter set message to despatcher
+   procedure Send_Parset_Msg (Str : String);
+   
+   -- send a load or store message
+   procedure Send_File_Msg (Str : String; Id : Earendil.Op_Type);
+   
+   -- send an enumeration message
+    procedure Send_Enum_Msg;
+   
+   String_Displayer : access procedure (S: String);
 end Earendil.Client1;
