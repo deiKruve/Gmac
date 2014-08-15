@@ -29,31 +29,38 @@
 -- This is a first try at a terminal for earendil.
 
 -- these must move to their own partition ultimately
---with Beren.Despatch.Helpers;
---with Berentest1;
+with Beren.Despatch.Helpers;
+with Berentest1;
+with Beren.Thread;
 
 with Earendil.Client1;
 with Vingilot_Helpers;
 with Ada.Text_IO;
+with Ada.Text_IO.Text_Streams;
 with Ada.Characters.Latin_1;
+with Ada.Strings.Unbounded;
 
 procedure Vingilot is
-   
-   package Erd renames Earendil;
-   package Ec1 renames Earendil.Client1;
-   package Tio renames Ada.Text_IO;
-   package Chr renames Ada.Characters.Latin_1;
+   package Vh   renames Vingilot_Helpers;
+   package Erd  renames Earendil;
+   package Ec1  renames Earendil.Client1;
+   package Tio  renames Ada.Text_IO;
+   package Tiots renames Ada.Text_IO.Text_Streams;
+   package Chr  renames Ada.Characters.Latin_1;
+   package Aubs renames Ada.Strings.Unbounded;
    
    J, K : Integer;
 begin
-   Ec1.String_Displayer := Vingilot_Helpers.Str_Display'Access;
+   Ec1.String_Displayer := Vh.Str_Display'Access;
+   Ec1.Send_Connect_Msg;
    loop
       Tio.Put ("vingilot >> ");
       declare 
 	 S : String := Tio.Get_Line;
       begin
-	 Tio.Put_Line ("string: " & S);
+	 --Tio.Put_Line ("string: " & S);
 	 -- find 1st space:
+	 K := 0;
 	 for I in S'First .. S'Last loop
 	    exit when S (Integer (I)) in ' ' | Chr.Cr;
 	    K := Integer (I);
@@ -63,29 +70,32 @@ begin
 	    exit when S (i) /= ' ';
 	    J := J + 1;
 	 end loop;
-	 declare 
-	    Command : String := S (S'First .. S'First + K - 1);-- & "@";
-	    Argument : String := S (J .. S'Last);-- & "@";
-	 begin
-	    Tio.Put_Line ("Command  : " & Command);
-	    Tio.Put_Line ("Argument : " & Argument);
-	    if Command = "setpar" then
-	       Ec1.Send_Parset_Msg (S (J .. S'Last));
-	       null;
-	    elsif Command = "load" then
-	       Ec1.Send_File_Msg (S (J .. S'Last), Erd.Load);
-	       null;
-	    elsif Command = "store" then
-	       Ec1.Send_File_Msg (S (J .. S'Last), Erd.Store);
-	       null;
-	    elsif Command = "enum" then
-	       Ec1.Send_Enum_Msg;
-	       null;
-	    else Tio.Put_Line ("  command syntax error.");
-	    end if; -- command
-	 end;
+	 if K > 1 then
+	    declare 
+	       Command : String := S (S'First .. S'First + K - 1);-- & "@";
+	       Argument : String := S (J .. S'Last);-- & "@";
+	    begin
+	       --Tio.Put_Line ("Command  : " & Command);
+	       --Tio.Put_Line ("Argument : " & Argument);
+	       if Command = "setpar" then
+		  Ec1.Send_Parset_Msg (S (J .. S'Last));
+		  null;
+	       elsif Command = "load" then
+		  Ec1.Send_File_Msg (S (J .. S'Last), Erd.Load);
+		  null;
+	       elsif Command = "store" then
+		  Ec1.Send_File_Msg (S (J .. S'Last), Erd.Store);
+		  null;
+	       elsif Command = "enum" then
+		  Vh.Patrn := Aubs.To_Unbounded_String (Argument);
+		  Ec1.Send_Enum_Msg;
+		  null;
+	       else Tio.Put_Line ("  command syntax error.");
+	       end if; -- command
+	    end;
+	 end if; --k > 1
       end;
    end loop;
-exception
-   when others => Tio.Put_Line ("-------------------> No connection.");
+--exception
+--   when others => Tio.Put_Line ("-------------------> No connection.");
 end Vingilot;

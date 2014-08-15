@@ -37,7 +37,10 @@ package Earendil.Client1 with Elaborate_Body is
    procedure Send_File_Msg (Str : String; Id : Earendil.Op_Type);
    
    -- send an enumeration message
-    procedure Send_Enum_Msg;
+   procedure Send_Enum_Msg;
+   
+   -- send a connect message
+   procedure Send_Connect_Msg;
    
    String_Displayer : access procedure (S: String);
 end Earendil.Client1;

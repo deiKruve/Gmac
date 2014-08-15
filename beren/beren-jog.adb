@@ -32,9 +32,10 @@ with Ada.Numerics;
 with Gmactextscan;
 with O_String;
 with Beren.Err;
-
+--with Ada.Text_IO;--for debug
+--with Ada.Text_IO.Text_Streams;--debug
 package body Beren.Jog is
-   
+   --package Tio  renames Ada.Text_IO;--for debug
    package Gts renames Gmactextscan;
    package Obs renames O_String;
    package Bob renames Earendil.Objects;
@@ -278,26 +279,32 @@ package body Beren.Jog is
 	 use type Gts.Extended_Token_Type;
       begin
 	 if M.Id = Bob.Store then
-	    String'Write (M.Ostr, "" & Name & " = {");
-	    if Xis = Linear then 
-	       declare 
-		  Ustr : String := " m/min}";
-	       begin
-		  String'Write (M.Ostr, "Jog_Rate = {" & 
-				  Mpsec_Type'Image (Obj.Jog_Rate * 60.0) &
-				  Ustr);
-	       end;
-	    elsif Xis = Rotary then
-	       declare 
-		  Ustr : String := " deg/min}";
-	       begin
-		  String'Write 
-		    (M.Ostr, "Jog_Rate = {" & 
-		       Mpsec_Type'Image (To_Degrees (Obj.Jog_Rate) * 60.0) &
-		       Ustr);
-	       end;
-	    end if;
-	    String'Write (M.Ostr, "}" & ASCII.LF);
+	    declare
+	    begin
+	       String'Write (M.Ostr, "" & Name & " = {");
+	       if Xis = Linear then 
+		  declare 
+		     Ustr : String := " m/min}";
+		  begin
+		     String'Write (M.Ostr, "Jog_Rate = {" & 
+				     Mpsec_Type'Image (Obj.Jog_Rate * 60.0) &
+				     Ustr);
+		  end;
+	       elsif Xis = Rotary then
+		  declare 
+		     Ustr : String := " deg/min}";
+		  begin
+		     String'Write 
+		       (M.Ostr, "Jog_Rate = {" & 
+			  Mpsec_Type'Image (To_Degrees (Obj.Jog_Rate) * 60.0) &
+			  Ustr);
+		  end;
+	       end if;
+	       String'Write (M.Ostr, "}" & ASCII.LF);
+	       M.Res := -1; -- success with this unit
+	    exception
+	       when others => M.Res := 4; -- disk full
+	    end;
 	 elsif M.Id = Bob.Load then
 	    Token := Gts.Find_Parameter ("Machine." & Name & ".Jog_Rate");
 	    --Tio.Put_Line ("debugger" & Gts.String_Value);
@@ -329,9 +336,14 @@ package body Beren.Jog is
 		     Done := True;
 		     exit;
 		  end loop;
+	       when Gts.Error =>
+		  Ber.Report_Error 
+		    ("gmac.text: " & Name & " : attr. name not known.");
+		  M.Res := 1; -- attr. name not known.
 	       when others    =>
 		  Ber.Report_Error 
 		    ("gmac.text: " & Name & ".Jog_Rate -> expected a float value.");
+		  M.Res := 3; -- exception in conversion
 	    end case;
 
 	    if not Done then
@@ -345,7 +357,7 @@ package body Beren.Jog is
 		    ("gmac.text: " & Name & 
 		       ".Jog_Rate -> expected deg/min or rad/min.");
 	       end if;
-	       M.Res := 1; -- error - not Done
+	       M.Res := 2; -- error - wrong units
 	    else
 	       Jogger.Jog_Rate := Ljograte;
 	       M.Res := 0;

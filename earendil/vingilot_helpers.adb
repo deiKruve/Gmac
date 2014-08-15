@@ -28,16 +28,84 @@
 --
 -- This is a first try at a terminal for earendil, the extra routines
 
-with Ada.Text_IO;
+with GNAT.Expect;
+
 package body Vingilot_Helpers is
    
-   package Tio renames Ada.Text_IO;
+   package Tio  renames Ada.Text_IO;
+   package Tiots renames Ada.Text_IO.Text_Streams;
+   package Gex  renames GNAT.Expect;
+   package Aubs renames Ada.Strings.Unbounded;
    
+   ------------------------------------------------
+   -- dislay the output of the enum command      --
+   -- the argument is used as a pattern for grep --
+   -- so a partial enumeration is possible       --
+   ------------------------------------------------
    procedure Str_Display (S : String)
    is
+      Status : aliased Integer := 0;
+      Sr : String := Gex.Get_Command_Output
+	(Command   => "grep",
+	 Arguments => (new String'("-i"), 
+		       new String'("-e" & Aubs.To_String (Patrn)), 
+		       new String'("-")),
+	 Input     => S,
+	 Status    => Status'access);
    begin
-      Tio.Put_Line (S);
+      if Status = 0 then
+	 Tio.Put_Line (sr);
+      end if;
    end Str_Display;
+   
+   
+   --  ----------------------------------
+   --  -- parameter file handling      --
+   --  -- not  used here at the moment --
+   --  ----------------------------------
+   
+   --  -- open a file for writing, or std.out --
+   --  procedure Open_Out_File (Name : String := ""; 
+   --  			     Ofd  : out Tio.File_Type; 
+   --  			     Ostr : out Tiots.Stream_Access)
+   --  is
+   --  begin
+   --     if Name = "" then
+   --  	 Ofd  := Tio.Standard_Output;
+   --  	 Ostr := Tiots.Stream (Tio.Standard_Output);
+   --     else
+   --  	 declare
+   --  	 begin
+   --  	    Tio.Open (File => Ofd, Mode => Tio.Out_File, 
+   --  		      Name => Name);
+   --  	 exception 
+   --  	    when Tio.Name_error =>
+   --  	       Tio.Create (File => Ofd, Mode => Tio.Out_File, 
+   --  			   Name => Name);
+   --  	 end;
+   --  	 Ostr := Tiots.Stream (Ofd);
+   --     end if;
+   --  exception
+   --     when others =>
+   --  	 Ofd  := Tio.Standard_Output;
+   --  	 Ostr := Tiots.Stream (Tio.Standard_Output);
+   --  end Open_Out_File;
+   
+   
+   --  -- open a file for reading --
+   --  function Open_In_File (Name : String := ""; 
+   --  			  Ifd  : out Tio.File_Type; 
+   --  			  Istr : out Tiots.Stream_Access)
+   --  is
+   --  begin
+   --     Tio.Open (File => Ifd, Mode => Tio.In_File, 
+   --  		Name => Name);
+   --     Istr := Tiots.Stream (Ifd);
+   --  exception when others =>
+   --     Tio.Put_Line ("file could not be found.");
+   --     Ofd  := null;
+   --     Ostr := null;
+   --  end Open_In_File;
    
 end Vingilot_Helpers;
 

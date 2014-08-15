@@ -26,8 +26,8 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --
+-- the server
 
---Tape.driver -- the server
 with Earendil.Name_Server;
 with Earendil.Objects;
 with Beren.Jogobj;
@@ -35,7 +35,9 @@ with Beren.Err;
 with O_String;
 
 package body Beren.Despatch is
-   
+   package Tio   renames Ada.Text_IO;
+   package Tiots renames Ada.Text_IO.Text_Streams;
+ 
    package Erd renames Earendil;
    package Ens renames Earendil.Name_Server;
    package Bob renames Earendil.Objects;
@@ -208,13 +210,39 @@ package body Beren.Despatch is
 		   ) return Integer
    is
       use type Erd.Op_Type;
+      use type Ada.Text_Io.Text_Streams.Stream_Access;
       M : Bob.File_Msg;
+      Fd  : Tio.File_Type; 
+      Ostr : Tiots.Stream_Access;
+      Istr : Tiots.Stream_Access;
    begin
-      if Id = Erd.Load then M.Id := Bob.Load;
-      elsif Id = Erd.Store then M.Id := Bob.Store;
+      if Id = Erd.Load then 
+	 M.Id := Bob.Load;
+	 Open_In_File (S, fd, Istr);
+	 if Istr /= null then
+	    M.Ostr := Istr;
+	 else return -1;
+	 end if;
+      elsif Id = Erd.Store then 
+	 M.Id := Bob.Store;
+	 Open_Out_File (S, fd, Ostr);
+	 --  if Ostr /= null then--debug
+	 --        Tio.Put_Line ("despatch, we got here");
+	 --  elsif  Ostr = null then--debug
+	 --        Tio.Put_Line ("despatch, we got here, it is null");
+	 --  end if;
+	 if Ostr /= null then
+	    M.Ostr := Ostr;
+	 else return -1;
+	 end if;
       end if;
-      M.Ostr := null;----------------------------------------------------ps
       Bob.Broadcast (M);
+      declare
+      begin
+	 Tio.Close (Fd);
+      exception
+	 when others => null;
+      end;
       return M.Res;
    end Handle;
    

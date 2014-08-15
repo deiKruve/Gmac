@@ -296,9 +296,9 @@ package body Beren.Hw is
 		  end;
 	       end if;
 	       String'Write (M.Ostr, "}" & ASCII.LF);
-	       M.Res := 0; -- always??
+	       M.Res := -1; -- success with this unit
 	    exception
-	       when others => M.Res := 1; -- disk full
+	       when others => M.Res := 4; -- disk full
 	    end;
 	 elsif M.Id = Bob.Load then
 	    Token := Gts.Find_Parameter ("Machine." & Name & ".Jog_Rate");
@@ -330,9 +330,14 @@ package body Beren.Hw is
 		     Done := True;
 		     exit;
 		  end loop;
+	       when Gts.Error =>
+		  Ber.Report_Error 
+		    ("gmac.text: " & Name & " : attr. name not known.");
+		  M.Res := 1; -- attr. name not known.
 	       when others    =>
 		  Ber.Report_Error 
 		    ("gmac.text: " & Name & ".Jog_Rate -> expected a float value.");
+		  M.Res := 3; -- exception in conversion
 	    end case;
 
 	    if not Done then
@@ -346,7 +351,7 @@ package body Beren.Hw is
 		    ("gmac.text: " & Name & 
 		       ".Jog_Rate -> expected deg/min or rad/min.");
 	       end if;
-	       M.Res := 1; -- error - not Done
+	       M.Res := 2; -- error - wrong units.
 	    else -- Done
 	       Jogger.Jog_Rate := Ljograte;
 	       M.Res := 0;

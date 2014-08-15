@@ -26,10 +26,15 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --
+with Ada.Text_IO;
+with Ada.Text_IO.Text_Streams;
 with O_String;
 with Beren.Jogobj;
 
 package body Beren.Despatch.Helpers is
+   package Tio   renames Ada.Text_IO;
+   package Tiots renames Ada.Text_IO.Text_Streams;
+   
    package Bjo renames Beren.Jogobj;
    package Obs renames O_String;
    
@@ -72,6 +77,62 @@ package body Beren.Despatch.Helpers is
       end case;
    end Enumerate_Attr;
    
+   
+   ----------------------------------
+   -- parameter file handling      --
+   -- not  used here at the moment --
+   ----------------------------------
+   
+   -- open a file for writing, or std.out --
+   procedure Opens_Out_File (Name : String := ""; 
+			     Ofd  : in out Tio.File_Type; 
+			     Ostr : in out Tiots.Stream_Access)
+   is
+   begin
+      if Name = "" then
+	 Send_Reply_Msg ("file could not be found.");
+	 --Ofd  := Tio.Standard_Output; --Tio.Standard_Output;
+	 Ostr := Tiots.Stream (Tio.Standard_Output);
+	 --Tio.Put_Line("we got here1");
+      else
+	 declare
+	 begin
+	    Tio.Open (File => Ofd, Mode => Tio.Out_File, 
+		      Name => Name);
+	 exception 
+	    when Tio.Name_error =>
+	       Tio.Create (File => Ofd, Mode => Tio.Out_File, 
+			   Name => Name);
+	 end;
+	 Ostr := Tiots.Stream (Ofd);
+	 --Tio.Put_Line("we got here2");
+      end if;
+   exception
+      when others =>
+	 Send_Reply_Msg ("file could not be found.");
+	 --Ofd  := Tio.Standard_Output; --Tio.Standard_Output;
+	 Ostr := Tiots.Stream (Tio.Standard_Output);
+   end Opens_Out_File;
+   
+   
+   -- open a file for reading --
+   procedure Opens_In_File (Name : String := ""; 
+			   Ifd  : in out Tio.File_Type; 
+			   Istr : in out Tiots.Stream_Access)
+   is
+   begin
+      Tio.Open (File => Ifd, Mode => Tio.In_File, 
+		Name => Name);
+      Istr := Tiots.Stream (Ifd);
+   exception when others =>
+      Send_Reply_Msg ("file could not be found.");
+      -- Tio.Put_Line ("file could not be found.");
+      --ifd  := null;
+      istr := null;
+   end Opens_In_File;
+   
 begin
-   Enumerate := Enumerate_Attr'Access;   
+   Enumerate     := Enumerate_Attr'Access;
+   Open_Out_File := Opens_Out_File'Access;
+   Open_In_File  := Opens_In_File'Access;
 end Beren.Despatch.Helpers;

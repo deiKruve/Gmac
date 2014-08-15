@@ -39,7 +39,7 @@ package body Earendil.Client1 is
    package Ens renames Earendil.Name_Server;
    
    -- remote connector object pointers.
-   Mp_P, Mf_P, Me_P : Ens.E_Obj_Msg_Access_Type;
+   Mp_P, Mf_P, Me_P, Mc_P : Ens.E_Obj_Msg_Access_Type;
    
    
    ------------------------------------------
@@ -142,8 +142,17 @@ package body Earendil.Client1 is
    procedure Send_Parset_Msg (Str : String)
    is
       Reply : Integer := Earendil.Handle (Em => Mp_P, S => Str);
-    begin
-      if Reply /= 0 then
+   begin
+      if Reply = 1 then
+	 Eer.Report_Error ("Client1.Send_ParSet_Msg : Error " & 
+			     Integer'Image (Reply) & " attr. name not known.");
+      elsif Reply = 2 then 
+	 Eer.Report_Error ("Client1.Send_ParSet_Msg : Error " & 
+			     Integer'Image (Reply) & " wrong units.");
+      elsif Reply = 3 then
+	 Eer.Report_Error ("Client1.Send_ParSet_Msg : Error " & 
+			     Integer'Image (Reply) & " expected a float value.");
+      elsif Reply /= 0 then -- '0' says the par was set;
 	 Eer.Report_Error ("Client1.Send_ParSet_Msg : Error " & 
 			     Integer'Image (Reply));
       end if;
@@ -154,10 +163,22 @@ package body Earendil.Client1 is
     is
        Reply : Integer := Earendil.Handle (Em => Mf_P, Id => Id, S => Str);
     begin
-      if Reply /= 0 then
+       if Reply = 1 then
 	 Eer.Report_Error ("Client1.Send_File_Msg : Error " & 
-			     Integer'Image (Reply));
-      end if;
+			     Integer'Image (Reply) & " attr. name not known.");
+       elsif Reply = 2 then 
+	 Eer.Report_Error ("Client1.Send_File_Msg : Error " & 
+			     Integer'Image (Reply) & " wrong units.");
+       elsif Reply = 3 then
+	  Eer.Report_Error ("Client1.Send_File_Msg : Error " & 
+			      Integer'Image (Reply) & " expected a float value.");
+       elsif Reply = 4 then
+	  Eer.Report_Error ("Client1.Send_File_Msg : Error " & 
+			      Integer'Image (Reply) & " disk full.");
+       elsif Reply > 0 then
+	  Eer.Report_Error ("Client1.Send_File_Msg : Error " & 
+			      Integer'Image (Reply));
+       end if;
     end Send_File_Msg;
     
     
@@ -166,11 +187,29 @@ package body Earendil.Client1 is
     is
        Reply : Integer := Earendil.Handle (Em => Me_P);
     begin
-       if Reply /= 0 then
+       if Reply > 0 then
 	 Eer.Report_Error ("Client1.Send_Enum_Msg : Error " & 
 			     Integer'Image (Reply));
        end if;
     end Send_Enum_Msg;
+    
+    
+    -- send a connect message
+    procedure Send_Connect_Msg
+    is
+       Reply : Integer;
+    begin
+       Mc_P  := Ens.Find ("Despatch_Socket");
+       Reply := Earendil.Handle (Em => Mc_P);
+       if Reply /= 0 then
+	 Eer.Report_Error ("Client1.Send_Connect_Msg : Error " & 
+			     Integer'Image (Reply));
+       end if;
+       -- find the remote connectors.
+       Mp_P := Ens.Find ("E_Parset_Msg");
+       Mf_P := Ens.Find ("E_File_Msg");
+       Me_P := Ens.Find ("E_Enum_Msg");
+    end Send_Connect_Msg;
     
    
 begin

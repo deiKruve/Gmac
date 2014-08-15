@@ -28,8 +28,23 @@
 --
 -- This is a first try at a terminal for earendil, the extra routines
 
+with Ada.Strings.Unbounded;
+with Ada.Text_IO;
+with Ada.Text_IO.Text_Streams;
+
 package Vingilot_Helpers is
    
+   Patrn : Ada.Strings.Unbounded.Unbounded_String;
+   
    procedure Str_Display (S : String);
+   
+   --  procedure Open_Out_File (Name : String := ""; 
+   --  			    Ofd  : out Ada.Text_IO.File_Type; 
+   --  			    Ostr : out Ada.Text_IO.Text_Streams.Stream_Access);
+   
+   
+   --  procedure Open_In_File (Name : String := ""; 
+   --  			  Ofd  : out Ada.Text_IO.File_Type; 
+   --  			  Ostr : out Ada.Text_IO.Text_Streams.Stream_Access);
    
 end Vingilot_Helpers;

@@ -26,10 +26,11 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --
-
---Tape.driver
+with Ada.Text_IO;
+with Ada.Text_IO.Text_Streams;
 
 with Beren.Jogobj;
+
 package Beren.Despatch is 
    pragma Elaborate_Body;
   
@@ -40,5 +41,13 @@ private
    procedure Send_Reply_Msg (C : Character);
    procedure Send_Reply_Msg (B : Boolean);
    
-   Enumerate : access procedure (Name : String; M : Beren.Jogobj.Attr_Msg);
+   Enumerate     : access procedure (Name : String; M : Beren.Jogobj.Attr_Msg);
+   Open_Out_File : access procedure 
+     (Name : String := ""; 
+      Ofd  : in out Ada.Text_IO.File_Type; 
+      Ostr : in out Ada.Text_IO.Text_Streams.Stream_Access);
+   Open_In_File  : access procedure 
+     (Name : String := ""; 
+      Ifd  : in out Ada.Text_IO.File_Type; 
+      Istr : in out Ada.Text_IO.Text_Streams.Stream_Access);
 end Beren.Despatch;

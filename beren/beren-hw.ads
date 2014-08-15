@@ -35,12 +35,18 @@ with Beren.Thread;
 with Beren.Jogobj;
 generic
    Name : String := "";
+   -- the name by which the instantiation is known in the system.
+   -- for parameter setting, debugging etc.
    Xis : Axis_type;
    -- type Axis_Type is (Linear, Rotary);
+   
    E_Stop_Init   : Boolean := False;
    In_Hwpos_Init : M_Type := 0.0;
    In_Cpos_Init  : M_Type := 0.0;
    In_Rpos_Init  : M_Type := 0.0;
+   -- these are init values for the real time dataflow interface
+   -- in case any of these is not needed. They  can be changed
+   -- on instantiation.
 package Beren.Hw is
    
    ----------------------------------

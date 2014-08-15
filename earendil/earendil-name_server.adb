@@ -26,11 +26,12 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --
+--with Ada.Text_Io;
+
 with Ada.Unchecked_Deallocation;
 
---with Earendil.Despatcher;
-
 package body Earendil.Name_Server is
+   --package Tio renames Ada.Text_Io;
    
     -- Dynamic binding to remote operations is achieved
     -- using the access-to-limited-class-wide Despatch_P_Type
@@ -52,12 +53,16 @@ package body Earendil.Name_Server is
     is
        Dentry : Dentry_Access_Type := Anchor;
     begin
+       --Tio.Put_Line ("name : " & Name);
        while Dentry.Next /= null loop
 	  Dentry := Dentry.Next;
+	  --Tio.Put_Line ("Dentry.name : " & Dentry.Name.all);
 	  if Name = Dentry.Name.all then
+	     --Tio.Put_Line (Name & " found");
 	     return Dentry.Addr;
 	  end if;
        end loop;
+       --Tio.Put_Line (Name & " not found");
        return null;
     end Find;
     
@@ -71,6 +76,7 @@ package body Earendil.Name_Server is
        Dentry.Addr := T;
        Dentry.Next := Anchor.Next;
        Anchor.Next := Dentry;
+       --Tio.Put_Line (Name & " registered");
     end Register;
     
     
