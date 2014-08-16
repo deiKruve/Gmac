@@ -29,13 +29,14 @@
 -- This is a first try at a terminal for earendil, the extra routines
 
 with GNAT.Expect;
-
+with Beren.Thread;
+with Ada.Calendar; -- debug
 package body Vingilot_Helpers is
-   
-   package Tio  renames Ada.Text_IO;
+   package Cal   renames Ada.Calendar; -- debug
+   package Tio   renames Ada.Text_IO;
    package Tiots renames Ada.Text_IO.Text_Streams;
-   package Gex  renames GNAT.Expect;
-   package Aubs renames Ada.Strings.Unbounded;
+   package Gex   renames GNAT.Expect;
+   package Aubs  renames Ada.Strings.Unbounded;
    
    ------------------------------------------------
    -- dislay the output of the enum command      --
@@ -59,6 +60,11 @@ package body Vingilot_Helpers is
    end Str_Display;
    
    
+   --------------------------------------------------
+   -- display the output of some get attr commands --
+   -- also Str_Display can be used, there will     --
+   -- just be no pattern for grep                  --
+   --------------------------------------------------
    procedure Boolean_Display (B : Boolean)
    is
    begin
@@ -85,6 +91,33 @@ package body Vingilot_Helpers is
    begin
       Tio.Put_Line (Integer'Image (I));
    end Integer_Display;
+   
+   
+   -------------------------------
+   -- taske to scan the modules --
+   -- for debugging only        --
+   -------------------------------
+   task Scanner;
+   task body Scanner 
+      is
+      use type Cal.Time;
+      Busy : Boolean := True;
+      Period : Duration := 1.0; -- secs
+      Next_Time : Cal.Time := Cal.Clock + period;
+      This_Time : Cal.Time := Next_Time;
+      Done_Time : Cal.Time;
+   begin
+      while Busy loop
+	 delay until Next_Time;
+	 This_Time := Next_Time;
+	 Next_Time := Next_Time + Period;
+	 Beren.Thread.Scan;
+	 Done_Time := Cal.Clock;
+	 Tio.Put_Line ("Scan Time : " & Duration'Image (Done_Time - This_Time));
+      end loop;
+   end Scanner;
+   
+   
    
    --  ----------------------------------
    --  -- parameter file handling      --

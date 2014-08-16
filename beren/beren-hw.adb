@@ -28,7 +28,7 @@
 --
 -- Template for a hand wheel module
 --
-with Ada.Text_Io;
+with Ada.Text_Io;-- debug??
 
 with Ada.Numerics;
 with Gmactextscan;
@@ -36,7 +36,7 @@ with O_String;
 with Beren.Err;
 
 package body Beren.Hw is
-   package Tio renames Ada.Text_Io;
+   package Tio renames Ada.Text_Io; -- debug??
    
    package Gts renames Gmactextscan;
    package Obs renames O_String;
@@ -118,7 +118,25 @@ package body Beren.Hw is
 	      M.Class := Bjo.Real;
 	      M.X     := Jog_Object_Type (Obj).Offset;
 	      M.Res := 0;
+	   elsif Obs.Eq (M.Name, "In_Cpos") then
+	      M.Class := Bjo.Real;
+	      M.X     := In_Cpos.all;
+	      M.Res   := 0;
+	   elsif Obs.Eq (M.Name, "Out_Cpos") then
+	      M.Class := Bjo.Real;
+	      M.X     := Out_Cpos;
+	      M.Res   := 0;
+	   elsif Obs.Eq (M.Name, "In_Rpos") then
+	      M.Class := Bjo.Real;
+	      M.X     := In_Rpos.all;
+	      M.Res   := 0;
+	   elsif Obs.Eq (M.Name, "Out_Rpos") then
+	      M.Class := Bjo.Real;
+	      M.X     := Out_Rpos;
+	      M.Res   := 0;
 	   else
+	      Ber.Report_Error 
+		("get param: " & Name & "no such attribute");
 	      M.Res := 1; -- attr. name not known
 	   end if;
 	   
@@ -380,6 +398,7 @@ package body Beren.Hw is
       --JogMin  : Boolean := Jog_Min.all;
       use type Bjo.Pulse_Mode_Enumeration_Type;
    begin
+      --Tio.Put_Line (Name & " Down_Scan.");----------------------- 
       -- llp handshaking
       if Stretch_Move_Req then
 	 if not Llp_Hsk.all then
@@ -416,6 +435,7 @@ package body Beren.Hw is
    procedure Up_Scan
    is
    begin
+      --Tio.Put_Line (Name & " Up_Scan");--------------------------------------
       Out_Rpos := In_Rpos.all - Jogger.Offset; -- the feedback data
    end Up_Scan;
    

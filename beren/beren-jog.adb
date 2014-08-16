@@ -28,14 +28,15 @@
 --
 -- Template for a jog module
 --
+
 with Ada.Numerics;
 with Gmactextscan;
 with O_String;
 with Beren.Err;
---with Ada.Text_IO;--for debug
+with Ada.Text_IO;--for debug
 --with Ada.Text_IO.Text_Streams;--debug
 package body Beren.Jog is
-   --package Tio  renames Ada.Text_IO;--for debug
+   package Tio  renames Ada.Text_IO;--for debug
    package Gts renames Gmactextscan;
    package Obs renames O_String;
    package Bob renames Earendil.Objects;
@@ -402,6 +403,7 @@ package body Beren.Jog is
       JogMin  : Boolean := Jog_Min.all;
       use type Bjo.Pulse_Mode_Enumeration_Type;
    begin
+      --Tio.Put_Line (Name & " Down_Scan.");----------------------- 
       -- llp handshaking
       if Skipto_Stop_Quint then
 	 if not Llp_Hsk.all then
@@ -462,6 +464,7 @@ package body Beren.Jog is
    procedure Up_Scan
    is
    begin
+      --Tio.Put_Line (Name & " Up_Scan");--------------------------------------
       Out_Rpos := In_Rpos.all - Jogger.Offset; -- the feedback data
    end Up_Scan;
    

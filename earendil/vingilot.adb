@@ -32,7 +32,7 @@
 with Beren.Despatch.Helpers;
 with Berentest1;
 with Beren.Thread;
-
+---------------------------------------
 with Earendil.Client1;
 with Vingilot_Helpers;
 with Ada.Text_IO;
@@ -95,7 +95,6 @@ begin
 		  --Ecl.Send_Attr_Msg (S (J .. S'Last), Erd.Set);
 	       elsif Command = "getattr" then
 		  -- "getattr " <moduleName> "." <attrName>
-		  
 		  Ec1.Send_Attr_Msg (S (J .. S'Last), Erd.Get);
 	       elsif Command = "load" then 
 		  -- "load " <filename>|<>
@@ -109,7 +108,7 @@ begin
 		  -- "enum " <grepfilter>|<>
 		  Vh.Patrn := Aubs.To_Unbounded_String (Argument);
 		  Ec1.Send_Enum_Msg;
-		  null;
+		  Vh.Patrn := Aubs.To_Unbounded_String ("");
 	       else Tio.Put_Line ("  command syntax error.");
 	       end if; -- command
 	    end;

@@ -28,9 +28,9 @@
 --
 -- scanner thread framework for the beren modules
 --
-
+--with Ada.Text_Io;--debug
 package body Beren.Thread is
-   
+   --package Tio renames Ada.Text_Io;--debug
    
    procedure Insert_Down_Scan (Ds : Scan_Proc_P_Type)
    is
@@ -83,7 +83,7 @@ package body Beren.Thread is
    
    procedure Scan
    is
-      Qq : Scan_Entry_P_Type := Scan_List;
+      Qq : Scan_Entry_P_Type := Scan_List.Next;
    begin
       while Qq.Scan /= null loop
 	 Qq.Scan.all;
@@ -94,7 +94,7 @@ package body Beren.Thread is
    
    procedure Scan (Q : Scan_Entry_P_Type)
    is
-      Qq : Scan_Entry_P_Type := Q;
+      Qq : Scan_Entry_P_Type := Q.next;
    begin
       while Qq.Scan /= null loop
 	 Qq.Scan.all;
