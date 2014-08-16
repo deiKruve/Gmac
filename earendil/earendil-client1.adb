@@ -31,15 +31,15 @@ with Earendil.Name_Server;
 with Earendil.Err;
 
 with O_String;
-
+with Ada.Text_Io; -- debug
 package body Earendil.Client1 is
-   
+   package Tio renames Ada.Text_Io; -- debug
    package Eer renames Earendil.Err;
    package Erd renames Earendil;
    package Ens renames Earendil.Name_Server;
    
    -- remote connector object pointers.
-   Mp_P, Mf_P, Me_P, Mc_P : Ens.E_Obj_Msg_Access_Type;
+   Mp_P, Mf_P, Me_P, Mc_P, Ma_P : Ens.E_Obj_Msg_Access_Type;
    
    
    ------------------------------------------
@@ -116,7 +116,8 @@ package body Earendil.Client1 is
    end Handle;
    
    
-   -- handle a reply from the despatcher, its asynchronous
+   -- handle a reply from the despatcher, 
+   -- these come before the original message is done
    function Handle (em    : access E_Reply_Msg_Type; 
 		    Id    : Erd.Op_Type;
 		    Name  : String;
@@ -129,7 +130,14 @@ package body Earendil.Client1 is
 		   ) return Integer 
    is
    begin
-      String_Displayer (S);
+      case Class is
+	 when Erd.Str  => String_Displayer (S);
+	 when Erd.Bool => Boolean_Displayer (B);
+	 when Erd.Char => Character_Displayer (C);
+	 when Erd.Real => Real_Displayer (X);
+	 when Erd.Int  => Integer_Displayer (I);
+	 when others   => null;
+      end case; -- class
       return 0;
    end Handle;
    
@@ -157,6 +165,34 @@ package body Earendil.Client1 is
 			     Integer'Image (Reply));
       end if;
     end Send_Parset_Msg;
+    
+    
+    -- send an attribute set or get message to despatcher
+    procedure Send_Attr_Msg (Str : String; Id : Erd.Op_Type)
+    is
+       Reply : Integer;
+       J : Integer := Str'First;
+       K : Integer := 0;
+    begin
+       for I in Str'Range loop
+	  exit when Str (I) = '.';
+	  J := J + 1;
+       end loop;
+       if Str (J) = '.' then -- module name found
+	  case Id is
+	     when Erd.Set =>
+		Eer.Report_Error ("Client1.Send_Attr_Msg : Error : " & 
+				    "not implemented.");
+	     when Erd.Get =>
+		Reply := Earendil.Handle (Em   => Ma_P, 
+					  S    => Str (Str'First .. J - 1), 
+					  Name => Str (J + 1 .. Str'last), 
+					  Id   => Id); -- and wait for the reply msg
+	     when others => null;
+	  end case;
+       end if; -- module name found
+    end Send_Attr_Msg;
+    
     
     -- send a load or store message
     procedure Send_File_Msg (Str : String; Id : Erd.Op_Type)
@@ -207,6 +243,7 @@ package body Earendil.Client1 is
        end if;
        -- find the remote connectors.
        Mp_P := Ens.Find ("E_Parset_Msg");
+       Ma_P := Ens.Find ("E_Attr_Msg");
        Mf_P := Ens.Find ("E_File_Msg");
        Me_P := Ens.Find ("E_Enum_Msg");
     end Send_Connect_Msg;
@@ -221,6 +258,7 @@ begin
    
    -- find the remote connectors.
    Mp_P := Ens.Find ("E_Parset_Msg");
+   Ma_P := Ens.Find ("E_Attr_Msg");
    Mf_P := Ens.Find ("E_File_Msg");
    Me_P := Ens.Find ("E_Enum_Msg");
 end Earendil.Client1;

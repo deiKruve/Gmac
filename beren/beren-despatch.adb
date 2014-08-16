@@ -83,6 +83,21 @@ package body Beren.Despatch is
 		   ) return Integer;
    
    
+   -- to recieve a message to set or get any attributes
+   type E_Attr_Msg_Type is new Erd.E_Obj_Msg_Type with null record;
+   overriding
+   function Handle (eM    : access E_Attr_Msg_Type;
+		    Id    : Erd.Op_Type;
+		    Name  : String;
+		    Class : Erd.Attr_Class;
+		    I     : Integer;
+		    X     : Long_Float;
+		    C     : Character;
+		    B     : Boolean;
+		    S     : String
+		   ) return Integer;
+   
+   
    -- to enumerate the attributes in the system
    type E_Enum_Msg_Type is new Erd.E_Obj_Msg_Type with null record;
    overriding
@@ -117,6 +132,7 @@ package body Beren.Despatch is
    -----------------------------------------
    E_File_Msg      : aliased E_File_Msg_Type;
    E_Enum_Msg      : aliased E_Enum_Msg_Type;
+   E_Attr_Msg      : aliased E_Attr_Msg_Type;
    E_Parset_Msg    : aliased E_Parset_Msg_Type;
    Despatch_Socket : aliased E_Client1_Connect_Msg_Type;
    
@@ -139,10 +155,13 @@ package body Beren.Despatch is
    is
    begin
       Earendil.Name_Server.Remove (E_Parset_Msg'Access);
+      Earendil.Name_Server.Remove (E_Attr_Msg'Access);
       Earendil.Name_Server.Remove (E_Enum_Msg'Access);
       Earendil.Name_Server.Remove (E_File_Msg'Access);
       Earendil.Name_Server.Register 
 	("E_Parset_Msg", E_Parset_Msg'Access);
+      Earendil.Name_Server.Register 
+	("E_Attr_Msg", E_Attr_Msg'Access);
       Earendil.Name_Server.Register 
 	("E_Enum_Msg", E_Enum_Msg'Access);
       Earendil.Name_Server.Register
@@ -172,6 +191,44 @@ package body Beren.Despatch is
       M.Class := Bjo.Str;
       M.S := Obs.To_O_String (64, S);
       Bob.Broadcast (Bjo.Attr_Msg (M));
+      return M.Res;
+   end Handle;
+   
+   -- handle an attr message
+   function Handle (eM    : access E_Attr_Msg_Type;
+		    Id    : Erd.Op_Type;
+		    Name  : String;
+		    Class : Erd.Attr_Class;
+		    I     : Integer;
+		    X     : Long_Float;
+		    C     : Character;
+		    B     : Boolean;
+		    S     : String
+		   ) return Integer
+   is
+      use type Erd.Op_Type;
+      M : Bjo.Attr_Msg;
+   begin
+      M.Name := Obs.To_O_String (32, Name);
+      M.S    := Obs.To_O_String (64, S);
+      if Id = Erd.Set then
+	 M.Id := Bob.Set;
+	 Bob.Broadcast (M);
+      elsif Id = Erd.Get then
+	 M.Id := Bob.Get;
+	 Bob.Broadcast (M);
+	 if M.Res = 0 then
+	    case M.Class is
+	       when Bjo.Enum => Send_Reply_Msg (M.E);
+	       when Bjo.Int  => Send_Reply_Msg (M.I);
+	       when Bjo.Real => Send_Reply_Msg (M.X);
+	       when Bjo.Char => Send_Reply_Msg (M.C);
+	       when Bjo.Bool => Send_Reply_Msg (M.B);
+	       when Bjo.Str  => Send_Reply_Msg (Obs.To_String (M.S));
+	       when others => null;
+	    end case; -- m.class
+	 end if; -- M.Res = 0
+      end if; -- Id = Erd.Set
       return M.Res;
    end Handle;
    
@@ -226,11 +283,6 @@ package body Beren.Despatch is
       elsif Id = Erd.Store then 
 	 M.Id := Bob.Store;
 	 Open_Out_File (S, fd, Ostr);
-	 --  if Ostr /= null then--debug
-	 --        Tio.Put_Line ("despatch, we got here");
-	 --  elsif  Ostr = null then--debug
-	 --        Tio.Put_Line ("despatch, we got here, it is null");
-	 --  end if;
 	 if Ostr /= null then
 	    M.Ostr := Ostr;
 	 else return -1;
@@ -306,8 +358,14 @@ package body Beren.Despatch is
       end if;
    end Send_Reply_Msg;
    
-    
-
+   
+   procedure Send_Reply_Msg (E : Bjo.Pulse_Mode_Enumeration_Type)
+   is
+   begin
+      Ber.Report_Error 
+      ("Beren.Despatch.Send_Reply_Msg.Pulse_Mode_Enumeration_Type : Error " & 
+	 "not implemented yet.");
+   end Send_Reply_Msg;
 
   
 begin
@@ -316,6 +374,8 @@ begin
      ("Despatch_Socket", Despatch_Socket'Access);
    Earendil.Name_Server.Register 
      ("E_Parset_Msg", E_Parset_Msg'Access);
+   Earendil.Name_Server.Register 
+     ("E_Attr_Msg", E_Attr_Msg'Access);
    Earendil.Name_Server.Register 
      ("E_Enum_Msg", E_Enum_Msg'Access);
    Earendil.Name_Server.Register

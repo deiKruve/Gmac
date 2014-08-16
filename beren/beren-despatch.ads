@@ -40,6 +40,7 @@ private
    procedure Send_Reply_Msg (X : Long_float);
    procedure Send_Reply_Msg (C : Character);
    procedure Send_Reply_Msg (B : Boolean);
+   procedure Send_Reply_Msg (E : Beren.Jogobj.Pulse_Mode_Enumeration_Type);
    
    Enumerate     : access procedure (Name : String; M : Beren.Jogobj.Attr_Msg);
    Open_Out_File : access procedure 

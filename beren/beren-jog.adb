@@ -92,33 +92,49 @@ package body Beren.Jog is
 	 use type Bob.Op_Type;
 	 use type Bjo.Attr_Class;
       begin
-	 if M.Id = Bob.Get then 
+	 if M.Id = Bob.Get and then Obs.Eq (M.S, Name) then 
 	   if Obs.Eq (M.Name, "Jog_Rate") then
 	      M.Class := Bjo.Real;
 	      M.X     := Jog_Object_Type (Obj).Jog_Rate;
 	      M.Res   := 0;
 	   elsif Obs.Eq (M.Name, "Enable") then
 	      M.Class := Bjo.Bool;
-	      M.B := Jog_Object_Type (Obj).Enable;
-	      M.Res := 0;
+	      M.B     := Jog_Object_Type (Obj).Enable;
+	      M.Res   := 0;
 	   elsif Obs.Eq (M.Name, "Scale") then
 	      M.Class := Bjo.Int;
-	      M.I := Jog_Object_Type (Obj).Scale;
-	      M.Res := 0;
+	      M.I     := Jog_Object_Type (Obj).Scale;
+	      M.Res   := 0;
 	   elsif Obs.Eq (M.Name, "Puls_Mod") then
 	      M.Class := Bjo.Enum;
-	      M.E := Jog_Object_Type (Obj).Puls_Mod;
-	      M.Res := 0;
+	      M.E     := Jog_Object_Type (Obj).Puls_Mod;
+	      M.Res   := 0;
 	   elsif Obs.Eq (M.Name, "Offset") then
 	      M.Class := Bjo.Real;
 	      M.X     := Jog_Object_Type (Obj).Offset;
-	      M.Res := 0;
+	      M.Res   := 0;
+	   elsif Obs.Eq (M.Name, "In_Cpos") then
+	      M.Class := Bjo.Real;
+	      M.X     := In_Cpos.all;
+	      M.Res   := 0;
+	   elsif Obs.Eq (M.Name, "Out_Cpos") then
+	      M.Class := Bjo.Real;
+	      M.X     := Out_Cpos;
+	      M.Res   := 0;
+	   elsif Obs.Eq (M.Name, "In_Rpos") then
+	      M.Class := Bjo.Real;
+	      M.X     := In_Rpos.all;
+	      M.Res   := 0;
+	   elsif Obs.Eq (M.Name, "Out_Rpos") then
+	      M.Class := Bjo.Real;
+	      M.X     := Out_Rpos;
+	      M.Res   := 0;
 	   else
 	      Ber.Report_Error 
 		("get param: " & Name & "no such attribute");
 	      M.Res := 1; -- attr. name not known
 	   end if;
-	 elsif M.Id = Bob.Set then
+	 elsif M.Id = Bob.Set and then Obs.Eq (M.S, Name) then
 	   if Obs.Eq (M.Name, "Jog_Rate") and then M.Class = Bjo.Real then
 	      Jog_Object_Type (Obj).Jog_Rate := M.X;
 	      M.Res   := 0;

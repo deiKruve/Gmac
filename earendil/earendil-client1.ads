@@ -33,6 +33,9 @@ package Earendil.Client1 with Elaborate_Body is
    -- send a parameter set message to despatcher
    procedure Send_Parset_Msg (Str : String);
    
+   -- send an attribute set or get message to despatcher
+   procedure Send_Attr_Msg (Str : String; Id : Earendil.Op_Type);
+   
    -- send a load or store message
    procedure Send_File_Msg (Str : String; Id : Earendil.Op_Type);
    
@@ -42,5 +45,9 @@ package Earendil.Client1 with Elaborate_Body is
    -- send a connect message
    procedure Send_Connect_Msg;
    
-   String_Displayer : access procedure (S: String);
+   String_Displayer    : access procedure (S : String);
+   Boolean_Displayer   : access procedure (B : Boolean);
+   Character_Displayer : access procedure (C : Character);
+   Real_Displayer      : access procedure (X : Long_Float);
+   Integer_Displayer   : access procedure (I : Integer);
 end Earendil.Client1;

@@ -51,8 +51,15 @@ procedure Vingilot is
    
    J, K : Integer;
 begin
-   Ec1.String_Displayer := Vh.Str_Display'Access;
+   -- set up some up-calls.
+   Ec1.String_Displayer    := Vh.Str_Display'Access;
+   Ec1.Boolean_Displayer   := Vh.Boolean_Display'Access;
+   Ec1.Character_Displayer := Vh.Character_Display'Access;
+   Ec1.Real_Displayer      := Vh.Real_Display'Access;
+   Ec1.Integer_Displayer   := Vh.Integer_Display'Access;
+   -- and connect.
    Ec1.Send_Connect_Msg;
+   -- the main loop.
    loop
       Tio.Put ("vingilot >> ");
       declare 
@@ -77,16 +84,29 @@ begin
 	    begin
 	       --Tio.Put_Line ("Command  : " & Command);
 	       --Tio.Put_Line ("Argument : " & Argument);
-	       if Command = "setpar" then
+	       if Command = "setpar" then 
+		  -- <Name> ".Jog_Rate = " <floatValue> [" m/min"|" deg/min"]
+		  -- and any other we may think of
 		  Ec1.Send_Parset_Msg (S (J .. S'Last));
 		  null;
-	       elsif Command = "load" then
+	       --elsif Command = "setattr" then
+		  -- "setattr "<moduleName>"."<attrName>" = "<floatValue><units>
+		  -- like setpar but has more possibilities. for debugging
+		  --Ecl.Send_Attr_Msg (S (J .. S'Last), Erd.Set);
+	       elsif Command = "getattr" then
+		  -- "getattr " <moduleName> "." <attrName>
+		  
+		  Ec1.Send_Attr_Msg (S (J .. S'Last), Erd.Get);
+	       elsif Command = "load" then 
+		  -- "load " <filename>|<>
 		  Ec1.Send_File_Msg (S (J .. S'Last), Erd.Load);
 		  null;
-	       elsif Command = "store" then
+	       elsif Command = "store" then 
+		  -- "store " <filename>|<>
 		  Ec1.Send_File_Msg (S (J .. S'Last), Erd.Store);
 		  null;
-	       elsif Command = "enum" then
+	       elsif Command = "enum" then 
+		  -- "enum " <grepfilter>|<>
 		  Vh.Patrn := Aubs.To_Unbounded_String (Argument);
 		  Ec1.Send_Enum_Msg;
 		  null;

@@ -38,6 +38,14 @@ package Vingilot_Helpers is
    
    procedure Str_Display (S : String);
    
+   procedure Boolean_Display (B : Boolean);
+   
+   procedure Character_Display (C : Character);
+   
+   procedure Real_Display (X : Long_Float);
+   
+   procedure Integer_Display (I : Integer);
+   
    --  procedure Open_Out_File (Name : String := ""; 
    --  			    Ofd  : out Ada.Text_IO.File_Type; 
    --  			    Ostr : out Ada.Text_IO.Text_Streams.Stream_Access);

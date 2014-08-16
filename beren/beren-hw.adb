@@ -97,7 +97,7 @@ package body Beren.Hw is
 	 use type Bob.Op_Type;
 	 use type Bjo.Attr_Class;
       begin
-	 if M.Id = Bob.Get then 
+	 if M.Id = Bob.Get and then Obs.Eq (M.S, Name) then 
 	   if Obs.Eq (M.Name, "Jog_Rate") then
 	      M.Class := Bjo.Real;
 	      M.X     := Jog_Object_Type (Obj).Jog_Rate;
@@ -122,7 +122,7 @@ package body Beren.Hw is
 	      M.Res := 1; -- attr. name not known
 	   end if;
 	   
-	 elsif M.Id = Bob.Set then
+	 elsif M.Id = Bob.Set and then Obs.Eq (M.S, Name) then
 	   if Obs.Eq (M.Name, "Jog_Rate") and then M.Class = Bjo.Real then
 	      Jog_Object_Type (Obj).Jog_Rate := M.X;
 	      M.Res   := 0;

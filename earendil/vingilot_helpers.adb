@@ -59,6 +59,33 @@ package body Vingilot_Helpers is
    end Str_Display;
    
    
+   procedure Boolean_Display (B : Boolean)
+   is
+   begin
+      Tio.Put_Line (Boolean'Image (B));
+   end Boolean_Display;
+   
+   
+   procedure Character_Display (C : Character)
+   is
+   begin
+      Tio.Put_Line (Character'Image (C));
+   end Character_Display;
+   
+   
+   procedure Real_Display (X : Long_Float)
+   is
+   begin
+      Tio.Put_Line (Long_Float'Image (X));
+   end Real_Display;
+   
+   
+   procedure Integer_Display (I : Integer)
+   is
+   begin
+      Tio.Put_Line (Integer'Image (I));
+   end Integer_Display;
+   
    --  ----------------------------------
    --  -- parameter file handling      --
    --  -- not  used here at the moment --
