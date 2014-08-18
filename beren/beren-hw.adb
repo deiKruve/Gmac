@@ -100,23 +100,23 @@ package body Beren.Hw is
 	 if M.Id = Bob.Get and then Obs.Eq (M.S, Name) then 
 	   if Obs.Eq (M.Name, "Jog_Rate") then
 	      M.Class := Bjo.Real;
-	      M.X     := Jog_Object_Type (Obj).Jog_Rate;
+	      M.X     := Obj.Jog_Rate;
 	      M.Res   := 0;
 	   elsif Obs.Eq (M.Name, "Enable") then
 	      M.Class := Bjo.Bool;
-	      M.B := Jog_Object_Type (Obj).Enable;
+	      M.B := Obj.Enable;
 	      M.Res := 0;
 	   elsif Obs.Eq (M.Name, "Scale") then
 	      M.Class := Bjo.Int;
-	      M.I := Jog_Object_Type (Obj).Scale;
+	      M.I := Obj.Scale;
 	      M.Res := 0;
 	   elsif Obs.Eq (M.Name, "Puls_Mod") then
 	      M.Class := Bjo.Enum;
-	      M.E := Jog_Object_Type (Obj).Puls_Mod;
+	      M.E := Obj.Puls_Mod;
 	      M.Res := 0;
 	   elsif Obs.Eq (M.Name, "Offset") then
 	      M.Class := Bjo.Real;
-	      M.X     := Jog_Object_Type (Obj).Offset;
+	      M.X     := Obj.Offset;
 	      M.Res := 0;
 	   elsif Obs.Eq (M.Name, "In_Cpos") then
 	      M.Class := Bjo.Real;
@@ -142,16 +142,16 @@ package body Beren.Hw is
 	   
 	 elsif M.Id = Bob.Set and then Obs.Eq (M.S, Name) then
 	   if Obs.Eq (M.Name, "Jog_Rate") and then M.Class = Bjo.Real then
-	      Jog_Object_Type (Obj).Jog_Rate := M.X;
+	      Obj.Jog_Rate := M.X;
 	      M.Res   := 0;
 	   elsif Obs.Eq (M.Name, "Enable" ) and then M.Class = Bjo.Bool then
-	      Jog_Object_Type (Obj).Enable := M.B;
+	      Obj.Enable := M.B;
 	      M.Res   := 0;
 	   elsif Obs.Eq (M.Name, "Scale") and then M.Class = Bjo.Int then
-	      Jog_Object_Type (Obj).Scale := M.I;
+	      Obj.Scale := M.I;
 	      M.Res   := 0;
 	   elsif Obs.Eq (M.Name, "Puls_Mod") and then M.Class = Bjo.Enum then
-	      Jog_Object_Type (Obj).Puls_Mod := M.E;
+	      Obj.Puls_Mod := M.E;
 	      case Jogger.Puls_Mod is
 		 when Bjo.Off       => Req_Move := 1.0; -- all in meters
 		 when Bjo.Hundredth => Req_Move := 0.000_01;

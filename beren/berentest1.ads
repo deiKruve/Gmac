@@ -3,10 +3,13 @@ with Earendil.Objects;
 with Beren.Jogobj;
 with Beren.Jog;
 with Beren.Hw;
+with Beren.Encoder;
 
 package Berentest1 is
    procedure Enumerate_Attr (Name : String; M : Beren.Jogobj.Attr_Msg);
-    
+   
+   package X_Enc is new Beren.Encoder (Name => "X_Enc");
+   
    package X_Jog is new Beren.Jog (Name => "X_Jog", Xis => Beren.Linear);
    package Y_Jog is new Beren.Jog (Name => "Y_Jog", Xis => Beren.Linear);
    package A_Jog is new Beren.Jog (Name => "A_Jog", Xis => Beren.Rotary);

@@ -119,21 +119,8 @@ package Beren.Hw is
    -- . . Offset: holds the present offset accumulated by the jog module
    -- . . Offs_Rst: pulse: resets the Offset Attribute
    -- . . 
-   Type Jog_Object_Type is new Earendil.Objects.Object_Desc with
-   record
-      Jog_Rate : Mpsec_Type with Atomic; -- meters per second
-      Enable   : Boolean with Atomic;
-      Scale    : Natural with Atomic;  -- 100 %
-      --Hw_Div   : Integer  with Atomic;  -- 
-      Puls_Mod : Beren.Jogobj.Pulse_Mode_Enumeration_Type with Atomic;
-      Offset   : M_Type  with Atomic;
-      --Offs_Rst : Boolean    := False;
-   end record;
-   type Jog_Object_P is access all Jog_Object_Type;
-   
-   -- message object --
-   Jogger : Jog_Object_P := new Jog_Object_Type;
-   
+   Type Jog_Object_Type is limited private;
+     
    -- message handler --
    procedure Handle (Obj : in out Earendil.Objects.Object; 
 		     M   : in out Earendil.Objects.Obj_Msg'Class);
@@ -149,6 +136,22 @@ package Beren.Hw is
    procedure Up_Scan;
    
 private
+  
+   Type Jog_Object_Type is new Earendil.Objects.Object_Desc with
+   record
+      Jog_Rate : Mpsec_Type with Atomic; -- meters per second
+      Enable   : Boolean with Atomic;
+      Scale    : Natural with Atomic;  -- 100 %
+      --Hw_Div   : Integer  with Atomic;  -- 
+      Puls_Mod : Beren.Jogobj.Pulse_Mode_Enumeration_Type with Atomic;
+      Offset   : M_Type  with Atomic;
+      --Offs_Rst : Boolean    := False;
+   end record;
+   type Jog_Object_P is access all Jog_Object_Type;
+   
+   -- message object --
+   Jogger : Jog_Object_P := new Jog_Object_Type;
+   
    ----------------------------
    -- beren.thread interface --
    ----------------------------

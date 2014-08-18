@@ -37,11 +37,10 @@ generic
    Name : String := "";
    -- the name by which the instantiation is known in the system.
    -- for parameter setting, debugging etc.
-   Xis : Axis_type;
+   --Xis : Axis_type;
    -- type Axis_Type is (Linear, Rotary);
    
-   In_Cpos_Init  : M_Type := 0.0;
-   In_Rpos_Init  : M_Type := 0.0;
+   In_Enc_Count_Init : U16value_Type := 0;
    -- these are init values for the real time dataflow interface
    -- in case any of these is not needed. They  can be changed
    -- on instantiation.
@@ -56,7 +55,7 @@ package Beren.Encoder is
    -- the system.
    ----------------------------------
    
-   In_Enc_count          : access Integer;
+   In_Enc_Count          : access U16value_Type;
    -- present encoder count from the hardware.
    Out_Rpos         : aliased M_Type;
    -- present position out to up-stream (low level planner a.t.l.)
@@ -90,25 +89,14 @@ package Beren.Encoder is
    -- . . Multiplier : in_count is multiplied by this factor
    -- . . divider : result is divided by this factor
    --              these 2 factors are used in scaling the counter.
-   -- . . resolution : resulting (from the calculation above) pulses per mm.
+   --          encoder-pulses /  mm X multiplier / divider = resolution /  mm.
+   --          encoder-pulses / deg X multiplier / divider = resolution / deg.
    ---
    -- the encoder will start up with 0 in counter and position.
    --
    -- . . Offset: holds the present offset accumulated by the encoder module
    -- . . 
-   type Encoder_Object_Type is new  Earendil.Objects.Object_Desc with
-      record
-	 Reset : Boolean with Atomic;
-	 Dir   : Boolean with atomic; -- True is fwd, false is backwd
-	 Multiplier : Integer with atomic;
-	 Divider    : Integer with atomic;
-	 Resolution : Integer with Atomic;
-	 --Offset     : M_Type  with Atomic;
-      end record;
-   type Encoder_Object_P is access all Encoder_Object_Type;
-   
-   -- message object --
-   Encoder : Encoder_Object_P := new Encoder_Object_Type;
+   type Encoder_Object_Type is limited private;
    
    -- message handler --
    procedure Handle (Obj : in out Earendil.Objects.Object; 
@@ -126,10 +114,26 @@ package Beren.Encoder is
    procedure Up_Scan;
    
 private
+   
+   type Encoder_Object_Type is new  Earendil.Objects.Object_Desc with
+      record
+	 Reset : Boolean with Atomic;
+	 Dir   : Boolean with atomic; -- True is fwd, false is backwd
+	 Multiplier : Integer with atomic;
+	 Divider    : Integer with atomic;
+	 --Resolution : Integer with Atomic;
+	 --Offset     : M_Type  with Atomic;
+      end record;
+   type Encoder_Object_P is access all Encoder_Object_Type;
+   
+   -- message object --
+   Encoder : Encoder_Object_P := new Encoder_Object_Type;
+   
+   
    ----------------------------
    -- beren.thread interface --
    ----------------------------
-   Ds : Beren.Thread.Scan_Proc_P_Type := Down_Scan'Access;
+   --Ds : Beren.Thread.Scan_Proc_P_Type := Down_Scan'Access;
    Us : Beren.Thread.Scan_Proc_P_Type := Up_Scan'Access;
   
 end Beren.Encoder;

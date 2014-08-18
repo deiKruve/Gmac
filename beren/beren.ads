@@ -42,6 +42,7 @@ package Beren is
    subtype Mpsec3_Type is Long_Float; -- jerk type
    
    type Axis_Type is (Linear, Rotary);
+   type U16value_Type is mod 2 ** 16;
    
    private
 
