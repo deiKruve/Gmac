@@ -5,66 +5,73 @@
 with Ada.Numerics.Generic_Real_Arrays;
 
 generic
-  type REAL is digits <> ;
-  with package Real_Arrays is new Ada.Numerics.Generic_Real_Arrays(REAL);
+   type Real is digits <>;
+   with package Real_Arrays is new Ada.Numerics.Generic_Real_Arrays (Real);
 
 package Generic_Real_Linear_Equations is
 
-  use Real_Arrays;
-  type INTEGER_VECTOR is array (INTEGER range <>) of INTEGER;
+   use Real_Arrays;
+   type Integer_Vector is array (Integer range <>) of Integer;
 
-  function LINEAR_EQUATIONS ( A : REAL_MATRIX ;
-                              Y : REAL_VECTOR ) return REAL_VECTOR ;
+   function Linear_Equations
+     (A : Real_Matrix;
+      Y : Real_Vector) return Real_Vector;
 
-  function LINEAR_EQUATIONS ( A : REAL_MATRIX ;
-                              Y : REAL_MATRIX ) return REAL_MATRIX ;
+   function Linear_Equations
+     (A : Real_Matrix;
+      Y : Real_Matrix) return Real_Matrix;
 
-  function DETERMINANT ( A : REAL_MATRIX ) return REAL ;
+   function Determinant (A : Real_Matrix) return Real;
 
-  function INVERSE ( A : REAL_MATRIX ) return REAL_MATRIX ;
+   function Inverse (A : Real_Matrix) return Real_Matrix;
 
-  procedure INVERSE ( A : in out REAL_MATRIX ) ;
+   procedure Inverse (A : in out Real_Matrix);
 
-  function CROUT_SOLVE ( A : REAL_MATRIX ;
-                         Y : REAL_VECTOR ) return REAL_VECTOR ;
+   function Crout_Solve (A : Real_Matrix; Y : Real_Vector) return Real_Vector;
 
-  function CHOLESKY_DECOMPOSITION ( A : REAL_MATRIX) return REAL_MATRIX ;
+   function Cholesky_Decomposition (A : Real_Matrix) return Real_Matrix;
 
-  function CHOLESKY_SOLVE ( L : REAL_MATRIX ;
-                            Y : REAL_VECTOR ) return REAL_VECTOR ;
+   function Cholesky_Solve
+     (L : Real_Matrix;
+      Y : Real_Vector) return Real_Vector;
 
-  procedure LU_DECOMPOSITION ( A : REAL_MATRIX ;
-                               L : in out REAL_MATRIX ;
-                               U : in out REAL_MATRIX ;
-                               P : in out INTEGER_VECTOR) ;
+   procedure Lu_Decomposition
+     (A :        Real_Matrix;
+      L : in out Real_Matrix;
+      U : in out Real_Matrix;
+      P : in out Integer_Vector);
 
-  function LU_SOLVE ( L : REAL_MATRIX ;
-                      U : REAL_MATRIX ;
-                      P : INTEGER_VECTOR ;
-                      Y : REAL_VECTOR ) return REAL_VECTOR ;
+   function Lu_Solve
+     (L : Real_Matrix;
+      U : Real_Matrix;
+      P : Integer_Vector;
+      Y : Real_Vector) return Real_Vector;
 
-  procedure QR_DECOMPOSITION ( A : REAL_MATRIX ;
-                               Q : in out REAL_MATRIX ;
-                               R : in out REAL_MATRIX ) ;
+   procedure Qr_Decomposition
+     (A :        Real_Matrix;
+      Q : in out Real_Matrix;
+      R : in out Real_Matrix);
 
-  function QR_SOLVE ( Q : REAL_MATRIX ;
-                      R : REAL_MATRIX ;
-                      Y : REAL_VECTOR ) return REAL_VECTOR ;
+   function Qr_Solve
+     (Q : Real_Matrix;
+      R : Real_Matrix;
+      Y : Real_Vector) return Real_Vector;
 
-  procedure SV_DECOMPOSITION ( A : REAL_MATRIX ;
-                               UU : in out REAL_MATRIX ;
-                               VV : in out REAL_MATRIX ;
-                               WW : in out REAL_VECTOR ) ;
+   procedure Sv_Decomposition
+     (A  :        Real_Matrix;
+      Uu : in out Real_Matrix;
+      Vv : in out Real_Matrix;
+      Ww : in out Real_Vector);
 
-  function SV_SOLVE ( U : REAL_MATRIX ;
-                      V : REAL_MATRIX ;
-                      W : REAL_VECTOR ;
-                      Y : REAL_VECTOR ) return REAL_VECTOR ;
+   function Sv_Solve
+     (U : Real_Matrix;
+      V : Real_Matrix;
+      W : Real_Vector;
+      Y : Real_Vector) return Real_Vector;
 
-  MATRIX_DATA_ERROR : exception; -- raised for singular, non positive definate,
+   Matrix_Data_Error : exception; -- raised for singular, non positive definate,
                                  -- not symmetric, etc.
 
-  ARRAY_INDEX_ERROR : exception; -- renames ARRAY_EXCEPTIONS.ARRAY_INDEX_ERROR;
+   Array_Index_Error : exception; -- renames ARRAY_EXCEPTIONS.ARRAY_INDEX_ERROR;
 
-
-end Generic_Real_Linear_Equations ;
+end Generic_Real_Linear_Equations;
