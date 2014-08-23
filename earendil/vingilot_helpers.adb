@@ -43,20 +43,38 @@ package body Vingilot_Helpers is
    -- the argument is used as a pattern for grep --
    -- so a partial enumeration is possible       --
    ------------------------------------------------
+   Grep_Open : Boolean := True;
+   
    procedure Str_Display (S : String)
    is
       Status : aliased Integer := 0;
-      Sr : String := Gex.Get_Command_Output
-	(Command   => "grep",
-	 Arguments => (new String'("-i"), 
-		       new String'("-e" & Aubs.To_String (Patrn)), 
-		       new String'("-")),
-	 Input     => S,
-	 Status    => Status'access);
+      use type Aubs.Unbounded_String;
    begin
-      if Status = 0 then
-	 Tio.Put_Line (sr);
+      while Grep_Open = False loop
+	 null;
+      end loop;
+      Grep_Open := False;
+      if Patrn /= "" then
+	 declare
+	    Sr : String := Gex.Get_Command_Output
+	      (Command   => "grep",
+	       Arguments => (new String'("-i"), 
+			     new String'("-e" & Aubs.To_String (Patrn)), 
+			     new String'("-")),
+	       Input     => S,
+	       Status    => Status'access);
+	 begin
+	    if Status = 0 then
+	       Tio.Put_Line (sr);
+	    elsif Status /= 1 then 
+	       Tio.Put_Line ("grep error:" & Integer'Image (Status));
+	       Tio.Put_Line (s);
+	    end if;
+	 end;
+      else
+	 Tio.Put_Line (s);
       end if;
+      Grep_Open := True;
    end Str_Display;
    
    
@@ -113,7 +131,7 @@ package body Vingilot_Helpers is
 	 Next_Time := Next_Time + Period;
 	 Beren.Thread.Scan;
 	 Done_Time := Cal.Clock;
-	 Tio.Put_Line ("Scan Time : " & Duration'Image (Done_Time - This_Time));
+	 --Tio.Put_Line ("Scan Time : " & Duration'Image (Done_Time - This_Time));
       end loop;
    end Scanner;
    

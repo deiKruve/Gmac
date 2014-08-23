@@ -118,11 +118,13 @@ private
 	 Next : Table_P_Type;
 	 Key,
 	 Val : Long_Float with Atomic;
+	 B   : Long_Float with Atomic; -- in case of Q curve 
+				       -- no connection with key and val
       end record;
    
    Type Amend_Object_Type is new Earendil.Objects.Object_Desc with
       record
-	 Rel          : Boolean with Atomic;
+	 Relative     : Boolean with Atomic;
 	 Bdirectional : Boolean with Atomic;
 	 Qcurve       : Boolean with Atomic;
 	 C_Table      : Table_P_Type;
@@ -133,6 +135,7 @@ private
    
    -- message object --
    Amender : Amend_Obj_P := new Amend_Object_Type;
+   Amender.C_Table       := new Table_Type;
    
    
    ----------------------------

@@ -33,7 +33,7 @@ with O_String;
 package Beren.Jogobj is
    
    
-   type Attr_Class is (Enum, Inval, Str, Int, Real, Char, Bool);
+   type Attr_Class is (Enum, Real_Pair, Inval, Str, Int, Real, Char, Bool);
    
    -- extra jog attr.
    type Pulse_Mode_Enumeration_Type is (Off, Hundredth, Tenth, Unit, Ten);
@@ -48,7 +48,8 @@ package Beren.Jogobj is
 	Class : Attr_Class;
 	E     : Pulse_Mode_Enumeration_Type;
 	I     : Integer;
-	X     : Long_Float;
+	X,
+	X1    : Long_Float;
 	C     : Character;
 	B     : Boolean;
 	S     : O_String.O_String (1 .. 64);

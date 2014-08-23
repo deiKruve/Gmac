@@ -166,6 +166,7 @@ package body Beren.Encoder is
 			  "False" | "false" then
 			   Encoder.Dir := 
 			     Boolean'Value (String (M.S) (K .. J - 1));
+			   M.Res := 0;
 			else
 			   Ber.Report_Error 
 			     ("set param: " & Name & 
@@ -183,6 +184,7 @@ package body Beren.Encoder is
 			end loop;
 			Encoder.Multiplier := 
 			  Integer'Value (String (M.S) (K .. J - 1));
+			M.Res := 0;
 		     elsif String (M.S) (J + 1 .. K) = "Divider" then
 			K := K + 1;
 			while M.S (K) in ' ' | '=' loop
@@ -194,6 +196,7 @@ package body Beren.Encoder is
 			end loop;
 			Encoder.Divider := 
 			  Integer'Value (String (M.S) (K .. J - 1));
+			M.Res := 0;
 		     --  elsif String (M.S) (J + 1 .. K) = "Resolution" then
 		     --  	K := K + 1;
 		     --  	while M.S (K) in ' ' | '=' loop

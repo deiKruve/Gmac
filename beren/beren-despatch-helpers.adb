@@ -73,7 +73,8 @@ package body Beren.Despatch.Helpers is
 	       Send_Reply_Msg 
 		 (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
 	    end;
-	 when others   => null;
+	 when others   => 
+	    null;
       end case;
    end Enumerate_Attr;
    

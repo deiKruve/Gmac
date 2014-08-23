@@ -77,6 +77,7 @@ begin
 	    exit when S (i) /= ' ';
 	    J := J + 1;
 	 end loop;
+	 if J > S'Last then J := S'Last+1; end if;
 	 if K > 1 then
 	    declare 
 	       Command : String := S (S'First .. S'First + K - 1);-- & "@";
