@@ -58,6 +58,14 @@ package body Beren.Despatch.Helpers is
 	       Send_Reply_Msg 
 		 (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
 	    end;
+	 when Bjo.Real_Pair =>
+	    declare 
+	       Rstr : String := Long_Float'Image (M.X);
+	       R1str : String := Long_Float'Image (M.X1);
+	    begin
+	       Send_Reply_Msg 
+		(Name & " : " & Obs.To_String (M.Name) & " = " & Rstr & " " & R1str);
+	    end;
 	 when Bjo.Char => Send_Reply_Msg (M.C);
 	 when Bjo.Bool => 
 	    declare

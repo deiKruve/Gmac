@@ -85,12 +85,22 @@ package Beren.Amend is
    --
    -- Atributes:
    -- . setup parameters:
-   -- . . table of correction points
-   -- . . table of quintic coefficients (b values) 
+   -- . . Relative : set when the Value is relative to the Key in C_Table
+   -- . . Bdirectional : set when there are 2 values for each Key, one for pos travel
+   --                     and one for negative travel.
+   --                    not compatible with Qcurve bwlow.
+   -- . . Qcurve : set when a Qcurve is used to interpret the Key - Value pairs
+   --               not compatible with Bdirectional.
+   -- . .          sending a "Qcurve Set" message will recalculate the C_Table curve.
+   -- . . C_Table : table of correction point Key - Value triplets.
+   --                 Val has the value for Plus direction, and B for minus direction
+   --                 when applicable. In case of quintic coefficients (b values) 
+   --                 B has those, and Val has the new abs value for the 
+   --                 individual points.
    -- 
    -- . operation parameters
-   -- . . Enable : enables the jog module. 
-   --              disabling might help to construct the table
+   -- . . Enable : enables the amend module. 
+   --              
    -- . . 
    
    type Amend_Object_Type is limited private;
@@ -115,11 +125,11 @@ private
    type Table_Type is
       record
 	 Prev,
-	 Next : Table_P_Type;
+	 Next  : Table_P_Type;
 	 Key,
-	 Val : Long_Float with Atomic;
-	 B   : Long_Float with Atomic; -- in case of Q curve 
-				       -- no connection with key and val
+	 Val   : Long_Float with Atomic; -- when Bdirectional : plus dir values
+	 B     : Long_Float with Atomic; -- in case of Q curve 
+				       -- when Bdirectional : minus dir values
       end record;
    
    Type Amend_Object_Type is new Earendil.Objects.Object_Desc with

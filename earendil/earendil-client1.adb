@@ -159,7 +159,8 @@ package body Earendil.Client1 is
 			     Integer'Image (Reply) & " wrong units.");
       elsif Reply = 3 then
 	 Eer.Report_Error ("Client1.Send_ParSet_Msg : Error " & 
-			     Integer'Image (Reply) & " expected a float or integer or logic value.");
+			     Integer'Image (Reply) & 
+			     " expected a float or integer or logic value.");
       elsif Reply /= 0 then -- '0' says the par was set;
 	 Eer.Report_Error ("Client1.Send_ParSet_Msg : Error " & 
 			     Integer'Image (Reply));

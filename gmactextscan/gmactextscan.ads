@@ -32,7 +32,8 @@
 -- EBNF for the setup file (a setup file has many configurations):
 -- Configuration = Group.
 --   Group = { Entry }.
---     Entry = [ Name "=" ] Value.
+--     Entry = [ Name "=" ] Value | "{" pair "}" "{" pair"}" . . . . .
+--       pair = Value " " Value [ " " Value ].
 --       Value = Token | "{" Group "}".
 --         Token = any token from the textsscanner; "{" and "}" must occur pairwise.
 --                 dont use + or - , they are used for float representation.
