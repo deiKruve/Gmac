@@ -30,10 +30,12 @@
 --
 with Ada.Text_Io;-- debug??
 
---with Ada.Numerics;
+with Ada.Numerics.Generic_Real_Arrays;
+
 with Gmactextscan;
 with O_String;
 with Beren.Err;
+with Beren.Jogobj;
 
 package body Beren.Amend is
       package Tio renames Ada.Text_Io; -- debug??
@@ -74,10 +76,215 @@ package body Beren.Amend is
    -- find the quintic coefficients. --
    ------------------------------------
    
-   procedure Quit_Find (T : Table_P_Type)
+   procedure Quint_Find (T : Table_P_Type)
+     -- count the number of points, this gives the order
+     -- then select the fitting matrix and result vector to suit
+     -- call the solver 
+     -- and tranfer the result to the table.
+     --
+     -- we might want to remember the number of points for the recurring 
+     -- rt level calculation.
    is
-   begin
+      Tn : Table_P_Type := T.Next;
+      N  : Integer := 0; -- Order of The curve
+      package Gra is new Ada.Numerics.Generic_Real_Arrays(Real => Long_Float);
       
+      
+      procedure Fill_In_A2 (A : in out Gra.Real_Matrix; 
+			    V : in out Gra.Real_Vector; 
+			    T : in out Table_P_Type) with Inline 
+      is
+      begin
+	 A (1, 1) := 1.0;
+	 A (1, 2) := Tn.Key;
+	 V (1)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (2, 1) := 1.0;
+	 A (2, 2) := Tn.Key;
+	 V (2)    := Tn.Val;
+      end Fill_In_A2;
+      
+      procedure Fill_In_A3 (A : in out Gra.Real_Matrix; 
+			    V : in out Gra.Real_Vector; 
+			    T : in out Table_P_Type) with Inline 
+      is
+	 Tn : Table_P_Type := T;
+      begin
+	 A (1, 1) := 1.0;
+	 A (1, 2) := Tn.Key;
+	 A (1, 3) := Tn.Key ** 2;
+	 V (1)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (2, 1) := 1.0;
+	 A (2, 2) := Tn.Key;
+	 A (2, 3) := Tn.Key ** 2;
+	 V (2)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (3, 1) := 1.0;
+	 A (3, 2) := Tn.Key;
+	 A (3, 3) := Tn.Key ** 2;
+	 V (3)    := Tn.Val;
+      end Fill_In_A3;
+      
+      
+      procedure Fill_In_A4 (A : in out Gra.Real_Matrix; 
+			    V : in out Gra.Real_Vector; 
+			    T  : in out Table_P_Type) with Inline 
+      is
+	 Tn : Table_P_Type := T;
+      begin
+	 A (1, 1) := 1.0;
+	 A (1, 2) := Tn.Key;
+	 A (1, 3) := Tn.Key ** 2;
+	 A (1, 4) := Tn.Key ** 3;
+	 V (1)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (2, 1) := 1.0;
+	 A (2, 2) := Tn.Key;
+	 A (2, 3) := Tn.Key ** 2;
+	 A (2, 4) := Tn.Key ** 3;
+	 V (2)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (3, 1) := 1.0;
+	 A (3, 2) := Tn.Key;
+	 A (3, 3) := Tn.Key ** 2;
+	 A (3, 4) := Tn.Key ** 3;
+	 V (3)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (4, 1) := 1.0;
+	 A (4, 2) := Tn.Key;
+	 A (4, 3) := Tn.Key ** 2;
+	 A (4, 4) := Tn.Key ** 3;
+	 V (4)    := Tn.Val;
+      end Fill_In_A4;
+      
+      procedure Fill_In_A5 (A : in out Gra.Real_Matrix; 
+			    V : in out Gra.Real_Vector; 
+			    T : in out Table_P_Type) with Inline 
+      is
+	 Tn : Table_P_Type := T;
+      begin
+	 A (1, 1) := 1.0;
+	 A (1, 2) := Tn.Key;
+	 A (1, 3) := Tn.Key ** 2;
+	 A (1, 4) := Tn.Key ** 3;
+	 A (1, 5) := Tn.Key ** 4;
+	 V (1)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (2, 1) := 1.0;
+	 A (2, 2) := Tn.Key;
+	 A (2, 3) := Tn.Key ** 2;
+	 A (2, 4) := Tn.Key ** 3;
+	 A (2, 5) := Tn.Key ** 4;
+	 V (2)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (3, 1) := 1.0;
+	 A (3, 2) := Tn.Key;
+	 A (3, 3) := Tn.Key ** 2;
+	 A (3, 4) := Tn.Key ** 3;
+	 A (3, 5) := Tn.Key ** 4;
+	 V (3)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (4, 1) := 1.0;
+	 A (4, 2) := Tn.Key;
+	 A (4, 3) := Tn.Key ** 2;
+	 A (4, 4) := Tn.Key ** 3;
+	 A (4, 5) := Tn.Key ** 4;
+	 V (4)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (5, 1) := 1.0;
+	 A (5, 2) := Tn.Key;
+	 A (5, 3) := Tn.Key ** 2;
+	 A (5, 4) := Tn.Key ** 3;
+	 A (5, 5) := Tn.Key ** 4;
+	 V (5)    :=  Tn.Val;
+      end Fill_In_A5;
+      
+      procedure Fill_In_A6 (A : in out Gra.Real_Matrix; 
+			    V : in out Gra.Real_Vector; 
+			    T : in out Table_P_Type) with Inline 
+      is
+	 Tn : Table_P_Type := T;
+      begin
+	 A (1, 1) := 1.0;
+	 A (1, 2) := Tn.Key;
+	 A (1, 3) := Tn.Key ** 2;
+	 A (1, 4) := Tn.Key ** 3;
+	 A (1, 5) := Tn.Key ** 4;
+	 A (1, 6) := Tn.Key ** 5;
+	 V (1)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (2, 1) := 1.0;
+	 A (2, 2) := Tn.Key;
+	 A (2, 3) := Tn.Key ** 2;
+	 A (2, 4) := Tn.Key ** 3;
+	 A (2, 5) := Tn.Key ** 4;
+	 A (2, 6) := Tn.Key ** 5;
+	 V (2)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (3, 1) := 1.0;
+	 A (3, 2) := Tn.Key;
+	 A (3, 3) := Tn.Key ** 2;
+	 A (3, 4) := Tn.Key ** 3;
+	 A (3, 5) := Tn.Key ** 4;
+	 A (3, 6) := Tn.Key ** 5;
+	 V (3)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (4, 1) := 1.0;
+	 A (4, 2) := Tn.Key;
+	 A (4, 3) := Tn.Key ** 2;
+	 A (4, 4) := Tn.Key ** 3;
+	 A (4, 5) := Tn.Key ** 4;
+	 A (4, 6) := Tn.Key ** 5;
+	 V (4)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (5, 1) := 1.0;	 
+	 A (5, 2) := Tn.Key;	 
+	 A (5, 3) := Tn.Key ** 2;
+	 A (5, 4) := Tn.Key ** 3;
+	 A (5, 5) := Tn.Key ** 4;
+	 A (5, 6) := Tn.Key ** 5;
+	 V (5)    := Tn.Val;
+	 Tn := Tn.Next;
+	 A (6, 1) := 1.0;	 
+	 A (6, 2) := Tn.Key;	 
+	 A (6, 3) := Tn.Key ** 2;
+	 A (6, 4) := Tn.Key ** 3;
+	 A (6, 5) := Tn.Key ** 4;
+	 A (6, 6) := Tn.Key ** 5;
+	 V (6)    := Tn.Val;
+      end Fill_In_A6;
+
+   begin
+      while Tn/= null loop -- count the data points
+	 N := N + 1;
+	 Tn:= Tn.Next;
+      end loop;
+      Tn := T.Next; -- back to the beginning
+      declare 
+	 A  : Gra.Real_Matrix (1 .. N, 1 .. N);
+	 V  : Gra.Real_Vector (1 .. N);
+	 Vr : Gra.Real_Vector (1 .. N);
+      begin
+	 case N is
+	    --when 1 => N1;
+	    when 2 => Fill_In_A2 (A, V, Tn);
+	    when 3 => Fill_In_A3 (A, V, Tn);
+	    when 4 => Fill_In_A4 (A, V, Tn);
+	    when 5 => Fill_In_A5 (A, V, Tn);
+	    when 6 => Fill_In_A6 (A, V, Tn);
+	    when others => Ber.Report_Error 
+	       (Name & 
+		" Quintic parameter calculation: too few or too many data points.");
+	 end case;
+	 --Vr := Solv.Linear_Equations (A, V);
+	 Vr := Gra.Solve (A, V);
+	 Tn := T.Next; -- back to the beginning
+	 for I in Vr'First .. Vr'Last loop
+	    Tn.B := Vr (I);
+	    Tn := Tn.Next;
+	 end loop;
+      end;
       null;
    end Quint_Find;
 
@@ -101,9 +308,9 @@ package body Beren.Amend is
 	 use type Bjo.Attr_Class;
       begin
 	 if M.Id = Bob.Get and then Obs.Eq (M.S, Name) then  
-	    if Obs.Eq (M.Name, "Rel") then
+	    if Obs.Eq (M.Name, "Relative") then
 	       M.Class := Bjo.Bool;
-	       M.B := Obj.Rel;
+	       M.B := Obj.Relative;
 	       M.Res := 0;
 	    elsif Obs.Eq (M.Name, "Bdirectional") then
 	       M.Class := Bjo.Bool;
@@ -134,7 +341,7 @@ package body Beren.Amend is
 	       end if;
 	    elsif Obs.Eq (M.Name, "C_Table_B") and then M.Class = Bjo.Int then
 	       -- gets the B number subscripted by the integer sent.
-	       for I in range 0 .. M.X loop
+	       for I in 0 .. M.I loop
 		  exit when T = null;
 	       end loop;
 	       if T /= null then
@@ -173,8 +380,8 @@ package body Beren.Amend is
 	    end if;
 	    
 	 elsif M.Id = Bob.Set and then Obs.Eq (M.S, Name) then
-	    if Obs.Eq (M.Name, "Rel") and then M.Class = Bjo.Bool then
-	       Obj.Rel := M.B;
+	    if Obs.Eq (M.Name, "Relative") and then M.Class = Bjo.Bool then
+	       Obj.Relative := M.B;
 	       M.Res := 0;
 	    elsif Obs.Eq (M.Name, "Bdirectional") and then M.Class = Bjo.Bool then
 	       Obj.Bdirectional := M.B;
@@ -197,8 +404,8 @@ package body Beren.Amend is
 	       begin
 		  T := Obj.C_Table;
 		  while T.next /= null and then -- find key
-		    (abs (M.X - T.Key) > Long_Float'Epsilon and
-		       M.X > T.Key) loop
+		    (abs (M.X - T.Next.Key) > Long_Float'Epsilon and
+		       M.X > T.Next.Key) loop
 		     T := T.Next;
 		  end loop;
 		  if T.next = null then -- insert at the end.
@@ -207,15 +414,20 @@ package body Beren.Amend is
 		     Tn.Prev := T;
 		     T.Next  := Tn;
 		     Tn.Key  := M.X;
-		  elsif abs (M.X - T.Key) <= Long_Float'Epsilon then
+		     Tn.Val  := 0.0;
+		     Tn.B    := 0.0;
+		  elsif abs (M.X - T.Next.Key) <= Long_Float'Epsilon then
 		     -- this is the key record, correct the value
-		     Tn := T;
+		     Tn := T.next;
 		  else -- insert before this record
-		     Tn      := new Table_type;
-		     Tn.Prev := T.Prev;
-		     T.Prev  := Tn;
-		     Tn.Next := T;
-		     Tn.Key  := M.X;
+		     Tn          := new Table_type;
+		     Tn.Prev     := T;
+		     Tn.Next     := T.Next;
+		     T.Next.Prev := Tn;
+		     T.Next      := Tn;
+		     Tn.Key      := M.X;
+		     Tn.Val      := 0.0;
+		     Tn.B        := 0.0;
 		  end if;
 		  If M.C in 'U' | 'u' then --pos direction
 		     Tn.Val  := M.X1;
@@ -307,6 +519,9 @@ package body Beren.Amend is
 			  "False" | "false" then
 			   Amender.Qcurve := 
 			     Boolean'Value (String (M.S) (K .. J - 1));
+			   if Amender.Qcurve = True then
+			      Quint_Find (Amender.C_Table);
+			   end if;
 			   M.Res := 0;
 			else
 			   Ber.Report_Error 
@@ -376,8 +591,8 @@ package body Beren.Amend is
 			   Tmp_Val := Long_Float'Value (String (M.S) (K .. J - 1));
 			   T := Obj.C_Table;
 			   while T.next /= null and then 
-			     (abs (Tmp_Key - T.Key) > Long_Float'Epsilon and
-				Tmp_Key > T.Key) loop
+			     (abs (Tmp_Key - T.Next.Key) > Long_Float'Epsilon and
+				Tmp_Key > T.Next.Key) loop
 			      T := T.Next;
 			   end loop;
 			   if T.next = null then -- insert at the end.
@@ -386,20 +601,28 @@ package body Beren.Amend is
 			      Tn.Prev := T;
 			      T.Next  := Tn;
 			      Tn.Key  := Tmp_Key;
-			   elsif abs (Tmp_key - T.Key) <= Long_Float'Epsilon then
-			      -- this is the key record, correct the value
-			      Tn := T;
-			   else -- insert before this record
-			      Tn      := new Table_type;
-			      Tn.Prev := T.Prev;
-			      T.Prev  := Tn;
-			      Tn.Next := T;
-			      Tn.Key  := Tmp_Key;
+			      Tn.Val  := 0.0;
+			      Tn.B    := 0.0;
+			   elsif 
+			     abs (Tmp_key - T.Next.Key) <= Long_Float'Epsilon then
+			      -- this is the key record, correct the value");
+			      Tn := T.Next;
+			   else 
+			      -- insert before this.next record");
+			      -- so after T
+			      Tn          := new Table_type;
+			      Tn.Prev     := T;
+			      Tn.Next     := T.next;
+			      T.Next.Prev := Tn;
+			      T.Next      := Tn;
+			      Tn.Key      := Tmp_Key;
+			      Tn.Val      := 0.0;
+			      Tn.B        := 0.0;
 			   end if;
 			   If Up then
-			      Tn.Val  := Tmp_Val;
+			      Tn.Val := Tmp_Val;
 			   elsif Down then
-			      Tn.B := Tmp_Val;
+			      Tn.B   := Tmp_Val;
 			   end if;
 			   M.Res   := 0;
 			end; -- c_table block
@@ -472,18 +695,18 @@ package body Beren.Amend is
 	    
 	    M.Name  := Obs.To_O_String (32, "<- Out_Cpos");
 	    M.Class := Bjo.Real;
-	    M.X     := Out_Cpos.all;
+	    M.X     := Out_Cpos;
 	    M.Enum  (Name, M);
 	    
 	    M.Name  := Obs.To_O_String (32, "<- Out_Rpos");
 	    M.Class := Bjo.Real;
-	    M.X     := Out_Rpos.all;
+	    M.X     := Out_Rpos;
 	    M.Enum  (Name, M);
 	    
 	 end if; -- M.Id = ..
       end Handle_Attr_M;
       -------------
-      procedure Handle_File_M (Obj : in out Jog_Object_Type; 
+      procedure Handle_File_M (Obj : in out Amend_Object_Type; 
 			       M : in out Bob.File_Msg)
 	with Inline
       is
@@ -498,25 +721,27 @@ package body Beren.Amend is
 	       String'Write (M.Ostr, "" & Name & " = {");
 	       String'Write (M.Ostr, "Relative = {" &
 			       Boolean'Image (Obj.Relative) & "}" & ASCII.LF);
-	       String'Write (M.Ostr, "Bdirectional = {" &
+	       String'Write (M.Ostr, "          Bdirectional = {" &
 			       Boolean'Image (Obj.Bdirectional) & "}" & ASCII.LF);
-	       String'Write (M.Ostr, "Qcurve = {" &
+	       String'Write (M.Ostr, "          Qcurve = {" &
 			       Boolean'Image (Obj.Qcurve) & "}" & ASCII.LF);
-	       String'Write (M.Ostr, "Enable = {" &
+	       String'Write (M.Ostr, "          Enable = {" &
 			       Boolean'Image (Obj.Enable) & "}" & ASCII.LF);
-	       String'Write (M.Ostr, "C_Table = {");
-	       declare 
+	       String'Write (M.Ostr, "          C_Table = {" & ASCII.LF);
+	       declare                                      
 		  T   : Table_P_Type := Amender.C_Table.Next;
 	       begin
 		  while T /= null loop
-		     String'Write (M.Ostr, "{"& 
-				     Long_Float'Image (Obj.Key) & " " &
-				     Long_Float'Image (Obj.Val) & " " &
-				     Long_Float'Image (Obj.B)   & "}");
+		     String'Write (M.Ostr, "                     {"& 
+				     Long_Float'Image (T.Key) & " " &
+				     Long_Float'Image (T.Val) & " " &
+				     Long_Float'Image (T.B)   & "}" &
+				     ASCII.LF);
 		     T := T.Next;
 		  end loop;
 	       end;
-	       String'Write (M.Ostr, "}" & ASCII.LF);
+	       String'Write (M.Ostr, "                    }" & ASCII.LF);
+	       String'Write (M.Ostr, "         }" & ASCII.LF);
 	       M.Res := -1; -- success with this unit
 	    exception
 	       when others => M.Res := 4; -- disk full
@@ -667,6 +892,13 @@ package body Beren.Amend is
    
    
 begin
+   Bob.Init_Obj (Bob.Object (Amender), Name);
+   Amender.Handle       := Handle'Access;
+   Amender.Relative     := False;
+   Amender.Bdirectional := False;
+   Amender.Qcurve       := True;
+   Amender.Enable       := False;
+   Amender.C_Table      := new Table_Type;
    Amender.C_Table.Prev := null;
    Amender.C_Table.Next := null;
    

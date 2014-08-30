@@ -1,0 +1,3 @@
+gnatpp -A1 -nM -aM -c0 generic_real_linear_equations.adb
+gnatpp -A1 -nM -aM -c0 generic_real_least_square_fit.adb
+gnatpp -A1 -nM -aM -c0 generic_real_least_square_fit.ads

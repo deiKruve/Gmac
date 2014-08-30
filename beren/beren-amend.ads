@@ -139,13 +139,11 @@ private
 	 Qcurve       : Boolean with Atomic;
 	 C_Table      : Table_P_Type;
 	 Enable       : Boolean with Atomic;
-	 
       end record;
    type Amend_Obj_P is access all Amend_Object_Type;
    
    -- message object --
    Amender : Amend_Obj_P := new Amend_Object_Type;
-   Amender.C_Table       := new Table_Type;
    
    
    ----------------------------

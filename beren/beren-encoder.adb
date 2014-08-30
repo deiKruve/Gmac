@@ -278,13 +278,13 @@ package body Beren.Encoder is
 	       String'Write (M.Ostr, "Dir = {" &
 			       Boolean'Image (Obj.Dir) & "}" & ASCII.LF);
 	       
-	       String'Write (M.Ostr, "        Multiplier = {" &
+	       String'Write (M.Ostr, "         Multiplier = {" &
 			       Integer'Image (Obj.Multiplier) & "}" & ASCII.LF);
-	       String'Write (M.Ostr, "        Divider = {" &
+	       String'Write (M.Ostr, "         Divider = {" &
 			       Integer'Image (Obj.Divider) & "}" & ASCII.LF);
 	       --  String'Write (M.Ostr, "        Resolution = {" &
 	       --  	         Integer'Image (Obj.Resolution) & "}" & ASCII.LF);
-	       String'Write (M.Ostr, "}" & ASCII.LF);
+	       String'Write (M.Ostr, "        }" & ASCII.LF);
 	       M.Res := -1; -- success with this unit
 	    exception
 	       when others => M.Res := 4; -- disk full

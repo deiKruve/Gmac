@@ -27,10 +27,10 @@
 ------------------------------------------------------------------------------
 --
 --
---with Ada.Text_Io;
+with Ada.Text_Io; -- debug
 
 package body Earendil.Objects is
-   --package Tio renames Ada.Text_Io;
+   package Tio renames Ada.Text_Io; -- debug
    package Obs renames O_String;
    
    subtype Gen_Name is Obs.O_String (1 .. 32);
@@ -145,6 +145,8 @@ package body Earendil.Objects is
       Obj.Handle   := null;
       New_Obj.Next := Object (Obj);
       New_Obj      := Object (Obj);
+      --Tio.Put ("Registered ");
+	    --Tio.Put_Line (Obs.To_String (obj.Name));
    end Init_Obj;
    
    
@@ -155,12 +157,13 @@ package body Earendil.Objects is
       Frame := Obj_Root.next;
       Stamp (M);
       M.Res := Integer'First;
-      --Tio.Put_Line ("broadcast00");
       while Frame /= null and M.Res < 0  loop
 
-	    --Tio.Put_Line ("broadcast");
-
-	 Frame.Handle (Frame, M);
+	    --Tio.Put ("broadcast ");
+	    --Tio.Put_Line (Obs.To_String (Frame.Name));
+	    
+	    Frame.Handle (Frame, M);
+	    --Tio.Put_Line ("we passed here0.");
 	 Frame := Frame.Next;
       end loop;
    end Broadcast;
