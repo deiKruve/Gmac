@@ -54,6 +54,13 @@ package body  Bezier_Spline_Test is
    is
    begin
       for I in P1'First + 1 .. P1'Last loop
+	 
+	 Tio.Put_Line (Integer'Image (I));
+	 Tio.Put_Line ("Xp1 " & Long_Float'Image (P1 (I - 1).X) & " + " & Long_Float'Image (2.0 * P1 (I).X));
+	 Tio.Put_Line ("Xp2 " & Long_Float'Image (P2 (I).X) & " + " &  Long_Float'Image (2.0 * P2 (I - 1).X));
+	 Tio.Put_Line ("X " & Long_Float'Image (P1 (I - 1).X + 2.0 * P1 (I).X) & Long_Float'Image (P2 (I).X + 2.0 * P2 (I - 1).X));
+	 Tio.Put_Line ("Y " & Long_Float'Image (P1 (I - 1).Y + 2.0 * P1 (I).Y) & Long_Float'Image (P2 (I).Y + 2.0 * P2 (I - 1).Y));
+	 
 	 Ass.Assert 
 	   (abs ((P1 (I - 1).X + 2.0 * P1 (I).X) - (P2 (I).X + 2.0 * P2 (I - 1).X)) 
 	      < 10.0e-7, "Check_Second_Derivative_Continuity X");
@@ -126,8 +133,6 @@ package body  Bezier_Spline_Test is
       Plx := Bs.Get_First_Control_Points (Rhs);
       -- Check the system solution.
       -- First equation.
-      Tio.Put_Line (Long_Float'Image (Knots (Knots'First).X + 2.0 * Knots (Knots'First + 1).X) & "  " & Long_Float'Image (2.0 * Plx (Plx'First) + Plx (Plx'First + 1)));
-      
       Ass.Assert (abs ((Knots (Knots'First).X + 2.0 * Knots (Knots'First + 1).X) - 
 			 (2.0 * Plx (Plx'First) + Plx (Plx'First + 1))) 
 		    < 10.0e-7, "Get_First_Control_Points_Test X 1st");
@@ -178,6 +183,9 @@ package body  Bezier_Spline_Test is
       P1,
       P2    : Bs.Point_Array_Type (Knots'First .. Knots'Last  - 1);
    begin
+      --
+      Tio.Put_Line (Integer'Image(Knots'First) &" "&Integer'Image(Knots'Last));
+      --
       Bs.Get_Curve_Control_Points (Knots, P1, P2);
       Check_CP_Arrays_Length (Knots , P1, P2);
       if (Knots'Length < 2) then
@@ -198,6 +206,7 @@ package body  Bezier_Spline_Test is
 				   (29.2893218813453, 170.710678118655), 
 				   (100.0, 0.0)); -- "Arc" curve with 3 points.
    begin
+      Tio.Put_Line (Integer'Image (Pa'First) &" "& Integer'Image (Pa'Last));
       return Pa;
    end Get_Knots_Arc_3Points;
    

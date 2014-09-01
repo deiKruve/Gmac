@@ -145,8 +145,9 @@
 --  end Bezier_Spline;
 
 
-
+with Ada.Text_Io;
 package body Bezier_Spline is
+   package Tio renames Ada.Text_Io;
    
    
    -- Solves a tridiagonal system for one of coordinates (x or y) of 
@@ -154,6 +155,41 @@ package body Bezier_Spline is
    --
    -- "rhs"   Right hand side vector.
    -- returns Solution vector.
+   function Get_First_Control_Points_p (Rhs : Double_Arr_Type) return Double_Arr_Type
+   is
+      N : Integer := Rhs'Length;
+      X,
+      Tmp : Double_Arr_Type (Rhs'First .. Rhs'Last);
+      B : Long_Float := 2.0;
+   begin
+      X (Rhs'First) := Rhs (Rhs'First) / B;
+      --Decomposition and forward substitution.
+      for I in Rhs'First + 1 .. Rhs'Last loop 
+	 Tmp (I) := 1.0 / B;
+	 -- C'(I) := c(i) / b(i) for the first one
+	 -- c'(i-1) := c'(i-1) / b(i-1)
+	 -- so tmp(i) is act. c'(i-1)
+	 -- then c'(i) := c(i) / (b(i) - a(i) * c'(i-1)
+	 --      c'(i-1) := 1  / (4    -        c'(i-1)
+	 if I < Rhs'Last then
+	    B := 4.0 - Tmp (I); 
+	    --  b(i) - c'(i-1)
+	 else
+	    B := 3.5 - Tmp (I);
+	 end if;
+	 X (I) := (Rhs (I) - X (I - 1)) / B;
+	 -- d'(i) := (d(i) - a(i) * d'(i-1)) / (b(i) - a(i) * c'(i-1))
+	 -- d'(i) := (d(i) -        d'(i))   / ( 4   - tmp(i))
+      end loop;
+      -- Backsubstitution.
+      for I in Rhs'Last .. Rhs'First + 1 loop 
+	 X (I - 1) := X (I - 1) - Tmp (I) * X (I);
+	 -- x(i) := x(i) - c'(i) * x(i+1)
+      end loop;
+      return X;
+   end Get_First_Control_Points_p;
+   
+   
    function Get_First_Control_Points (Rhs : Double_Arr_Type) return Double_Arr_Type
    is
       N : Integer := Rhs'Length;
@@ -173,7 +209,7 @@ package body Bezier_Spline is
 	 X (I) := (Rhs (I) - X (I - 1)) / B;
       end loop;
       -- Backsubstitution.
-      for I in Rhs'Last .. Rhs'First + 1 loop 
+      for I in reverse Rhs'First + 1 .. Rhs'Last loop 
 	 X (I - 1) := X (I - 1) - Tmp (I) * X (I);
       end loop;
       return X;
@@ -198,12 +234,19 @@ package body Bezier_Spline is
       First_Control_Points  : out Point_Array_Type;
       Second_Control_Points : out Point_Array_Type)
    is
-      N    : Integer        := Knots'Length - 1;
+     N    : Integer        := Knots'Length - 1;
+     -- Fcp,
+     -- Scp  : Point_Array_Type (1 .. N);
       Fcp,
-      Scp  : Point_Array_Type (1 .. N);
+      Scp  : Point_Array_Type (Knots'First .. Knots'Last - 1);
+      
+      --  Rhs,
+      --  X,
+      --  Y    : Double_Arr_Type (1 .. N);
+      
       Rhs,
       X,
-      Y    : Double_Arr_Type (1 .. N);
+      Y    : Double_Arr_Type (Knots'First .. Knots'Last - 1);
       --Tmp : Double_Arr_Type (Rhs'First .. Rhs'Last);
    begin
       if N <  1 then
@@ -211,41 +254,65 @@ package body Bezier_Spline is
       elsif N = 1 then 
 	 -- straight line, 2 points only:
 	 -- 3P1 = 2P0 + P3
-	 Fcp (1).X := (2.0 * Knots (1).X + Knots (2).X) / 3.0;
-	 Fcp (1).Y := (2.0 * Knots (1).Y + Knots (2).Y) / 3.0;
+	 Fcp (Fcp'First).X := 
+	   (2.0 * Knots (Knots'First).X + Knots (Knots'First + 1).X) / 3.0;
+	 Fcp (Fcp'First).Y := 
+	   (2.0 * Knots (Knots'First).Y + Knots (Knots'First + 1).Y) / 3.0;
 	 -- P2 = 2P1 – P0
-	 Scp (1).X := 2.0 * Fcp (1).X - Knots (1).X;
-	 Scp (1).Y := 2.0 * Fcp (1).Y - Knots (1).Y;
+	 --Scp (1).X := 2.0 * Fcp (1).X - Knots (1).X;
+	 --Scp (1).Y := 2.0 * Fcp (1).Y - Knots (1).Y;
+	 
+	 Scp (Scp'First).X := 2.0 * Fcp (Fcp'First).X - Knots (Knots'First).X;
+	 Scp (Scp'First).Y := 2.0 * Fcp (Fcp'First).Y - Knots (Knots'First).Y;
       else
 	 -- Calculate first Bezier control points
 	 -- Right hand side vector:
 	 -- Set right hand side X values
-	 Rhs (1) := Knots (1).X + 2.0 * Knots (2).X;
-	 for I in 2 .. N - 1 loop-----------------------------------------
-	    Rhs (I) := 4.0 * Knots (I).X + 2.0 * Knots (I + 1).X; 
+	 Tio.Put_Line (Integer'Image(Knots'First) &" "&Integer'Image(Knots'Last));
+	 
+	 --  Rhs (1) := Knots (1).X + 2.0 * Knots (2).X;
+	 --  for I in 2 .. N - 1 loop-----------------------------------------
+	 --     Rhs (I) := 4.0 * Knots (I).X + 2.0 * Knots (I + 1).X; 
+	 --  end loop;
+	 --  Rhs (N) := (8.0 * Knots (N).X + Knots (N + 1).X) / 2.0;
+	 
+	 Rhs (Rhs'First) := Knots (Knots'First).X + 2.0 * Knots (Knots'First + 1).X;
+	 for I in Knots'First + 1 .. Knots'Last - 2 loop
+	    Rhs (I) := 4.0 * Knots (I).X + 2.0 * Knots (I + 1).X;
 	 end loop;
-	 Rhs (N) := (8.0 * Knots (N).X + Knots (N + 1).X) / 2.0;
+	 Rhs (Rhs'Last) := 
+	   (8.0 * Knots (Knots'Last - 1).X + Knots (Knots'Last).X) / 2.0;
+	 
 	 -- Get first control points X-values
-	 X := Get_First_Control_Points (Rhs);
-	 -- Set right hand side Y values
-	 Rhs (1) := Knots (1).Y + 2.0 * Knots (2).Y;
-	 for I in 2 .. N - 1 loop
-	    Rhs (I) := 4.0 * Knots (I).Y + 2.0 * Knots (I + 1) .Y; 
+	 X := Get_First_Control_Points (Rhs);---------------------
+	 
+	 -- Set right hand side Y values 
+	 Rhs (Rhs'First) := Knots (Knots'First).Y + 2.0 * Knots (Knots'First + 1).Y;
+	 for I in Knots'First + 1 .. Knots'Last - 2 loop
+	    Rhs (I) := 4.0 * Knots (I).Y + 2.0 * Knots (I + 1).Y;
 	 end loop;
-	 Rhs (N) := (8.0 * Knots (N).Y + Knots (N + 1).Y) / 2.0;
+	 Rhs (Rhs'Last) := 
+	   (8.0 * Knots (Knots'Last - 1).Y + Knots (Knots'Last).Y) / 2.0;
+	 
 	 -- Get first control points Y-values
 	 Y := Get_First_Control_Points (Rhs);
+	 
 	 -- Fill output arrays.
-	 for I in 1 .. N - 1 loop
+	 for I in Knots'First .. Knots'Last - 2 loop
+	 --for I in 1 .. N - 1 loop
 	    Fcp (I).X := X (I);
 	    Fcp (I).Y := Y (I);
 	    Scp (I).X := 2.0 * Knots (I + 1).X - X (I + 1);
 	    Scp (I).Y := 2.0 * Knots (I + 1).Y - Y (I + 1);
 	 end loop;
-	 Fcp (N).X := X (N);
-	 Fcp (N).Y := Y (N);
-	 Scp (N).X := Knots (N + 1).X + X (N) / 2.0;
-	 Scp (N).Y := Knots (N + 1).Y + Y (N) / 2.0;
+	 --Fcp (N).X := X (N);
+	 Fcp (Fcp'Last).X := X (X'Last);
+	 --Fcp (N).Y := Y (N);
+	 Fcp (Fcp'Last).Y := Y (Y'Last);
+	 --Scp (N).X := Knots (N + 1).X + X (N) / 2.0;
+	 Scp (Scp'Last).X := Knots (Knots'Last).X + X (X'Last) / 2.0;
+	 --Scp (N).Y := Knots (N + 1).Y + Y (N) / 2.0;
+	 Scp (Scp'Last).Y := Knots (Knots'Last).Y + Y (Y'Last) / 2.0;
       end if;
       First_Control_Points  := Fcp;
       Second_Control_Points := Scp;
