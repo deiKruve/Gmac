@@ -212,6 +212,7 @@ package body  Bezier_Spline_Test is
       Check_First_Derivative_Continuity (Knots, P1, P2);
       Check_Second_Derivative_Continuity (P1, P2);
       Check_Boundary_Conditions (Knots, P1, P2);
+      Bs.Plot_Bez_Spline (Knots, P1, P2, 5.0);---------------------------------
    end Get_Curve_Control_Points_Test;
    
    

@@ -141,8 +141,12 @@
 --- From this set of equations, P1[1..n] are easy but tedious to solve.
 ---
 
+with Ada.Text_IO.Text_Streams;
 
 package body Bezier_Spline is
+   
+   package Tio   renames Ada.Text_IO;
+   package Tiots renames Ada.Text_IO.Text_Streams;
    
    -- Solves a tridiagonal system for one of coordinates (x or y) of 
    --  first Bezier control points.
@@ -253,6 +257,137 @@ package body Bezier_Spline is
       First_Control_Points  := Fcp;
       Second_Control_Points := Scp;
    end Get_Curve_Control_Points;
+   
+   
+   -- gives out a pair of x and y
+   -- should be rewritten for file output or streaming
+   procedure Point_Write
+     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+      Item   : Point_type)
+   is
+   begin
+      Tio.Put_Line (Long_Float'Image (Item.X) & "  " & Long_Float'Image (Item.Y));
+      null;
+   end Point_Write;
+   
+   
+   function "+" (Left, Right : Point_Type) 
+		return Point_type with inline
+   is
+      A : Point_Type;
+   begin
+      A.X := Left.X + Right.X;
+      A.Y := Left.Y + Right.Y;
+     return  A;
+   end "+";
+   
+   
+   function "-" (Left, Right : Point_Type) 
+		return Point_type with inline
+   is
+      A : Point_Type;
+   begin
+      A.X := Left.X - Right.X;
+      A.Y := Left.Y - Right.Y;
+     return  A;
+   end "-";
+   
+   
+   function "/" (Left : Point_Type; D : Long_Float) 
+		return Point_Type with inline
+   is
+      A : Point_Type;
+   begin
+      A.X := Left.X / D;
+      A.Y := Left.Y / D;
+      return A;
+   end "/";
+   
+   
+   function ">" (Left : Point_Type; Right_Sq : Long_Float) 
+		return Boolean with Inline
+   is
+   begin
+      if Left.X ** 2 + Left.Y ** 2 > Right_Sq then
+	 return True;
+      else
+	 return False;
+      end if;
+   end ">";
+   
+   
+   -- split a bezier curve
+   -- "p0" and "p3" are the end points
+   -- "p1" and "p2" are the control points
+   -- "dmax_sq" is the max distance squared, between the endpoints that is allowed
+   --                                          before splitting.
+   -- "p0" must be written before entering to the outputstream
+   --    in case of a splined bezier, "p0" is off course the "p3" of 
+   --                                                        the previous section.
+   -- "p3" must be written after return from this routine.
+   procedure Split_Bez (P0, P1, P2, P3 : Point_Type; Dmax_Sq : Long_float)
+   is
+      Q0, Q1, Q2, Q3, R0, R1, R2, R3, H : Point_Type; 
+      Ostr : Tiots.Stream_Access := Tiots.Stream (Tio.Standard_Output);
+   begin
+      Q0 := P0;
+      R3 := P3;
+      Q1 := (P0 + P1) / 2.0;
+      R2 := (P2 + P3) / 2.0;
+      H  := (P1 + P2) / 2.0;
+      Q2 := (Q1 + H) / 2.0;
+      R1 := (H + R2) / 2.0;
+      R0 := (Q2 + R1) / 2.0;
+      Q3 := R0;
+      if Q3 - Q0 > Dmax_Sq then
+	 Split_Bez (Q0, Q1, Q2, Q3, Dmax_Sq);
+      end if;
+      Point_Type'Write (Ostr, Q3);
+      if
+	R0 - R3 > Dmax_Sq then
+	 Split_Bez (R0, R1, R2, R3, Dmax_Sq);
+      end if;
+      
+   end Split_Bez;
+   
+   ----------------------------------------------------------------------------------
+   --                                                                              --
+   -- Plot a Bezier spline to a list of point pairs                                --
+   --                                                                              --
+   -- "knots"               >Input.  Knot Bezier spline points.                    --
+   -- "firstControlPoints"  >Input.  First Control points array of                 --
+   --                                          knots.Length - 1 length.            --
+   -- "secondControlPoints" >Input.  Second Control points array of                --
+   --                                           knots.Length - 1 length.           --
+   -- "Interval"            >Input.  Inteval between the plot points.              --
+   -- NOT "Bez_Spline_list"     >Output. The output list of plotted points         --
+   -- outputs via Point_Type'Write to std io
+   ----------------------------------------------------------------------------------
+   procedure Plot_Bez_Spline 
+     (Knots                 : Point_Array_Type;
+      First_Control_Points  : Point_Array_Type;
+      Second_Control_Points : Point_Array_Type;
+      Dmax                  : Long_Float)
+     --return Point_Array_Type
+   is
+      Dmax_Sq : Long_Float := Dmax ** 2;
+      Ostr : Tiots.Stream_Access := Tiots.Stream (Tio.Standard_Output);
+      A : Point_Array_Type ( 1 .. 2);
+   begin
+      Point_Type'Write (Ostr, Knots (Knots'First));
+      for I in Knots'First .. Knots'Last - 1 loop
+	 if Knots (I + 1) - Knots (I) > Dmax_Sq then
+	    Split_Bez (Knots (I), 
+		       First_Control_Points (I), 
+		       Second_Control_Points (I),
+		       Knots (I + 1),
+		       Dmax_Sq);
+	 end if;
+	 Point_Type'Write (Ostr, Knots (I + 1));
+      end loop;
+      --return A;
+   end Plot_Bez_Spline;
+   
    
    
 end Bezier_Spline;

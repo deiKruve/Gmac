@@ -141,6 +141,7 @@
 --- From this set of equations, P1[1..n] are easy but tedious to solve.
 --- 
 
+with Ada.Streams;
 
 package Bezier_Spline is
    
@@ -152,6 +153,11 @@ package Bezier_Spline is
 	 Y : Long_Float;
       end record;
    type Point_Array_Type is array (Integer range <>) of Point_Type;
+   
+   procedure Point_Write
+     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+      Item   : Point_type);
+   for Point_Type'Write use Point_Write;
    
    
    ArgumentException     : exception; 
@@ -179,4 +185,25 @@ package Bezier_Spline is
    -- only for testing
    function Get_First_Control_Points (Rhs : Double_Arr_Type) return Double_Arr_Type;
    
+   
+   ----------------------------------------------------------------------------------
+   --                                                                              --
+   -- Plot a Bezier spline to a list of point pairs                                --
+   --                                                                              --
+   -- "knots"               >Input.  Knot Bezier spline points.                    --
+   -- "firstControlPoints"  >Input.  First Control points array of                 --
+   --                                          knots.Length - 1 length.            --
+   -- "secondControlPoints" >Input.  Second Control points array of                --
+   --                                           knots.Length - 1 length.           --
+   -- "Interval"            >Input.  Interval between the plot points.             --
+   -- NOT "Bez_Spline_list"     >Output. The output list of plotted points         --
+   -- outputs via Point_Type'Write to std io
+   ----------------------------------------------------------------------------------
+   procedure Plot_Bez_Spline 
+     (Knots                 :     Point_Array_Type;
+      First_Control_Points  :  Point_Array_Type;
+      Second_Control_Points :  Point_Array_Type;
+      Dmax                  :  Long_Float);
+     --return Point_Array_Type;
+	
 end Bezier_Spline;
