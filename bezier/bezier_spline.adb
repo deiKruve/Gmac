@@ -1,23 +1,39 @@
+------------------------------------------------------------------------------
+--                                                                          --
+--                              GMAC COMPONENTS                             --
+--                                                                          --
+--                         B E Z I E R _ S P L I N E                        --
+--                                                                          --
+--                                  B o d y                                 --
+--                                                                          --
+--                                                                          --
+-- Original analisys and code Copyright © 2008-2009 Oleg V. Polikarpotchkin.--
+--  <email>ov-p@yandex.ru</email>                                           --
+-- Modified: Peter Lee (peterlee.com.cn < at > gmail.com)                   --
+--   Update: 2009-03-16                                                     --
+--                                                                          --
+--           Ada translation Copyright (C) 2014, Jan de Kruyf               --
+--                                                                          --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.                                               --
+--                                                                          --
+-- You should have received a copy of the GNU General Public License and    --
+-- a copy of the GCC Runtime Library Exception along with this program;     --
+-- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
+-- <http://www.gnu.org/licenses/>.                                          --
+--                                                                          --
+--                 gMAC is maintained by J de Kruijf Engineers              --
+--                     (email: jan.de.kruyf@hotmail.com)                    --
+--                                                                          --
+------------------------------------------------------------------------------
+--
+-- Methods to calculate Bezier Spline connection points.
 
--- <copyright file="BezierSpline.cs" company="Oleg V. Polikarpotchkin">
--- Copyright © 2008-2009 Oleg V. Polikarpotchkin. All Right Reserved
--- </copyright>
--- <author>Oleg V. Polikarpotchkin</author>
--- <email>ov-p@yandex.ru</email>
--- <date>2008-12-17</date>
--- <summary>
--- Methods to calculate Bezier Spline points.
--- Modified: Peter Lee (peterlee.com.cn < at > gmail.com)
---   Update: 2009-03-16
-
-
-
---- <summary>
---- Bezier Spline methods
---- </summary>
---- <remarks>
---- Modified: Peter Lee (peterlee.com.cn < at > gmail.com)
----   Update: 2009-03-16
 --- 
 --- see also:
 --- Draw a smooth curve through a set of 2D points with Bezier primitives
@@ -123,73 +139,16 @@
 ---               P1[n-1] + 3.5P1[n]   = (8Q[n-1] + Q[n]) / 2
 ---  
 --- From this set of equations, P1[1..n] are easy but tedious to solve.
---- </remarks>
+---
 
 
---  package Bezier_Spline is
-   
-
---     type Point_Type is 
---        record
---  	 X : Long_Float;
---  	 Y : Long_Float;
---        end record;
---     type Point_Array_Type is array (Integer range <>) of Point_Type;
-   
---     ArgumentNullException : exception; -- ("knots")
---     ArgumentException     : exception; -- ("At least two knot points required", "knots")
-   
-					 
-   
-   
---  end Bezier_Spline;
-
-
-with Ada.Text_Io;
 package body Bezier_Spline is
-   package Tio renames Ada.Text_Io;
-   
    
    -- Solves a tridiagonal system for one of coordinates (x or y) of 
    --  first Bezier control points.
    --
    -- "rhs"   Right hand side vector.
-   -- returns Solution vector.
-   function Get_First_Control_Points_p (Rhs : Double_Arr_Type) return Double_Arr_Type
-   is
-      N : Integer := Rhs'Length;
-      X,
-      Tmp : Double_Arr_Type (Rhs'First .. Rhs'Last);
-      B : Long_Float := 2.0;
-   begin
-      X (Rhs'First) := Rhs (Rhs'First) / B;
-      --Decomposition and forward substitution.
-      for I in Rhs'First + 1 .. Rhs'Last loop 
-	 Tmp (I) := 1.0 / B;
-	 -- C'(I) := c(i) / b(i) for the first one
-	 -- c'(i-1) := c'(i-1) / b(i-1)
-	 -- so tmp(i) is act. c'(i-1)
-	 -- then c'(i) := c(i) / (b(i) - a(i) * c'(i-1)
-	 --      c'(i-1) := 1  / (4    -        c'(i-1)
-	 if I < Rhs'Last then
-	    B := 4.0 - Tmp (I); 
-	    --  b(i) - c'(i-1)
-	 else
-	    B := 3.5 - Tmp (I);
-	 end if;
-	 X (I) := (Rhs (I) - X (I - 1)) / B;
-	 -- d'(i) := (d(i) - a(i) * d'(i-1)) / (b(i) - a(i) * c'(i-1))
-	 -- d'(i) := (d(i) -        d'(i))   / ( 4   - tmp(i))
-      end loop;
-      -- Backsubstitution.
-      for I in Rhs'Last .. Rhs'First + 1 loop 
-	 X (I - 1) := X (I - 1) - Tmp (I) * X (I);
-	 -- x(i) := x(i) - c'(i) * x(i+1)
-      end loop;
-      return X;
-   end Get_First_Control_Points_p;
-   
-   
+   -- returns Solution vector.  
    function Get_First_Control_Points (Rhs : Double_Arr_Type) return Double_Arr_Type
    is
       N : Integer := Rhs'Length;
@@ -234,20 +193,12 @@ package body Bezier_Spline is
       First_Control_Points  : out Point_Array_Type;
       Second_Control_Points : out Point_Array_Type)
    is
-     N    : Integer        := Knots'Length - 1;
-     -- Fcp,
-     -- Scp  : Point_Array_Type (1 .. N);
+      N    : Integer        := Knots'Length - 1;
       Fcp,
       Scp  : Point_Array_Type (Knots'First .. Knots'Last - 1);
-      
-      --  Rhs,
-      --  X,
-      --  Y    : Double_Arr_Type (1 .. N);
-      
       Rhs,
       X,
       Y    : Double_Arr_Type (Knots'First .. Knots'Last - 1);
-      --Tmp : Double_Arr_Type (Rhs'First .. Rhs'Last);
    begin
       if N <  1 then
 	 raise ArgumentException;
@@ -259,23 +210,13 @@ package body Bezier_Spline is
 	 Fcp (Fcp'First).Y := 
 	   (2.0 * Knots (Knots'First).Y + Knots (Knots'First + 1).Y) / 3.0;
 	 -- P2 = 2P1 – P0
-	 --Scp (1).X := 2.0 * Fcp (1).X - Knots (1).X;
-	 --Scp (1).Y := 2.0 * Fcp (1).Y - Knots (1).Y;
-	 
 	 Scp (Scp'First).X := 2.0 * Fcp (Fcp'First).X - Knots (Knots'First).X;
 	 Scp (Scp'First).Y := 2.0 * Fcp (Fcp'First).Y - Knots (Knots'First).Y;
       else
 	 -- Calculate first Bezier control points
 	 -- Right hand side vector:
+	 
 	 -- Set right hand side X values
-	 Tio.Put_Line (Integer'Image(Knots'First) &" "&Integer'Image(Knots'Last));
-	 
-	 --  Rhs (1) := Knots (1).X + 2.0 * Knots (2).X;
-	 --  for I in 2 .. N - 1 loop-----------------------------------------
-	 --     Rhs (I) := 4.0 * Knots (I).X + 2.0 * Knots (I + 1).X; 
-	 --  end loop;
-	 --  Rhs (N) := (8.0 * Knots (N).X + Knots (N + 1).X) / 2.0;
-	 
 	 Rhs (Rhs'First) := Knots (Knots'First).X + 2.0 * Knots (Knots'First + 1).X;
 	 for I in Knots'First + 1 .. Knots'Last - 2 loop
 	    Rhs (I) := 4.0 * Knots (I).X + 2.0 * Knots (I + 1).X;
@@ -284,7 +225,7 @@ package body Bezier_Spline is
 	   (8.0 * Knots (Knots'Last - 1).X + Knots (Knots'Last).X) / 2.0;
 	 
 	 -- Get first control points X-values
-	 X := Get_First_Control_Points (Rhs);---------------------
+	 X := Get_First_Control_Points (Rhs);
 	 
 	 -- Set right hand side Y values 
 	 Rhs (Rhs'First) := Knots (Knots'First).Y + 2.0 * Knots (Knots'First + 1).Y;
@@ -299,20 +240,15 @@ package body Bezier_Spline is
 	 
 	 -- Fill output arrays.
 	 for I in Knots'First .. Knots'Last - 2 loop
-	 --for I in 1 .. N - 1 loop
 	    Fcp (I).X := X (I);
 	    Fcp (I).Y := Y (I);
 	    Scp (I).X := 2.0 * Knots (I + 1).X - X (I + 1);
 	    Scp (I).Y := 2.0 * Knots (I + 1).Y - Y (I + 1);
 	 end loop;
-	 --Fcp (N).X := X (N);
 	 Fcp (Fcp'Last).X := X (X'Last);
-	 --Fcp (N).Y := Y (N);
 	 Fcp (Fcp'Last).Y := Y (Y'Last);
-	 --Scp (N).X := Knots (N + 1).X + X (N) / 2.0;
-	 Scp (Scp'Last).X := Knots (Knots'Last).X + X (X'Last) / 2.0;
-	 --Scp (N).Y := Knots (N + 1).Y + Y (N) / 2.0;
-	 Scp (Scp'Last).Y := Knots (Knots'Last).Y + Y (Y'Last) / 2.0;
+	 Scp (Scp'Last).X := (Knots (Knots'Last).X + X (X'Last)) / 2.0;
+	 Scp (Scp'Last).Y := (Knots (Knots'Last).Y + Y (Y'Last)) / 2.0;
       end if;
       First_Control_Points  := Fcp;
       Second_Control_Points := Scp;

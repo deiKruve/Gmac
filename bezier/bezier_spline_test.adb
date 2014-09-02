@@ -1,19 +1,47 @@
---  <copyright file="BezierSplineTest.cs" company="Oleg V. Polikarpotchkin">
---  Copyright © 2008-2009 Oleg V. Polikarpotchkin. All Right Reserved
---  </copyright>
---  <author>Oleg V. Polikarpotchkin</author>
---  <email>ov-p@yandex.ru</email>
---  <date>2009-03-20</date>
---  <summary>Tests for BezierSpline class.</summary>
+------------------------------------------------------------------------------
+--                                                                          --
+--                              GMAC COMPONENTS                             --
+--                                                                          --
+--                     B E Z I E R _ S P L I N E _ T E S T                  --
+--                                                                          --
+--                                  B o d y                                 --
+--                                                                          --
+--                                                                          --
+-- Original analisys and code Copyright © 2008-2009 Oleg V. Polikarpotchkin.--
+--  <email>ov-p@yandex.ru</email>                                           --
+-- Modified: Peter Lee (peterlee.com.cn < at > gmail.com)                   --
+--   Update: 2009-03-16                                                     --
+--                                                                          --
+--           Ada translation Copyright (C) 2014, Jan de Kruyf               --
+--                                                                          --
+-- This is free software;  you can redistribute it  and/or modify it  under --
+-- terms of the  GNU General Public License as published  by the Free Soft- --
+-- ware  Foundation;  either version 3,  or (at your option) any later ver- --
+-- sion.  This software is distributed in the hope  that it will be useful, --
+-- but WITHOUT ANY WARRANTY;  without even the implied warranty of MERCHAN- --
+-- TABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public --
+-- License for  more details.                                               --
+--                                                                          --
+-- You should have received a copy of the GNU General Public License and    --
+-- a copy of the GCC Runtime Library Exception along with this program;     --
+-- see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see    --
+-- <http://www.gnu.org/licenses/>.                                          --
+--                                                                          --
+--                 gMAC is maintained by J de Kruijf Engineers              --
+--                     (email: jan.de.kruyf@hotmail.com)                    --
+--                                                                          --
+------------------------------------------------------------------------------
+--
+--  <summary> Tests for Bezier_Spline class.</summary>
 --
 
 with Ada.Assertions;
-with Ada.Text_IO;
+with Ada.Text_IO; 
 
 package body  Bezier_Spline_Test is
    package Bs renames Bezier_Spline;
    package Ass renames Ada.Assertions;
-   package Tio renames Ada.Text_IO;
+   package Tio renames Ada.Text_IO; 
    
    
    -- Check for the boundary conditions.
@@ -36,8 +64,8 @@ package body  Bezier_Spline_Test is
 	   < 10.0e-7, "Check_Boundary_Conditions 1 Y");
       -- right bound
       Ass.Assert 
-	(abs (Knots (Knots'last).X - (2.0 * P2 (P2'last).X - P1 (P1'last).X)) 
-	   < 10.0e-7, "Check_Boundary_Conditions 2 X");
+      	(abs (Knots (Knots'last).X - (2.0 * P2 (P2'last).X - P1 (P1'last).X)) 
+      	   < 10.0e-7, "Check_Boundary_Conditions 2 X");
       Ass.Assert 
 	(abs (Knots (Knots'last).Y - (2.0 * P2 (P2'last).Y - P1 (P1'last).Y)) 
 	   < 10.0e-7, "Check_Boundary_Conditions 2 Y");
@@ -54,13 +82,6 @@ package body  Bezier_Spline_Test is
    is
    begin
       for I in P1'First + 1 .. P1'Last loop
-	 
-	 Tio.Put_Line (Integer'Image (I));
-	 Tio.Put_Line ("Xp1 " & Long_Float'Image (P1 (I - 1).X) & " + " & Long_Float'Image (2.0 * P1 (I).X));
-	 Tio.Put_Line ("Xp2 " & Long_Float'Image (P2 (I).X) & " + " &  Long_Float'Image (2.0 * P2 (I - 1).X));
-	 Tio.Put_Line ("X " & Long_Float'Image (P1 (I - 1).X + 2.0 * P1 (I).X) & Long_Float'Image (P2 (I).X + 2.0 * P2 (I - 1).X));
-	 Tio.Put_Line ("Y " & Long_Float'Image (P1 (I - 1).Y + 2.0 * P1 (I).Y) & Long_Float'Image (P2 (I).Y + 2.0 * P2 (I - 1).Y));
-	 
 	 Ass.Assert 
 	   (abs ((P1 (I - 1).X + 2.0 * P1 (I).X) - (P2 (I).X + 2.0 * P2 (I - 1).X)) 
 	      < 10.0e-7, "Check_Second_Derivative_Continuity X");
@@ -183,9 +204,6 @@ package body  Bezier_Spline_Test is
       P1,
       P2    : Bs.Point_Array_Type (Knots'First .. Knots'Last  - 1);
    begin
-      --
-      Tio.Put_Line (Integer'Image(Knots'First) &" "&Integer'Image(Knots'Last));
-      --
       Bs.Get_Curve_Control_Points (Knots, P1, P2);
       Check_CP_Arrays_Length (Knots , P1, P2);
       if (Knots'Length < 2) then
@@ -206,7 +224,6 @@ package body  Bezier_Spline_Test is
 				   (29.2893218813453, 170.710678118655), 
 				   (100.0, 0.0)); -- "Arc" curve with 3 points.
    begin
-      Tio.Put_Line (Integer'Image (Pa'First) &" "& Integer'Image (Pa'Last));
       return Pa;
    end Get_Knots_Arc_3Points;
    
