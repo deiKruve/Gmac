@@ -140,6 +140,9 @@
 ---  
 --- From this set of equations, P1[1..n] are easy but tedious to solve.
 ---
+---- note that in the software 
+---- Q[0]  is at Knots (0)
+---- P1[1] is at Fcp (0) and and P2[1] is at Scp (0)
 
 with Ada.Text_IO.Text_Streams;
 

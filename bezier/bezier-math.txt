@@ -1,0 +1,24 @@
+
+Bezier formula:
+
+P (s) = (1 s)3 y0 + 3s(1 s)2 y1=3 + 3s2 (1 s)y2=3 + s3 y1
+
+P  (s) = (1 - s)^3 P0  +  3s (1 - s)^2 P1  +  3s^2 (1 - s) P2  +  s^3 P3
+
+1st derivative
+
+P' (s) = -3 (1 - s)^2 P0  +  3(3s^2 - 4s +1) p1  + 3s (2 - 3s) P2  +  3s^2 P3
+
+---Using the first derivative continuity condition:
+--- 
+--- B'[i-1](1) = B'[i](0)
+--- 
+and p3[i-1] = p0[i]
+(let i-1 = j)
+--- we get:
+
+-3 P2 [j] + 3 P0 [i]  == -3 P0 [i] + 3 P1 [i] 
+
+6 P0 [i] = 3 P1 [i] + 3 P2 [i - 1]
+
+
