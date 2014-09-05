@@ -37,12 +37,24 @@
 
 with Ada.Assertions;
 with Ada.Text_IO; 
+with Ada.Streams;
 
 package body  Bezier_Spline_Test is
    package Bs renames Bezier_Spline;
    package Ass renames Ada.Assertions;
    package Tio renames Ada.Text_IO; 
    
+   
+   -- gives out a pair of x and y
+   procedure Point_Write
+     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+      Item   : Bs.Point_type)
+   is
+   begin
+      Tio.Put_Line (Long_Float'Image (Item.X) & "  " & 
+		      Long_Float'Image (Item.Y));
+   end Point_Write;
+
    
    -- Check for the boundary conditions.
    --
@@ -295,6 +307,6 @@ package body  Bezier_Spline_Test is
    end Get_First_Control_Points_Test;
    
 					 
-   
-   
+begin
+   Bs.Write_Point := Point_Write'Access;
 end Bezier_Spline_Test;

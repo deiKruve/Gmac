@@ -30,6 +30,7 @@
 
 with Earendil.Objects;
 with Beren.Thread;
+with Beren.Jogobj;
 
 generic
    Name : String := "";
@@ -88,15 +89,22 @@ package Beren.Amend is
    -- . . Relative : set when the Value is relative to the Key in C_Table
    -- . . Bdirectional : set when there are 2 values for each Key, one for pos travel
    --                     and one for negative travel.
-   --                    not compatible with Qcurve bwlow.
-   -- . . Qcurve : set when a Qcurve is used to interpret the Key - Value pairs
-   --               not compatible with Bdirectional.
-   -- . .          sending a "Qcurve Set" message will recalculate the C_Table curve.
+   --                    not compatible with Bezier or Poly curve below.
+   -- . . Curve : linear - linear interpretation between C_Table sections
+   --             bezier - linear interpretation between B_table sections.
+   --                      the sections are generated fron the spline knots in C-table
+   --                      and are not more than <Dmax> from each other.
+   --             poly   - polynomial interpretation of C_Table. The curve is generated 
+   --                      with the sum-least-square algorithm from C_Table.
+   --             whenever a "setpar bezier" or a "setpar poly" is send the curve gets 
+   --             regenerated. 
    -- . . C_Table : table of correction point Key - Value triplets.
    --                 Val has the value for Plus direction, and B for minus direction
-   --                 when applicable. In case of quintic coefficients (b values) 
+   --                 when applicable. In case of polynomial coefficients (b values) 
    --                 B has those, and Val has the new abs value for the 
    --                 individual points.
+   --                In the case of a Bezier curve pline for the correction values :
+   --     Dmax :       sets the max straight lengths between the curve points in B_table.
    -- 
    -- . operation parameters
    -- . . Enable : enables the amend module. 
@@ -136,8 +144,10 @@ private
       record
 	 Relative     : Boolean with Atomic;
 	 Bdirectional : Boolean with Atomic;
-	 Qcurve       : Boolean with Atomic;
+	 --Qcurve       : Boolean with Atomic;
+	 Curve        : Beren.Jogobj.Curve_Enumeration_Type with Atomic;
 	 C_Table      : Table_P_Type;
+	 Dmax         : Long_Float with Atomic;
 	 Enable       : Boolean with Atomic;
       end record;
    type Amend_Obj_P is access all Amend_Object_Type;

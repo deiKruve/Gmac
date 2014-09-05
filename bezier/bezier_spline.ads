@@ -158,7 +158,13 @@ package Bezier_Spline is
      (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
       Item   : Point_type);
    for Point_Type'Write use Point_Write;
-   
+      
+   -- write_point is used by point_write to output point_type values
+   -- hook your own routine into here.
+   Write_Point : access Procedure 
+     (Stream   : not null access Ada.Streams.Root_Stream_Type'Class;
+      Item     : Point_type);
+
    
    ArgumentException     : exception; 
    -- ("At least two knot points required", "knots")
@@ -197,13 +203,12 @@ package Bezier_Spline is
    --                                           knots.Length - 1 length.           --
    -- "Interval"            >Input.  Interval between the plot points.             --
    -- NOT "Bez_Spline_list"     >Output. The output list of plotted points         --
-   -- outputs via Point_Type'Write to std io
+   -- outputs via Point_Type'Write to the custom procedure Write_Point accesses    --
    ----------------------------------------------------------------------------------
    procedure Plot_Bez_Spline 
      (Knots                 :     Point_Array_Type;
       First_Control_Points  :  Point_Array_Type;
       Second_Control_Points :  Point_Array_Type;
       Dmax                  :  Long_Float);
-     --return Point_Array_Type;
-	
+   
 end Bezier_Spline;

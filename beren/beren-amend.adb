@@ -25,21 +25,23 @@
 --                     (email: jan.de.kruyf@hotmail.com)                    --
 --                                                                          --
 ------------------------------------------------------------------------------
---
+--ambrogio de agostini
 -- Template for a correction module
 --
 with Ada.Text_Io;-- debug??
-
+with Ada.Streams;
 with Ada.Numerics.Generic_Real_Arrays;
 
+with Bezier_Spline;
 with Gmactextscan;
 with O_String;
 with Beren.Err;
 with Beren.Jogobj;
 
 package body Beren.Amend is
-      package Tio renames Ada.Text_Io; -- debug??
-   
+   package Tio renames Ada.Text_Io; -- debug??
+      
+   package Bs  renames Bezier_Spline;
    package Gts renames Gmactextscan;
    package Obs renames O_String;
    package Bob renames Earendil.Objects;
@@ -72,11 +74,91 @@ package body Beren.Amend is
    pragma Inline (To_Radians, To_Degrees);
    
    
-   ------------------------------------
-   -- find the quintic coefficients. --
-   ------------------------------------
+   --------------------------------------------------------
+   -- the Bezier section                                 --
+   -- from the points in C_Table the definitions of the  --
+   -- bezier curve spline pieces are found.              --
+   -- then the spline is plotted into the B_Table via    --
+   -- Point_Write                                        --
+   --------------------------------------------------------
    
-   procedure Quint_Find (T : Table_P_Type)
+   B_Table,                     -- the spline table
+   B_Table_Now : Table_P_Type;  -- and a pointer
+   
+   
+   -- Point_Write is used by Point_Type'Write in the Bezier package
+   -- Stream is preset to Std-Out 
+   -- Item has the Bs.Point_Type to be plotted
+   procedure Point_Write
+     (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+      Item   : Bs.Point_Type)
+   is
+      Tn  : Table_P_Type;
+   begin
+      -- insert at the end.
+      Tn               := new Table_type;
+      Tn.Next          := B_Table_Now.Next;
+      Tn.Prev          := B_Table_Now;
+      B_Table_Now.Next := Tn;
+      
+      Tn.Key  := Item.X;
+      Tn.Val  := Item.Y;
+      Tn.B    := 0.0;
+   end Point_Write;
+   
+   
+   -------------------------------
+   -- find Bezier coefficients. --
+   -------------------------------
+   
+   procedure Open_Bezi_Find (T : Table_P_Type)
+     -- count the number of points
+     -- and transfer them into a knot array
+     -- call the bezier routine and store the result
+     --
+     -- the output is stored in B_Table by the Point_Write routine.
+     -- 
+   is
+      Tn : Table_P_Type := T.Next;
+      N  : Integer := 0; -- Number of knots
+   begin
+      while Tn/= null loop -- count the data points
+	 N := N + 1;
+	 Tn:= Tn.Next;
+      end loop;
+      Tn := T.Next; -- back to the beginning
+      declare
+	 Knots                 : Bs.Point_Array_Type (1 .. N);
+	 First_Control_Points  : Bs.Point_Array_Type (1 .. N - 1);
+	 Second_Control_Points : Bs.Point_Array_Type (1 .. N - 1);
+      begin
+	 -- knots.x will have the Z value
+	 -- knots Y will have the required focussing voltage level.
+	 -- in other words: X will have the read value, and Y the 
+	 -- corrected absolute value
+	 for I in Knots'First .. Knots'Last loop
+	    Knots (I).X := Tn.key;
+	    Knots (I).Y := Tn.Val;
+	    Tn:= Tn.Next;
+	 end loop;
+	 Bs.Get_Curve_Control_Points 
+	   (Knots, First_Control_Points, Second_Control_Points);
+	 B_Table      := new Table_Type; -- set up the table
+	 B_Table.Prev := null;
+	 B_Table.Next := null;
+	 B_Table_Now  := B_Table; -- the pointer for storing the plot
+	 Bs.Plot_Bez_Spline 
+	   (Knots, First_Control_Points, Second_Control_Points, Amender.Dmax);
+	 B_Table_Now  := B_Table; -- ready for every day use 
+      end;
+   end Open_Bezi_Find;
+   
+     
+     ---------------------------------------
+   -- find the polynomial coefficients. --
+   ---------------------------------------
+   
+   procedure Poly_Find (T : Table_P_Type)
      -- count the number of points, this gives the order
      -- then select the fitting matrix and result vector to suit
      -- call the solver 
@@ -275,7 +357,7 @@ package body Beren.Amend is
 	    when 6 => Fill_In_A6 (A, V, Tn);
 	    when others => Ber.Report_Error 
 	       (Name & 
-		" Quintic parameter calculation: too few or too many data points.");
+		" Polynomial parameter calculation: too few or too many data points.");
 	 end case;
 	 --Vr := Solv.Linear_Equations (A, V);
 	 Vr := Gra.Solve (A, V);
@@ -286,7 +368,7 @@ package body Beren.Amend is
 	 end loop;
       end;
       null;
-   end Quint_Find;
+   end Poly_Find;
 
 
    -----------------------
@@ -306,6 +388,7 @@ package body Beren.Amend is
 	 --Tn  : Table_P_Type;
 	 use type Bob.Op_Type;
 	 use type Bjo.Attr_Class;
+	 use type Bjo.Curve_Enumeration_Type;
       begin
 	 if M.Id = Bob.Get and then Obs.Eq (M.S, Name) then  
 	    if Obs.Eq (M.Name, "Relative") then
@@ -316,14 +399,31 @@ package body Beren.Amend is
 	       M.Class := Bjo.Bool;
 	       M.B := Obj.Bdirectional;
 	       M.Res := 0;
-	    elsif Obs.Eq (M.Name, "Qcurve") then
-	       M.Class := Bjo.Bool;
-	       M.B := Obj.Qcurve;
+	    elsif Obs.Eq (M.Name, "Curve") then
+	       M.Class := Bjo.Enum;
+	       M.E1 := Obj.Curve;
 	       M.Res := 0;
 	    elsif Obs.Eq (M.Name, "Enable") then
 	       M.Class := Bjo.Bool;
 	       M.B := Obj.Enable;
 	       M.Res := 0;
+	    elsif Obs.Eq (M.Name, "Dmax") then
+	      M.Class := Bjo.Real;
+	      M.X     := Obj.Dmax;
+	      M.Res   := 0;
+	    elsif Obs.Eq (M.Name, "B_Table") then
+	       declare
+		  T : Table_P_Type := B_Table.next;
+	       begin
+		  while T.Next /= null loop
+		     M.Class := Bjo.Real_Pair;
+		     M.X     := T.Key;
+		     M.X1    := T.Val;
+		     M.Enum  (Name, M);
+		     T       := T.Next;
+		  end loop;
+		  M.Res   := 0;
+	       end;
 	    elsif Obs.Eq (M.Name, "C_Table") and then M.Class = Bjo.Real then 
 	       -- get the values for the key in M.X
 	       while M.X - T.Key > Long_Float'Epsilon and T /= null  loop
@@ -353,6 +453,7 @@ package body Beren.Amend is
 		    ("get param: " & Name & "B not found.");
 		  M.Res := 3; -- key not found;
 	       end if;
+	       
 	    elsif Obs.Eq (M.Name, "In_Corrector") then
 	      M.Class := Bjo.Real;
 	      M.X     := In_Corrector.all;
@@ -386,10 +487,13 @@ package body Beren.Amend is
 	    elsif Obs.Eq (M.Name, "Bdirectional") and then M.Class = Bjo.Bool then
 	       Obj.Bdirectional := M.B;
 	       M.Res := 0;
-	    elsif Obs.Eq (M.Name, "Qcurve") and then M.Class = Bjo.Bool then
-	       Obj.Qcurve := M.B;
-	       if M.B = True then -- find the quintic parameters
-		  Quint_Find (Obj.C_Table);
+	    elsif Obs.Eq (M.Name, "Curve") and then M.Class = Bjo.Enum then
+	       Obj.Curve := M.E1;
+	       if M.E1 = Bjo.Poly then -- find the polynomial parameters
+		  Poly_Find (Obj.C_Table);
+		  M.Res := 0;
+	       elsif M.E1 = Bjo.Bezier then -- find the bezier spline curve
+		  Open_Bezi_Find (Obj.C_Table);
 		  M.Res := 0;
 	       else
 		  null; -- nothing to be done;
@@ -446,8 +550,9 @@ package body Beren.Amend is
 	    --   <Name> ".Enable = " <boolValue>
 	    --   <Name> ".Relative = " <boolValue>
 	    --   <Name> ".Bdirectional = " <boolValue>
-	    --   <Name> ".Qcurve = " <boolValue>
+	    --   <Name> ".Curve = " ["Off", "Linear", "Bezier" or "Poly"]
 	    --   <Name> ".C_Table "["U "|"D "] <key> " = " <value>
+	    --   <Name> ".Dmax" =  <floatValue> ["mm" | "inch"]
 	    if M.Class = Bjo.Str then
 	       declare
 		  J, K : Integer := 0;
@@ -505,28 +610,30 @@ package body Beren.Amend is
 				".Bdirectional -> expected 'True' or 'False'.");
 			   M.Res := 3; -- exception in conversion
 			end if; -- true or false
-		     elsif String (M.S) (J + 1 .. K) = "Qcurve" then
-			-- Set "Qcurve"
+		     elsif String (M.S) (J + 1 .. K) = "Curve" then
+			-- Set "Curve"
 			K := K + 1;
 			while M.S (K) in ' ' | '=' loop
 			   K := K + 1;
 			end loop;
 			J := K;
-			while M.S (J) in 'T' | 'F' | 'a' .. 'z' loop
+			while M.S (J) in 'O' | 'B' | 'P' | 'L' | 'a' .. 'z' loop
 			   J := J + 1;
 			end loop;
-			if String (M.S) (K .. J - 1) in "True" | "true" | 
-			  "False" | "false" then
-			   Amender.Qcurve := 
-			     Boolean'Value (String (M.S) (K .. J - 1));
-			   if Amender.Qcurve = True then
-			      Quint_Find (Amender.C_Table);
+			if String (M.S) (K .. J - 1) in "Off" | "off" | "Linear" | 
+			  "Bezier" | "bezier" | "Poly" | "poly" then
+			   Amender.Curve := 
+			     Bjo.Curve_Enumeration_Type'Value (String (M.S) (K .. J - 1));
+			   if Amender.Curve = Bjo.Poly then
+			      Poly_Find (Amender.C_Table);
+			   elsif Amender.Curve = Bjo.Bezier then
+			      Open_Bezi_Find (Amender.C_Table);
 			   end if;
 			   M.Res := 0;
 			else
 			   Ber.Report_Error 
 			     ("set param: " & Name & 
-				".Qcurve -> expected 'True' or 'False'.");
+				".Curve -> expected 'Off', 'Linear', 'Bezier' or 'Poly'.");
 			   M.Res := 3; -- exception in conversion
 			end if; -- true or false
 		     elsif String (M.S) (J + 1 .. K) = "Enable" then
@@ -626,6 +733,33 @@ package body Beren.Amend is
 			   end if;
 			   M.Res   := 0;
 			end; -- c_table block
+		     elsif String (M.S) (J + 1 .. K) = "Dmax" then
+			-- set Dmax
+			K := K + 1;
+			while M.S (K) in ' ' | '=' loop
+			   K := K + 1;
+			end loop;
+			J := K;
+			while M.S (J) in '0' .. '9' | '.' | '-' | '+' loop
+			   J := J + 1;
+			end loop;
+			Tmp_Val := Long_Float'Value (String (M.S) (K .. J - 1));
+			while M.S (J) = ' ' loop
+			   J := J + 1;
+			end loop;
+			if Xis = Linear and then 
+			  String (M.S) (J .. J + 1) = "mm" then
+			   Amender.Dmax := Tmp_Val;
+			   M.Res := 0; -- success
+			elsif Xis = Rotary and then 
+			  String (M.S) (J .. J + 2) = "deg" then
+			   Amender.Dmax := To_Radians (Tmp_Val);
+			   M.Res := 0; -- success
+			else
+			   Ber.Report_Error 
+			     ("set param: " & Name & ".Dmax -> wrong units.");
+			   M.Res := 2; -- units wrong
+			end if;
 		     else
 			Ber.Report_Error 
 			  ("set param: " & Name & "no such attribute");
@@ -654,14 +788,19 @@ package body Beren.Amend is
 	    M.B := Amender.all.Bdirectional;
 	    M.Enum  (Name, M);
 	    
-	    M.Name  := Obs.To_O_String (32, "Qcurve");
-	    M.Class := Bjo.Bool;
-	    M.B := Amender.all.Qcurve;
+	    M.Name  := Obs.To_O_String (32, "Curve");
+	    M.Class := Bjo.Enum;
+	    M.E1 := Amender.all.Curve;
 	    M.Enum  (Name, M);
 	    
 	    M.Name  := Obs.To_O_String (32, "Enable");
 	    M.Class := Bjo.Bool;
 	    M.B := Amender.all.Enable;
+	    M.Enum  (Name, M);
+	    
+	    M.Name  := Obs.To_O_String (32, "Dmax");
+	    M.Class := Bjo.Real;
+	    M.X     := Amender.all.Dmax;
 	    M.Enum  (Name, M);
 	    
 	    declare 
@@ -723,8 +862,8 @@ package body Beren.Amend is
 			       Boolean'Image (Obj.Relative) & "}" & ASCII.LF);
 	       String'Write (M.Ostr, "          Bdirectional = {" &
 			       Boolean'Image (Obj.Bdirectional) & "}" & ASCII.LF);
-	       String'Write (M.Ostr, "          Qcurve = {" &
-			       Boolean'Image (Obj.Qcurve) & "}" & ASCII.LF);
+	       String'Write (M.Ostr, "          Curve = {" &
+			       Bjo.Curve_Enumeration_Type'Image (Obj.Curve) & "}" & ASCII.LF);
 	       String'Write (M.Ostr, "          Enable = {" &
 			       Boolean'Image (Obj.Enable) & "}" & ASCII.LF);
 	       String'Write (M.Ostr, "          C_Table = {" & ASCII.LF);
@@ -783,11 +922,11 @@ package body Beren.Amend is
 		     M.Res := 3; -- exception in conversion
 		     exit;
 	       end case;
-	       Token := Gts.Find_Parameter ("Machine." & Name & ".Qcurve");
+	       Token := Gts.Find_Parameter ("Machine." & Name & ".Curve");
 	       --Tio.Put_Line ("debugger" & Gts.String_Value);
 	       case Token is
 		  when Gts.T_String =>
-		     Amender.Qcurve := Boolean'Value (Gts.String_Value);
+		     Amender.Curve := Bjo.Curve_Enumeration_Type'Value (Gts.String_Value);
 		  when Gts.Error =>
 		     Ber.Report_Error 
 		       ("gmac.text: " & Name & " : attr. name not known.");
@@ -796,7 +935,7 @@ package body Beren.Amend is
 		  when others    =>
 		     Ber.Report_Error 
 		       ("gmac.text: " & Name & 
-			  ".Qcurve -> expected 'True' or 'False'.");
+			  ".Curve -> expected 'Off', 'Linear', 'Bezier' or 'Poly'.");
 		     M.Res := 3; -- exception in conversion
 		     exit;
 	       end case;
@@ -896,12 +1035,12 @@ begin
    Amender.Handle       := Handle'Access;
    Amender.Relative     := False;
    Amender.Bdirectional := False;
-   Amender.Qcurve       := True;
+   Amender.Curve        := Bjo.Linear;
    Amender.Enable       := False;
    Amender.C_Table      := new Table_Type;
    Amender.C_Table.Prev := null;
    Amender.C_Table.Next := null;
-   
+   Amender.Dmax         := 20.0; 
    -- connect inputs to the defaults
    In_Corrector := In_Corrector_Xf'Access;
    In_Cpos      := In_Cpos_Xf'Access;

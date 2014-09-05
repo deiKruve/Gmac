@@ -263,14 +263,14 @@ package body Bezier_Spline is
    
    
    -- gives out a pair of x and y
-   -- should be rewritten for file output or streaming
-   procedure Point_Write
+   -- should be rewritten for file output or streaming--
+   -- write_point can now be defined externally and used as appropriate
+  procedure Point_Write
      (Stream : not null access Ada.Streams.Root_Stream_Type'Class;
       Item   : Point_type)
    is
    begin
-      Tio.Put_Line (Long_Float'Image (Item.X) & "  " & Long_Float'Image (Item.Y));
-      null;
+      Write_Point (Stream, Item);
    end Point_Write;
    
    
@@ -364,18 +364,16 @@ package body Bezier_Spline is
    --                                           knots.Length - 1 length.           --
    -- "Interval"            >Input.  Inteval between the plot points.              --
    -- NOT "Bez_Spline_list"     >Output. The output list of plotted points         --
-   -- outputs via Point_Type'Write to std io
+   -- outputs via Point_Type'Write to 
    ----------------------------------------------------------------------------------
    procedure Plot_Bez_Spline 
      (Knots                 : Point_Array_Type;
       First_Control_Points  : Point_Array_Type;
       Second_Control_Points : Point_Array_Type;
       Dmax                  : Long_Float)
-     --return Point_Array_Type
    is
       Dmax_Sq : Long_Float := Dmax ** 2;
       Ostr : Tiots.Stream_Access := Tiots.Stream (Tio.Standard_Output);
-      A : Point_Array_Type ( 1 .. 2);
    begin
       Point_Type'Write (Ostr, Knots (Knots'First));
       for I in Knots'First .. Knots'Last - 1 loop
@@ -388,9 +386,6 @@ package body Bezier_Spline is
 	 end if;
 	 Point_Type'Write (Ostr, Knots (I + 1));
       end loop;
-      --return A;
    end Plot_Bez_Spline;
-   
-   
-   
+     
 end Bezier_Spline;

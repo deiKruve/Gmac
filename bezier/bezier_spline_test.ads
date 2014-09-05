@@ -34,7 +34,7 @@
 --
 --  <summary> Tests for Bezier_Spline class.</summary>
 --
-
+with Ada.Streams;
 with Bezier_Spline;
 
 package Bezier_Spline_Test is
@@ -44,7 +44,6 @@ package Bezier_Spline_Test is
    
    -- GetFirstControlPoints method test.
    procedure Get_First_Control_Points_Test;
-   
    
    
 end Bezier_Spline_Test;
