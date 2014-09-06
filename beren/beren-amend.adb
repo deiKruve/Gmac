@@ -388,6 +388,7 @@ package body Beren.Amend is
 	 --Tn  : Table_P_Type;
 	 use type Bob.Op_Type;
 	 use type Bjo.Attr_Class;
+	 use type Bjo.Enumeration_Type;
 	 use type Bjo.Curve_Enumeration_Type;
       begin
 	 if M.Id = Bob.Get and then Obs.Eq (M.S, Name) then  
@@ -401,7 +402,8 @@ package body Beren.Amend is
 	       M.Res := 0;
 	    elsif Obs.Eq (M.Name, "Curve") then
 	       M.Class := Bjo.Enum;
-	       M.E1 := Obj.Curve;
+	       M.E := Bjo.Curve_Enumeration_Type'Pos (Obj.Curve);
+	       M.E1 := Bjo.Curve;
 	       M.Res := 0;
 	    elsif Obs.Eq (M.Name, "Enable") then
 	       M.Class := Bjo.Bool;
@@ -487,12 +489,14 @@ package body Beren.Amend is
 	    elsif Obs.Eq (M.Name, "Bdirectional") and then M.Class = Bjo.Bool then
 	       Obj.Bdirectional := M.B;
 	       M.Res := 0;
-	    elsif Obs.Eq (M.Name, "Curve") and then M.Class = Bjo.Enum then
-	       Obj.Curve := M.E1;
-	       if M.E1 = Bjo.Poly then -- find the polynomial parameters
+	    elsif Obs.Eq (M.Name, "Curve") and then 
+	      M.Class = Bjo.Enum and then
+	      M.E1 = Bjo.Curve then
+	       Obj.Curve := Bjo.Curve_Enumeration_Type'Val (M.E);
+	       if Obj.Curve = Bjo.Poly then -- find the polynomial parameters
 		  Poly_Find (Obj.C_Table);
 		  M.Res := 0;
-	       elsif M.E1 = Bjo.Bezier then -- find the bezier spline curve
+	       elsif Obj.Curve = Bjo.Bezier then -- find the bezier spline curve
 		  Open_Bezi_Find (Obj.C_Table);
 		  M.Res := 0;
 	       else
@@ -790,7 +794,8 @@ package body Beren.Amend is
 	    
 	    M.Name  := Obs.To_O_String (32, "Curve");
 	    M.Class := Bjo.Enum;
-	    M.E1 := Amender.all.Curve;
+	    M.E := Bjo.Curve_Enumeration_Type'Pos (Amender.all.Curve);
+	    M.E1    := Bjo.Curve;
 	    M.Enum  (Name, M);
 	    
 	    M.Name  := Obs.To_O_String (32, "Enable");

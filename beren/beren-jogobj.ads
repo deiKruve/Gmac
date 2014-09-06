@@ -40,6 +40,8 @@ package Beren.Jogobj is
    -- extra amend attr
    type Curve_Enumeration_Type is (Linear, Bezier, Poly);
    
+   type Enumeration_Type is (Pulse_Mode, Curve);
+   
    -- jog attibutes message
    type Attr_Msg is new Earendil.Objects.Obj_Msg with
      record
@@ -48,8 +50,8 @@ package Beren.Jogobj is
 	Name  : Earendil.Objects.Attr_Name;
 	--Res   : Integer;
 	Class : Attr_Class;
-	E     : Pulse_Mode_Enumeration_Type;
-	E1    : Curve_Enumeration_Type;
+	E     : integer;
+	E1    : Enumeration_Type;
 	I     : Integer;
 	X,
 	X1    : Long_Float;

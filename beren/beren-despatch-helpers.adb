@@ -41,6 +41,7 @@ package body Beren.Despatch.Helpers is
    procedure Enumerate_Attr (Name : String; M : Beren.Jogobj.Attr_Msg)
    is
       use type Bjo.Attr_Class;
+      use type Bjo.Enumeration_Type;
    begin
       case M.Class is
 	 when Bjo.Str  =>  Send_Reply_Msg (Obs.To_String (M.S));
@@ -75,12 +76,25 @@ package body Beren.Despatch.Helpers is
 		 (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
 	    end;
 	 when Bjo.Enum => 
-	    declare
-	       Rstr  : String := Bjo.Pulse_Mode_Enumeration_Type'Image (M.E);
-	    begin
-	       Send_Reply_Msg 
-		 (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
-	    end;
+	    if M.E1 = Bjo.Pulse_Mode then
+	       declare
+		  Rstr  : String := 
+		    Bjo.Pulse_Mode_Enumeration_Type'Image 
+		    (Bjo.Pulse_Mode_Enumeration_Type'Val (M.E));
+	       begin
+		  Send_Reply_Msg 
+		    (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
+	       end;
+	    elsif M.E1 = Bjo.Curve then
+	       declare
+		  Rstr  : String := 
+		    Bjo.Curve_Enumeration_Type'Image 
+		    (Bjo.Curve_Enumeration_Type'Val (M.E));
+	       begin
+		  Send_Reply_Msg 
+		    (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
+	       end;
+	    end if;
 	 when others   => 
 	    null;
       end case;

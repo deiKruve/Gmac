@@ -96,6 +96,7 @@ package body Beren.Hw is
       is
 	 use type Bob.Op_Type;
 	 use type Bjo.Attr_Class;
+	 use type Bjo.Enumeration_Type;
       begin
 	 if M.Id = Bob.Get and then Obs.Eq (M.S, Name) then 
 	   if Obs.Eq (M.Name, "Jog_Rate") then
@@ -112,7 +113,8 @@ package body Beren.Hw is
 	      M.Res := 0;
 	   elsif Obs.Eq (M.Name, "Puls_Mod") then
 	      M.Class := Bjo.Enum;
-	      M.E := Obj.Puls_Mod;
+	      M.E := Bjo.Pulse_Mode_Enumeration_Type'Pos (Obj.Puls_Mod);
+	      M.E1  := Bjo.Pulse_Mode;
 	      M.Res := 0;
 	   elsif Obs.Eq (M.Name, "Offset") then
 	      M.Class := Bjo.Real;
@@ -150,8 +152,10 @@ package body Beren.Hw is
 	   elsif Obs.Eq (M.Name, "Scale") and then M.Class = Bjo.Int then
 	      Obj.Scale := M.I;
 	      M.Res   := 0;
-	   elsif Obs.Eq (M.Name, "Puls_Mod") and then M.Class = Bjo.Enum then
-	      Obj.Puls_Mod := M.E;
+	   elsif Obs.Eq (M.Name, "Puls_Mod") and then 
+	     M.Class = Bjo.Enum and then
+	     M.E1 = Bjo.Pulse_Mode then
+	      Obj.Puls_Mod := Bjo.Pulse_Mode_Enumeration_Type'Val (M.E);
 	      case Jogger.Puls_Mod is
 		 when Bjo.Off       => Req_Move := 1.0; -- all in meters
 		 when Bjo.Hundredth => Req_Move := 0.000_01;
@@ -248,7 +252,8 @@ package body Beren.Hw is
 	    M.Enum (Name, M);
 	    M.Name  := Obs.To_O_String (32, "Puls_Mod");
 	    M.Class := Bjo.Enum;
-	    M.E := Jogger.all.Puls_Mod;
+	    M.E := Bjo.Pulse_Mode_Enumeration_Type'Pos (Jogger.all.Puls_Mod);
+	    M.E1 := Bjo.Pulse_Mode;
 	    M.Enum (Name, M);
 	    M.Name  := Obs.To_O_String (32, "Offset");
 	    M.Class := Bjo.Real;

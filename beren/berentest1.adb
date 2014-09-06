@@ -11,6 +11,7 @@ package body Berentest1 is
    procedure Enumerate_Attr (Name : String; M : Beren.Jogobj.Attr_Msg)
    is
       use type Bjo.Attr_Class;
+      use type Bjo.Enumeration_Type;
    begin
       if M.Class = Bjo.Real then
 	 declare 
@@ -31,11 +32,25 @@ package body Berentest1 is
 	    Tio.Put_Line (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
 	 end;
       elsif M.Class = Bjo.Enum then
-	 declare
-	    Rstr  : String := Bjo.Pulse_Mode_Enumeration_Type'Image (M.E);
-	 begin
-	    Tio.Put_Line (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
-	 end;
+	 if M.E1 = Bjo.Pulse_Mode then
+	    declare
+	       Rstr  : String := 
+		 Bjo.Pulse_Mode_Enumeration_Type'Image 
+		 (Bjo.Pulse_Mode_Enumeration_Type'Val (M.E));
+	    begin
+	       Tio.Put_Line
+		 (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
+	    end;
+	 elsif M.E1 = Bjo.Curve then
+	    declare
+	       Rstr  : String := 
+		 Bjo.Curve_Enumeration_Type'Image 
+		 (Bjo.Curve_Enumeration_Type'Val (M.E));
+	    begin
+	       Tio.Put_Line
+		 (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
+	    end;
+	 end if;
       end if;
    end Enumerate_Attr;
    
