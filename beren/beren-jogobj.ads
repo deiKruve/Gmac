@@ -39,7 +39,7 @@ package Beren.Jogobj is
    type Pulse_Mode_Enumeration_Type is (Off, Hundredth, Tenth, Unit, Ten);
    -- extra amend attr
    type Curve_Enumeration_Type is (Linear, Bezier, Poly);
-   
+   -- so we know which enumeration type is stored in the attr.message
    type Enumeration_Type is (Pulse_Mode, Curve);
    
    -- jog attibutes message
@@ -50,7 +50,7 @@ package Beren.Jogobj is
 	Name  : Earendil.Objects.Attr_Name;
 	--Res   : Integer;
 	Class : Attr_Class;
-	E     : integer;
+	E     : integer; -- stores the 'pos of the enumeration type in E1
 	E1    : Enumeration_Type;
 	I     : Integer;
 	X,

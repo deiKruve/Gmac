@@ -82,8 +82,8 @@ package body Beren.Amend is
    -- Point_Write                                        --
    --------------------------------------------------------
    
-   B_Table,                     -- the spline table
-   B_Table_Now : Table_P_Type;  -- and a pointer
+   B_Table       : Table_P_Type;  -- the spline table anchor
+   B_Table_Now : Table_P_Type with atomic;  -- and a pointer
    
    
    -- Point_Write is used by Point_Type'Write in the Bezier package
@@ -95,15 +95,21 @@ package body Beren.Amend is
    is
       Tn  : Table_P_Type;
    begin
-      -- insert at the end.
+      -- insert at the end, i.e. before the anchor
       Tn               := new Table_type;
-      Tn.Next          := B_Table_Now.Next;
-      Tn.Prev          := B_Table_Now;
-      B_Table_Now.Next := Tn;
-      
+      Tn.Next           := B_Table;
+      Tn.Prev           := B_Table.Prev;
+      B_Table.Prev.Next := Tn;
+      B_Table.Prev      := Tn;
       Tn.Key  := Item.X;
       Tn.Val  := Item.Y;
-      Tn.B    := 0.0;
+      if Tn.Prev /= B_Table then -- not for the first one
+	 --Y = X.m + n
+	 --Y = X((y2-y1)/(x2-x1))+(x2y1-x1y2)/(x2-x1)
+	 Tn.Prev.M := (Tn.Val - Tn.Prev.Val) / (Tn.Key - Tn.Prev.Key);
+	 Tn.Prev.N := (Tn.Key * Tn.Prev.Val - Tn.Prev.Key * Tn.Val) / 
+	   (Tn.Key - Tn.Prev.Key);
+      end if;
    end Point_Write;
    
    
@@ -122,7 +128,7 @@ package body Beren.Amend is
       Tn : Table_P_Type := T.Next;
       N  : Integer := 0; -- Number of knots
    begin
-      while Tn/= null loop -- count the data points
+      while Tn /= null loop -- count the data points
 	 N := N + 1;
 	 Tn:= Tn.Next;
       end loop;
@@ -143,13 +149,13 @@ package body Beren.Amend is
 	 end loop;
 	 Bs.Get_Curve_Control_Points 
 	   (Knots, First_Control_Points, Second_Control_Points);
-	 B_Table      := new Table_Type; -- set up the table
-	 B_Table.Prev := null;
-	 B_Table.Next := null;
-	 B_Table_Now  := B_Table; -- the pointer for storing the plot
+	 B_Table      := new Table_Type; -- set up the global table
+	 B_Table.Prev := B_Table;
+	 B_Table.Next := B_Table;
+	 --B_Table_Now  := B_Table; -- the pointer for storing the plot
 	 Bs.Plot_Bez_Spline 
 	   (Knots, First_Control_Points, Second_Control_Points, Amender.Dmax);
-	 B_Table_Now  := B_Table; -- ready for every day use 
+	 B_Table_Now  := B_Table.next; -- ready for every day use in the scanner
       end;
    end Open_Bezi_Find;
    
@@ -701,16 +707,17 @@ package body Beren.Amend is
 			   end loop;
 			   Tmp_Val := Long_Float'Value (String (M.S) (K .. J - 1));
 			   T := Obj.C_Table;
-			   while T.next /= null and then 
+			   while T.next /= Obj.C_Table and then 
 			     (abs (Tmp_Key - T.Next.Key) > Long_Float'Epsilon and
 				Tmp_Key > T.Next.Key) loop
 			      T := T.Next;
 			   end loop;
-			   if T.next = null then -- insert at the end.
+			   if T.next = Obj.C_Table then -- insert at the end.
 			      Tn      := new Table_type;
 			      Tn.Next := T.Next;
 			      Tn.Prev := T;
 			      T.Next  := Tn;
+			      Obj.C_Table.Prev := Tn;
 			      Tn.Key  := Tmp_Key;
 			      Tn.Val  := 0.0;
 			      Tn.B    := 0.0;
@@ -811,7 +818,7 @@ package body Beren.Amend is
 	    declare 
 	       T   : Table_P_Type := Amender.C_Table.Next;
 	    begin
-	       while T /= null loop
+	       while T /= Amender.C_Table loop
 		  M.Name  := 
 		    Obs.To_O_String (32, "C_Table " & Long_Float'Image (T.Key));
 		  M.Class := Bjo.Real_Pair;
@@ -875,7 +882,7 @@ package body Beren.Amend is
 	       declare                                      
 		  T   : Table_P_Type := Amender.C_Table.Next;
 	       begin
-		  while T /= null loop
+		  while T /= Amender.C_Table loop
 		     String'Write (M.Ostr, "                     {"& 
 				     Long_Float'Image (T.Key) & " " &
 				     Long_Float'Image (T.Val) & " " &
@@ -967,7 +974,7 @@ package body Beren.Amend is
 		    Exptn : exception;
 		 begin
 		    if Token /= Gts.Open_Brace then raise Exptn; end if;
-		    while T /= null loop
+		    while T /= Amender.C_Table loop
 		       Token := Gts.Next_Token;
 		       if Token = Gts.T_String then
 			  T.Key := Long_Float'Value (Gts.String_Value);
@@ -1015,18 +1022,58 @@ package body Beren.Amend is
    -------------------------------------------
    -- Scan once per cnc scan period         --
    -- this is executed in a priority thread --
+   -- these 2 are used when                 --
+   -- Out_Cpos is a function of In_Cpos.    --
+   -- the function is determined by the curve  --
    -------------------------------------------
    procedure Down_Scan
    is
    begin
-      null;
+      while In_Cpos.all < B_Table_Now.Key loop
+	 B_Table_Now := B_Table_Now.Prev;
+	 exit when B_Table_Now = B_Table.Next; -- lowest segment
+      end loop;
+      while In_Cpos.all > B_Table_Now.Next.Key loop
+	 B_Table_Now := B_Table_Now.Next;
+	 exit when B_Table_Now = B_Table.Prev.Prev; -- highest segment
+      end loop;
+      Out_Cpos := In_Cpos.all * B_Table_Now.M + B_Table_Now.N;
    end Down_Scan;
+   
    
    procedure Up_Scan
    is
    begin
-      null;
+      -- we hope there is little difference with the commanded pos.
+      Out_Rpos := (In_Rpos.all - B_Table_Now.N) / B_Table_Now.M;
    end Up_Scan;
+   
+   
+   -----------------------------------------------------
+   -- these are used in the case of a relative offset --
+   -- which is a function of the 'In_Corrector input' --
+   -----------------------------------------------------
+   procedure Down_Scan_C 
+   is
+   begin
+      while In_Cpos.all < B_Table_Now.Key loop
+	 B_Table_Now := B_Table_Now.Prev;
+	 exit when B_Table_Now = B_Table.Next; -- lowest segment
+      end loop;
+      while In_Cpos.all > B_Table_Now.Next.Key loop
+	 B_Table_Now := B_Table_Now.Next;
+	 exit when B_Table_Now = B_Table.Prev.Prev; -- highest segment
+      end loop;
+      Out_Cpos := In_Cpos.all * B_Table_Now.M + B_Table_Now.N;
+   end Down_Scan_C;
+   
+   
+   procedure Up_Scan_C 
+   is
+   begin
+      -- we hope there is little difference with the commanded pos.
+      Out_Rpos := (In_Rpos.all - B_Table_Now.N) / B_Table_Now.M;
+   end Up_Scan_C;
    
    
    -- input defaults
@@ -1043,8 +1090,8 @@ begin
    Amender.Curve        := Bjo.Linear;
    Amender.Enable       := False;
    Amender.C_Table      := new Table_Type;
-   Amender.C_Table.Prev := null;
-   Amender.C_Table.Next := null;
+   Amender.C_Table.Prev := Amender.C_Table;
+   Amender.C_Table.Next := Amender.C_Table;
    Amender.Dmax         := 20.0; 
    -- connect inputs to the defaults
    In_Corrector := In_Corrector_Xf'Access;
@@ -1052,7 +1099,11 @@ begin
    In_Rpos      := In_Rpos_Xf'Access;
    
    -- connect the scan routines in the scan thread.
-   Bth.Insert_Down_Scan (Ds);
-   Bth.Insert_Up_Scan (Us);
-   
+   if Use_In_Corrector then 
+      Bth.Insert_Down_Scan (Dsc);
+      Bth.Insert_Up_Scan (Usc);
+   else
+      Bth.Insert_Down_Scan (Ds);
+      Bth.Insert_Up_Scan (Us);
+   end if;
 end Beren.Amend;

@@ -38,6 +38,7 @@ generic
    -- for parameter setting, debugging etc.
    Xis : Axis_type;
    -- type Axis_Type is (Linear, Rotary);
+   Use_In_Corrector : Boolean := False;
    
    In_Corrector_Init : M_Type := 0.0;
    In_Cpos_Init      : M_Type := 0.0;
@@ -117,6 +118,9 @@ package Beren.Amend is
    procedure Handle (Obj : in out Earendil.Objects.Object; 
 		     M   : in out Earendil.Objects.Obj_Msg'Class);
    
+   -- these 2 are used in the case of        --
+   -- Out_Cpos is a function of In_Cpos.     --
+   --
    -- must be scanned every cnc scan period;
    -- with the flow of the data from llp to motors
    -- so the data travels in 1 scan period to the motor drive
@@ -126,6 +130,11 @@ package Beren.Amend is
    -- with the flow of the data from motors to llp 
    -- so the encoder data travels in 1 scan period to the llp.
    procedure Up_Scan;
+   
+   -- these are used in the case of a relative offset --
+   -- which is a function of the 'In_Corrector input' --
+   procedure Down_Scan_C;
+   procedure Up_Scan_C;
    
 private
    type Table_Type;
@@ -137,7 +146,9 @@ private
 	 Key,
 	 Val   : Long_Float with Atomic; -- when Bdirectional : plus dir values
 	 B     : Long_Float with Atomic; -- in case of Q curve 
-				       -- when Bdirectional : minus dir values
+					 -- when Bdirectional : minus dir values
+	 M, N  : Long_Float with Atomic; -- in case of Bezier and also pointtopoint?
+					 -- hold the Y = X.m + n factors
       end record;
    
    Type Amend_Object_Type is new Earendil.Objects.Object_Desc with
@@ -159,7 +170,10 @@ private
    ----------------------------
    -- beren.thread interface --
    ----------------------------
-   Ds : Beren.Thread.Scan_Proc_P_Type := Down_Scan'Access;
-   Us : Beren.Thread.Scan_Proc_P_Type := Up_Scan'Access;
+   Ds  : Beren.Thread.Scan_Proc_P_Type := Down_Scan'Access;
+   Dsc : Beren.Thread.Scan_Proc_P_Type := Down_Scan_C'Access;
+   Us  : Beren.Thread.Scan_Proc_P_Type := Up_Scan'Access;
+   Usc : Beren.Thread.Scan_Proc_P_Type := Up_Scan_C'Access;
+   
    
 end Beren.Amend;
