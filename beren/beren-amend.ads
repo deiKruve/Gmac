@@ -27,6 +27,14 @@
 ------------------------------------------------------------------------------
 --
 -- Template for a correction module
+--
+-- this module might correct:
+--  the effect of temperature on distance travelled. 
+--    the output will have a correction based on the In_Corrector input
+--  the output as a function of the input as in the case where
+--    a focus voltage is dependent on a hight or similar.
+--    in this case the output is directly described by the correction curve
+--
 
 with Earendil.Objects;
 with Beren.Thread;
@@ -39,6 +47,23 @@ generic
    Xis : Axis_type;
    -- type Axis_Type is (Linear, Rotary);
    Use_In_Corrector : Boolean := False;
+   -- when this is true it is assumed that the correction applied to the
+   -- command position is f(In_Corrector) and that it is a multiplier. 
+   -- therefore the B in the input table holds a zero offset for purposes of
+   -- the correction.
+   -- the formula applied is as follows:
+   -- Out_Cpos := In_Cpos.all + 
+   --                ((In_Cpos.all - B_Table_Now.B) * 
+   --                            (B_Table_Now.M * In_Corrector.all + B_Table_Now.N));
+   -- where m and n are the factors of the line equation A = B.m + n;
+   -- the straight lines are interpolation segments of the correction curve.
+   -- 
+   -- The B Value is copied from the input table that is used to generate the curve
+   --  so every curve segment can have its own offset in terms of the used formula.
+   --
+   -- when Use_In_Corrector is false, Out_Cpos = f(In_Cpos), 
+   -- the function is described by the curve.
+   --
    
    In_Corrector_Init : M_Type := 0.0;
    In_Cpos_Init      : M_Type := 0.0;
@@ -87,25 +112,26 @@ package Beren.Amend is
    --
    -- Atributes:
    -- . setup parameters:
-   -- . . Relative : set when the Value is relative to the Key in C_Table
-   -- . . Bdirectional : set when there are 2 values for each Key, one for pos travel
-   --                     and one for negative travel.
-   --                    not compatible with Bezier or Poly curve below.
+   -- -- . . Relative : set when the Value is relative to the Key in C_Table
+   -- -- . . Bdirectional : set when there are 2 values for each Key, one for pos travel
+   -- --                     and one for negative travel.
+   -- --                    not compatible with Bezier or Poly curve below.
    -- . . Curve : linear - linear interpretation between C_Table sections
    --             bezier - linear interpretation between B_table sections.
-   --                      the sections are generated fron the spline knots in C-table
+   --                      the sections are generated fron the spline knots 
+   --                       in C-table
    --                      and are not more than <Dmax> from each other.
-   --             poly   - polynomial interpretation of C_Table. The curve is generated 
-   --                      with the sum-least-square algorithm from C_Table.
-   --             whenever a "setpar bezier" or a "setpar poly" is send the curve gets 
-   --             regenerated. 
+   --             poly   - polynomial interpretation of C_Table. 
+   --                      The curve is generated  with the sum-least-square 
+   --                       algorithm from C_Table.
+   --             whenever a "setpar bezier" or a "setpar poly" is send 
+   --                       the curve gets regenerated. 
    -- . . C_Table : table of correction point Key - Value triplets.
-   --                 Val has the value for Plus direction, and B for minus direction
-   --                 when applicable. In case of polynomial coefficients (b values) 
-   --                 B has those, and Val has the new abs value for the 
-   --                 individual points.
+   --                 Key and Val describe the correction curve.
+   --                 B is a zero offset in case of 'Use_In_Corrector' being true
+   --                 This is described under 'Use_In_Corrector'
    --                In the case of a Bezier curve pline for the correction values :
-   --     Dmax :       sets the max straight lengths between the curve points in B_table.
+   --     Dmax :   sets the max straight lengths between the curve points in B_table.
    -- 
    -- . operation parameters
    -- . . Enable : enables the amend module. 
@@ -153,8 +179,8 @@ private
    
    Type Amend_Object_Type is new Earendil.Objects.Object_Desc with
       record
-	 Relative     : Boolean with Atomic;
-	 Bdirectional : Boolean with Atomic;
+	 --Relative     : Boolean with Atomic;
+	 --Bdirectional : Boolean with Atomic;
 	 --Qcurve       : Boolean with Atomic;
 	 Curve        : Beren.Jogobj.Curve_Enumeration_Type with Atomic;
 	 C_Table      : Table_P_Type;

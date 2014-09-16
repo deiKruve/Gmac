@@ -25,12 +25,13 @@
 --                     (email: jan.de.kruyf@hotmail.com)                    --
 --                                                                          --
 ------------------------------------------------------------------------------
---ambrogio de agostini
+--
 -- Template for a correction module
 --
 with Ada.Text_Io;-- debug??
 with Ada.Streams;
 with Ada.Numerics.Generic_Real_Arrays;
+with Ada.Unchecked_Deallocation;
 
 with Bezier_Spline;
 with Gmactextscan;
@@ -72,6 +73,46 @@ package body Beren.Amend is
    end To_Degrees;
    
    pragma Inline (To_Radians, To_Degrees);
+   
+   
+   ------------------------------
+   -- print a correction table --
+   -- for debugging only       --
+   ------------------------------
+   procedure Print_Table (T : Table_P_Type)
+   is
+      Tn : Table_P_Type := T.Next;
+   begin
+      Ber.Report_Error ("Key       Val          B            M           N");
+      while Tn /= T loop
+	 Ber.Report_Error 
+	   (Long_Float'Image (Tn.Key) & " " & 
+	      Long_Float'Image (Tn.Val) & " " & 
+	      Long_Float'Image (Tn.B) & " " & 
+	      Long_Float'Image (Tn.M) & " " & 
+	      Long_Float'Image (Tn.N));
+	 Tn := Tn.Next;
+      end loop;
+      null;
+   end Print_Table;
+   
+   
+   ------------------------------
+   -- clear a correction table --
+   ------------------------------
+   procedure Clear_Table (T : Table_P_Type)
+   is
+      procedure Free is 
+	 new Ada.Unchecked_Deallocation (Table_Type, Table_P_Type);
+      Tn : Table_P_Type := T.Next;
+   begin
+      while Tn /= T loop
+	 T.Next      := Tn.Next;
+	 T.Next.Prev := T;
+	 Free (Tn);
+	 Tn          := T.Next;
+      end loop;
+   end Clear_Table;
    
    
    --------------------------------------------------------
@@ -116,7 +157,6 @@ package body Beren.Amend is
    -------------------------------
    -- find Bezier coefficients. --
    -------------------------------
-   
    procedure Open_Bezi_Find (T : Table_P_Type)
      -- count the number of points
      -- and transfer them into a knot array
@@ -149,18 +189,74 @@ package body Beren.Amend is
 	 end loop;
 	 Bs.Get_Curve_Control_Points 
 	   (Knots, First_Control_Points, Second_Control_Points);
-	 B_Table      := new Table_Type; -- set up the global table
-	 B_Table.Prev := B_Table;
-	 B_Table.Next := B_Table;
-	 --B_Table_Now  := B_Table; -- the pointer for storing the plot
+	 Clear_Table (B_Table);
 	 Bs.Plot_Bez_Spline 
 	   (Knots, First_Control_Points, Second_Control_Points, Amender.Dmax);
+	 if Use_In_Corrector then -- copy the B values
+	    declare
+	       Ti : Table_P_Type := Amender.C_Table.Next;
+	       To : Table_P_Type := B_Table.Next;
+	    begin
+	       while To /= B_Table loop
+		  while To.Key > Ti.Next.key loop
+		     Ti := Ti.Next;
+		     exit when Ti = Amender.C_Table;
+		  end loop;
+		  To.B := Ti.B;
+		  To   := To.Next;
+	       end loop;
+	    end;
+	 end if;
+	 Print_Table (B_Table);-----------------------debug
 	 B_Table_Now  := B_Table.next; -- ready for every day use in the scanner
       end;
    end Open_Bezi_Find;
    
-     
-     ---------------------------------------
+   
+   ----------------------------------
+   -- find the linear coefficients --
+   ----------------------------------
+   procedure Linear_Find (T : Table_P_Type)
+   is
+      Ti : Table_P_Type := T.Next;
+   begin
+      Clear_Table (B_Table);
+      while Ti /= T.Prev loop
+	 declare
+	    Tn : Table_P_Type := new Table_type;
+	 begin
+	    Tn.Key := Ti.Key;
+	    Tn.Val := Ti.Val;
+	    Tn.B   := Ti.B;
+	    Tn.M   := (Ti.Key - Ti.Next.Key) / (Ti.Val - Ti.Next.Val);
+	    Tn.N   := Ti.Val - Ti.Key * Tn.M; 
+	    Tn.Next           := B_Table;
+	    Tn.Prev           := B_Table.Prev;
+	    B_Table.Prev.Next := Tn;
+	    B_Table.Prev      := Tn;
+	 end;
+	 Ti := Ti.Next;
+      end loop;
+      if Ti /= T then
+	 declare
+	    Tn : Table_P_Type := new Table_type;
+	 begin
+	    Tn.Key := Ti.Key;
+	    Tn.Val := Ti.Val;
+	    Tn.B   := 0.0;
+	    Tn.M   := 0.0;
+	    Tn.N   := 0.0;
+	    Tn.Next           := B_Table;
+	    Tn.Prev           := B_Table.Prev;
+	    B_Table.Prev.Next := Tn;
+	    B_Table.Prev      := Tn;
+	 end;
+      end if;
+      Print_Table (B_Table);-----------------------debug
+   end Linear_Find;
+   
+   
+   ---------------------------------------
    -- find the polynomial coefficients. --
    ---------------------------------------
    
@@ -398,15 +494,15 @@ package body Beren.Amend is
 	 use type Bjo.Curve_Enumeration_Type;
       begin
 	 if M.Id = Bob.Get and then Obs.Eq (M.S, Name) then  
-	    if Obs.Eq (M.Name, "Relative") then
-	       M.Class := Bjo.Bool;
-	       M.B := Obj.Relative;
-	       M.Res := 0;
-	    elsif Obs.Eq (M.Name, "Bdirectional") then
-	       M.Class := Bjo.Bool;
-	       M.B := Obj.Bdirectional;
-	       M.Res := 0;
-	    elsif Obs.Eq (M.Name, "Curve") then
+	    --  if Obs.Eq (M.Name, "Relative") then
+	    --     M.Class := Bjo.Bool;
+	    --     M.B := Obj.Relative;
+	    --     M.Res := 0;
+	    --  elsif Obs.Eq (M.Name, "Bdirectional") then
+	    --     M.Class := Bjo.Bool;
+	    --     M.B := Obj.Bdirectional;
+	    --     M.Res := 0;
+	    if Obs.Eq (M.Name, "Curve") then
 	       M.Class := Bjo.Enum;
 	       M.E := Bjo.Curve_Enumeration_Type'Pos (Obj.Curve);
 	       M.E1 := Bjo.Curve;
@@ -489,25 +585,23 @@ package body Beren.Amend is
 	    end if;
 	    
 	 elsif M.Id = Bob.Set and then Obs.Eq (M.S, Name) then
-	    if Obs.Eq (M.Name, "Relative") and then M.Class = Bjo.Bool then
-	       Obj.Relative := M.B;
-	       M.Res := 0;
-	    elsif Obs.Eq (M.Name, "Bdirectional") and then M.Class = Bjo.Bool then
-	       Obj.Bdirectional := M.B;
-	       M.Res := 0;
-	    elsif Obs.Eq (M.Name, "Curve") and then 
+	    --  if Obs.Eq (M.Name, "Relative") and then M.Class = Bjo.Bool then
+	    --     Obj.Relative := M.B;
+	    --     M.Res := 0;
+	    --  elsif Obs.Eq (M.Name, "Bdirectional") and then M.Class = Bjo.Bool then
+	    --     Obj.Bdirectional := M.B;
+	    --     M.Res := 0;
+	    if Obs.Eq (M.Name, "Curve") and then 
 	      M.Class = Bjo.Enum and then
 	      M.E1 = Bjo.Curve then
 	       Obj.Curve := Bjo.Curve_Enumeration_Type'Val (M.E);
-	       if Obj.Curve = Bjo.Poly then -- find the polynomial parameters
-		  Poly_Find (Obj.C_Table);
-		  M.Res := 0;
-	       elsif Obj.Curve = Bjo.Bezier then -- find the bezier spline curve
-		  Open_Bezi_Find (Obj.C_Table);
-		  M.Res := 0;
-	       else
-		  null; -- nothing to be done;
-	       end if;
+	       case Obj.Curve is
+		  when Bjo.Poly   => Poly_Find (Amender.C_Table);
+		  when Bjo.Bezier => Open_Bezi_Find (Amender.C_Table);
+		  when Bjo.Linear => Linear_Find (Amender.C_Table);
+		  when others     => null;
+	       end case;
+	       M.Res := 0;
 	    elsif Obs.Eq (M.Name, "Enable") and then M.Class = Bjo.Bool then
 	       Obj.Enable := M.B;
 	       M.Res := 0;
@@ -558,8 +652,8 @@ package body Beren.Amend is
 	 elsif M.Id = Bob.Setpar then
 	    -- dissect the string 
 	    --   <Name> ".Enable = " <boolValue>
-	    --   <Name> ".Relative = " <boolValue>
-	    --   <Name> ".Bdirectional = " <boolValue>
+	    -- --   <Name> ".Relative = " <boolValue>
+	    -- --   <Name> ".Bdirectional = " <boolValue>
 	    --   <Name> ".Curve = " ["Off", "Linear", "Bezier" or "Poly"]
 	    --   <Name> ".C_Table "["U "|"D "] <key> " = " <value>
 	    --   <Name> ".Dmax" =  <floatValue> ["mm" | "inch"]
@@ -578,49 +672,49 @@ package body Beren.Amend is
 			exit when M.S (I) in ' ' | '=';
 			K := I;
 		     end loop;
-		     if String (M.S) (J + 1 .. K) = "Relative" then
-			-- set "Relative"
-			K := K + 1;
-			while M.S (K) in ' ' | '=' loop
-			   K := K + 1;
-			end loop;
-			J := K;
-			while M.S (J) in 'T' | 'F' | 'a' .. 'z' loop
-			   J := J + 1;
-			end loop;
-			if String (M.S) (K .. J - 1) in "True" | "true" | 
-			  "False" | "false" then
-			   Amender.Relative := 
-			     Boolean'Value (String (M.S) (K .. J - 1));
-			   M.Res := 0;
-			else
-			   Ber.Report_Error 
-			     ("set param: " & Name & 
-				".Relative -> expected 'True' or 'False'.");
-			   M.Res := 3; -- exception in conversion
-			end if; -- true or false
-		     elsif String (M.S) (J + 1 .. K) = "Bdirectional" then
-			-- set "Bdirectional"
-			K := K + 1;
-			while M.S (K) in ' ' | '=' loop
-			   K := K + 1;
-			end loop;
-			J := K;
-			while M.S (J) in 'T' | 'F' | 'a' .. 'z' loop
-			   J := J + 1;
-			end loop;
-			if String (M.S) (K .. J - 1) in "True" | "true" | 
-			  "False" | "false" then
-			   Amender.Bdirectional := 
-			     Boolean'Value (String (M.S) (K .. J - 1));
-			   M.Res := 0;
-			else
-			   Ber.Report_Error 
-			     ("set param: " & Name & 
-				".Bdirectional -> expected 'True' or 'False'.");
-			   M.Res := 3; -- exception in conversion
-			end if; -- true or false
-		     elsif String (M.S) (J + 1 .. K) = "Curve" then
+		     --  if String (M.S) (J + 1 .. K) = "Relative" then
+		     --  	-- set "Relative"
+		     --  	K := K + 1;
+		     --  	while M.S (K) in ' ' | '=' loop
+		     --  	   K := K + 1;
+		     --  	end loop;
+		     --  	J := K;
+		     --  	while M.S (J) in 'T' | 'F' | 'a' .. 'z' loop
+		     --  	   J := J + 1;
+		     --  	end loop;
+		     --  	if String (M.S) (K .. J - 1) in "True" | "true" | 
+		     --  	  "False" | "false" then
+		     --  	   Amender.Relative := 
+		     --  	     Boolean'Value (String (M.S) (K .. J - 1));
+		     --  	   M.Res := 0;
+		     --  	else
+		     --  	   Ber.Report_Error 
+		     --  	     ("set param: " & Name & 
+		     --  		".Relative -> expected 'True' or 'False'.");
+		     --  	   M.Res := 3; -- exception in conversion
+		     --  	end if; -- true or false
+		     --  elsif String (M.S) (J + 1 .. K) = "Bdirectional" then
+		     --  	-- set "Bdirectional"
+		     --  	K := K + 1;
+		     --  	while M.S (K) in ' ' | '=' loop
+		     --  	   K := K + 1;
+		     --  	end loop;
+		     --  	J := K;
+		     --  	while M.S (J) in 'T' | 'F' | 'a' .. 'z' loop
+		     --  	   J := J + 1;
+		     --  	end loop;
+		     --  	if String (M.S) (K .. J - 1) in "True" | "true" | 
+		     --  	  "False" | "false" then
+		     --  	   Amender.Bdirectional := 
+		     --  	     Boolean'Value (String (M.S) (K .. J - 1));
+		     --  	   M.Res := 0;
+		     --  	else
+		     --  	   Ber.Report_Error 
+		     --  	     ("set param: " & Name & 
+		     --  		".Bdirectional -> expected 'True' or 'False'.");
+		     --  	   M.Res := 3; -- exception in conversion
+		     --  	end if; -- true or false
+		     if String (M.S) (J + 1 .. K) = "Curve" then
 			-- Set "Curve"
 			K := K + 1;
 			while M.S (K) in ' ' | '=' loop
@@ -634,11 +728,12 @@ package body Beren.Amend is
 			  "Bezier" | "bezier" | "Poly" | "poly" then
 			   Amender.Curve := 
 			     Bjo.Curve_Enumeration_Type'Value (String (M.S) (K .. J - 1));
-			   if Amender.Curve = Bjo.Poly then
-			      Poly_Find (Amender.C_Table);
-			   elsif Amender.Curve = Bjo.Bezier then
-			      Open_Bezi_Find (Amender.C_Table);
-			   end if;
+			   case Amender.Curve is
+			      when Bjo.Poly   => Poly_Find (Amender.C_Table);
+			      when Bjo.Bezier => Open_Bezi_Find (Amender.C_Table);
+			      when Bjo.Linear => Linear_Find (Amender.C_Table);
+			      when others     => null;
+			   end case;
 			   M.Res := 0;
 			else
 			   Ber.Report_Error 
@@ -789,15 +884,15 @@ package body Beren.Amend is
 	    end if; -- if m.class = string
 	    
 	 elsif M.Id = Bob.Enum then
-	    M.Name  := Obs.To_O_String (32, "Relative");
-	    M.Class := Bjo.Bool;
-	    M.B := Amender.all.Relative;
-	    M.Enum  (Name, M);
+	    --  M.Name  := Obs.To_O_String (32, "Relative");
+	    --  M.Class := Bjo.Bool;
+	    --  M.B := Amender.all.Relative;
+	    --  M.Enum  (Name, M);
 	    
-	    M.Name  := Obs.To_O_String (32, "Bdirectional");
-	    M.Class := Bjo.Bool;
-	    M.B := Amender.all.Bdirectional;
-	    M.Enum  (Name, M);
+	    --  M.Name  := Obs.To_O_String (32, "Bdirectional");
+	    --  M.Class := Bjo.Bool;
+	    --  M.B := Amender.all.Bdirectional;
+	    --  M.Enum  (Name, M);
 	    
 	    M.Name  := Obs.To_O_String (32, "Curve");
 	    M.Class := Bjo.Enum;
@@ -870,10 +965,10 @@ package body Beren.Amend is
 	    declare
 	    begin
 	       String'Write (M.Ostr, "" & Name & " = {");
-	       String'Write (M.Ostr, "Relative = {" &
-			       Boolean'Image (Obj.Relative) & "}" & ASCII.LF);
-	       String'Write (M.Ostr, "          Bdirectional = {" &
-			       Boolean'Image (Obj.Bdirectional) & "}" & ASCII.LF);
+	       --  String'Write (M.Ostr, "Relative = {" &
+	       --  		       Boolean'Image (Obj.Relative) & "}" & ASCII.LF);
+	       --  String'Write (M.Ostr, "          Bdirectional = {" &
+	       --  		       Boolean'Image (Obj.Bdirectional) & "}" & ASCII.LF);
 	       String'Write (M.Ostr, "          Curve = {" &
 			       Bjo.Curve_Enumeration_Type'Image (Obj.Curve) & "}" & ASCII.LF);
 	       String'Write (M.Ostr, "          Enable = {" &
@@ -900,40 +995,40 @@ package body Beren.Amend is
 	    
 	 elsif M.Id = Bob.Load then
 	    loop
-	       Token := Gts.Find_Parameter ("Machine." & Name & ".Relative");
-	       --Tio.Put_Line ("debugger" & Gts.String_Value);
-	       case Token is
-		  when Gts.T_String =>
-		     Amender.Relative := Boolean'Value (Gts.String_Value);
-		  when Gts.Error =>
-		     Ber.Report_Error 
-		       ("gmac.text: " & Name & " : attr. name not known.");
-		     M.Res := 1; -- attr. name not known.
-		     exit;
-		  when others    =>
-		     Ber.Report_Error 
-		       ("gmac.text: " & Name & 
-			  ".Relative -> expected 'True' or 'False'.");
-		     M.Res := 3; -- exception in conversion
-		     exit;
-	       end case;
-	       Token := Gts.Find_Parameter ("Machine." & Name & ".Bdirectional");
-	       --Tio.Put_Line ("debugger" & Gts.String_Value);
-	       case Token is
-		  when Gts.T_String =>
-		     Amender.Bdirectional := Boolean'Value (Gts.String_Value);
-		  when Gts.Error =>
-		     Ber.Report_Error 
-		       ("gmac.text: " & Name & " : attr. name not known.");
-		     M.Res := 1; -- attr. name not known.
-		     exit;
-		  when others    =>
-		     Ber.Report_Error 
-		       ("gmac.text: " & Name & 
-			  ".Bdirectional -> expected 'True' or 'False'.");
-		     M.Res := 3; -- exception in conversion
-		     exit;
-	       end case;
+	       --  Token := Gts.Find_Parameter ("Machine." & Name & ".Relative");
+	       --  --Tio.Put_Line ("debugger" & Gts.String_Value);
+	       --  case Token is
+	       --  	  when Gts.T_String =>
+	       --  	     Amender.Relative := Boolean'Value (Gts.String_Value);
+	       --  	  when Gts.Error =>
+	       --  	     Ber.Report_Error 
+	       --  	       ("gmac.text: " & Name & " : attr. name not known.");
+	       --  	     M.Res := 1; -- attr. name not known.
+	       --  	     exit;
+	       --  	  when others    =>
+	       --  	     Ber.Report_Error 
+	       --  	       ("gmac.text: " & Name & 
+	       --  		  ".Relative -> expected 'True' or 'False'.");
+	       --  	     M.Res := 3; -- exception in conversion
+	       --  	     exit;
+	       --  end case;
+	       --  Token := Gts.Find_Parameter ("Machine." & Name & ".Bdirectional");
+	       --  --Tio.Put_Line ("debugger" & Gts.String_Value);
+	       --  case Token is
+	       --  	  when Gts.T_String =>
+	       --  	     Amender.Bdirectional := Boolean'Value (Gts.String_Value);
+	       --  	  when Gts.Error =>
+	       --  	     Ber.Report_Error 
+	       --  	       ("gmac.text: " & Name & " : attr. name not known.");
+	       --  	     M.Res := 1; -- attr. name not known.
+	       --  	     exit;
+	       --  	  when others    =>
+	       --  	     Ber.Report_Error 
+	       --  	       ("gmac.text: " & Name & 
+	       --  		  ".Bdirectional -> expected 'True' or 'False'.");
+	       --  	     M.Res := 3; -- exception in conversion
+	       --  	     exit;
+	       --  end case;
 	       Token := Gts.Find_Parameter ("Machine." & Name & ".Curve");
 	       --Tio.Put_Line ("debugger" & Gts.String_Value);
 	       case Token is
@@ -969,41 +1064,46 @@ package body Beren.Amend is
 		     exit;
 	       end case;
 	       Token := Gts.Find_Parameter ("Machine." & Name & ".C_Table");
-		 declare 
-		    T   : Table_P_Type := Amender.C_Table.Next;
-		    Exptn : exception;
-		 begin
-		    if Token /= Gts.Open_Brace then raise Exptn; end if;
-		    while T /= Amender.C_Table loop
-		       Token := Gts.Next_Token;
-		       if Token = Gts.T_String then
-			  T.Key := Long_Float'Value (Gts.String_Value);
-		       else raise Exptn; 
-		       end if;
-		       Token := Gts.Next_Token;
-		       if Token = Gts.T_String then
-			  T.Val := Long_Float'Value (Gts.String_Value);
-		       else raise Exptn; 
-		       end if;
-		       Token := Gts.Next_Token;
-		       if Token = Gts.T_String then
-			  T.B := Long_Float'Value (Gts.String_Value);
-		       else raise Exptn; 
-		       end if;
-		       T := T.Next;
-		    end loop;
-		    Token := Gts.Next_Token;
-		    if Token /= Gts.Close_Brace then raise Exptn; end if;
-		    M.Res := 0;
-		 exception
-		    when Exptn => 
-		       Ber.Report_Error 
+	       declare 
+		  T   : Table_P_Type := Amender.C_Table.Next;
+		  Exptn : exception;
+	       begin
+		  if Token /= Gts.Open_Brace then raise Exptn; end if;
+		  while T /= Amender.C_Table loop
+		     Token := Gts.Next_Token;
+		     if Token = Gts.T_String then
+			T.Key := Long_Float'Value (Gts.String_Value);
+		     else raise Exptn; 
+		     end if;
+		     Token := Gts.Next_Token;
+		     if Token = Gts.T_String then
+			T.Val := Long_Float'Value (Gts.String_Value);
+		     else raise Exptn; 
+		     end if;
+		     Token := Gts.Next_Token;
+		     if Token = Gts.T_String then
+			T.B := Long_Float'Value (Gts.String_Value);
+		     else raise Exptn; 
+		     end if;
+		     T := T.Next;
+		  end loop;
+		  Token := Gts.Next_Token;
+		  if Token /= Gts.Close_Brace then raise Exptn; end if;
+		  M.Res := 0;
+	       exception
+		  when Exptn => 
+		     Ber.Report_Error 
 		       ("gmac.text: " & Name & 
 			  ".C_Table -> Key, Value, Value triplets " & 
 			  "of real expected.");
-		       M.Res := 3; -- exception in conversion
-		 end;
-
+		     M.Res := 3; -- exception in conversion
+	       end;
+	       case Amender.Curve is
+		  when Bjo.Poly   => Poly_Find (Amender.C_Table);
+		  when Bjo.Bezier => Open_Bezi_Find (Amender.C_Table);
+		  when Bjo.Linear => Linear_Find (Amender.C_Table);
+		  when others     => null;
+	       end case;
 	    end loop; -- read pars
 	 end if; -- M.Id = 
       end Handle_File_M;
@@ -1056,15 +1156,17 @@ package body Beren.Amend is
    procedure Down_Scan_C 
    is
    begin
-      while In_Cpos.all < B_Table_Now.Key loop
+      while In_Corrector.all < B_Table_Now.Key loop
 	 B_Table_Now := B_Table_Now.Prev;
 	 exit when B_Table_Now = B_Table.Next; -- lowest segment
       end loop;
-      while In_Cpos.all > B_Table_Now.Next.Key loop
+      while In_Corrector.all > B_Table_Now.Next.Key loop
 	 B_Table_Now := B_Table_Now.Next;
 	 exit when B_Table_Now = B_Table.Prev.Prev; -- highest segment
       end loop;
-      Out_Cpos := In_Cpos.all * B_Table_Now.M + B_Table_Now.N;
+      Out_Cpos := In_Cpos.all + 
+	((In_Cpos.all - B_Table_Now.B) * 
+	   (B_Table_Now.M * In_Corrector.all + B_Table_Now.N));
    end Down_Scan_C;
    
    
@@ -1072,7 +1174,10 @@ package body Beren.Amend is
    is
    begin
       -- we hope there is little difference with the commanded pos.
-      Out_Rpos := (In_Rpos.all - B_Table_Now.N) / B_Table_Now.M;
+      Out_Rpos := 
+	(In_Rpos.all + B_Table_Now.B * B_Table_Now.M * In_Corrector.all + 
+	   B_Table_Now.B * B_Table_Now.N) / 
+	(1.0 + B_Table_Now.M * In_Corrector.all + B_Table_Now.N);
    end Up_Scan_C;
    
    
@@ -1085,8 +1190,8 @@ package body Beren.Amend is
 begin
    Bob.Init_Obj (Bob.Object (Amender), Name);
    Amender.Handle       := Handle'Access;
-   Amender.Relative     := False;
-   Amender.Bdirectional := False;
+   --Amender.Relative     := False;
+   --Amender.Bdirectional := False;
    Amender.Curve        := Bjo.Linear;
    Amender.Enable       := False;
    Amender.C_Table      := new Table_Type;
@@ -1097,6 +1202,10 @@ begin
    In_Corrector := In_Corrector_Xf'Access;
    In_Cpos      := In_Cpos_Xf'Access;
    In_Rpos      := In_Rpos_Xf'Access;
+   -- the secondary correction table
+   B_Table      := new Table_Type; -- set up the global table
+   B_Table.Prev := B_Table;
+   B_Table.Next := B_Table;
    
    -- connect the scan routines in the scan thread.
    if Use_In_Corrector then 
