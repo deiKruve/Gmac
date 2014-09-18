@@ -5,12 +5,14 @@ with Beren.Jog;
 with Beren.Hw;
 with Beren.Encoder;
 with Beren.Amend;
+with Beren.Index;
 
 package Berentest1 is
    procedure Enumerate_Attr (Name : String; M : Beren.Jogobj.Attr_Msg);
    
    package X_Enc is new Beren.Encoder (Name => "X_Enc");
    package X_Corr is new Beren.Amend (Name => "X_Corr", Xis => Beren.Linear);
+   package Y_Idx is new Beren.Index (Name => "Y_Idx", Xis => Beren.Linear);
    package X_Jog is new Beren.Jog (Name => "X_Jog", Xis => Beren.Linear);
    package Y_Jog is new Beren.Jog (Name => "Y_Jog", Xis => Beren.Linear);
    package A_Jog is new Beren.Jog (Name => "A_Jog", Xis => Beren.Rotary);

@@ -33,14 +33,18 @@ with O_String;
 package Beren.Jogobj is
    
    
-   type Attr_Class is (Enum, Real_Pair, Inval, Str, Int, Real, Char, Bool);
+   type Attr_Class is 
+     (Enum, Real_Pair, Enum_Real_Pair, Inval, Str, Int, Real, Char, Bool);
    
    -- extra jog attr.
    type Pulse_Mode_Enumeration_Type is (Off, Hundredth, Tenth, Unit, Ten);
    -- extra amend attr
    type Curve_Enumeration_Type is (Linear, Bezier, Poly);
+   -- extra index attr
+   type Index_Instr_Enumeration_Type is 
+     (No_Go, Go_Pos_Ls, Go_Neg_Ls, Go_Pos_Hs, Go_Neg_Hs, Go_Pos_Idxm, Go_Neg_Idxm);
    -- so we know which enumeration type is stored in the attr.message
-   type Enumeration_Type is (Pulse_Mode, Curve);
+   type Enumeration_Type is (Pulse_Mode, Curve, Index_Instr);
    
    -- jog attibutes message
    type Attr_Msg is new Earendil.Objects.Obj_Msg with

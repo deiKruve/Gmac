@@ -2,7 +2,7 @@
 --                                                                          --
 --                             BEREN COMPONENTS                             --
 --                                                                          --
---                                 B E R E N                                --
+--                            B E R E N . S T O P                           --
 --                                                                          --
 --                                  S p e c                                 --
 --                                                                          --
@@ -26,42 +26,34 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 --
+-- beren-stop implements a central movement stop module
 --
-with Ada.Numerics.Generic_Real_Arrays;
 
-package Beren is
-   ---------------------------
-   -- for sonja and friends --
-   ---------------------------
-   subtype Sec_Type is Long_Float;
-   subtype M_Type is Long_Float; -- this is disingenious, 
-				 --rads are now also called meters.
-   subtype Rad_Type is Long_Float;
-   subtype Mpsec_Type is Long_Float;  -- speed type
-   subtype Mpsec2_Type is Long_Float; -- acc type
-   subtype Mpsec3_Type is Long_Float; -- jerk type
-   
-   type Axis_Type is (Linear, Rotary);
-   type U16value_Type is mod 2 ** 16; -- for encoder perhaps
-   
-   type Stop_Inst_Type is (Noinstr, Idx_Lls, Idx_Rls, Idx_Hls); -- for the idx units
-   type Stop_Repl_Type is (Norepl, Reached, mDone, Error);
-   
-   private
-
-   package Mv is new Ada.Numerics.Generic_Real_Arrays 
-     (Real => Long_Float);
-   
-   --  type Pos_Vector_Type is
-   --     record
-   --  	 X,
-   --  	 Y,
-   --  	 Z  : M_Type;
-   --  	 A,
-   --  	 B,
-   --  	 C  : M_Type;
-   --     end record;
-   type Real_Vector_Type is new Mv.Real_Vector (1 .. 6);
+package Beren.Stop is
    
    
-end Beren;
+   ----------------------------------
+   -- real time dataflow interface. 
+   -- note:
+   -- this works together with the 
+   -- scan sequence, to insure
+   -- the right dataflow through
+   -- the system.
+   ----------------------------------
+   
+      E_stop           : access Boolean;
+      -- Set On An Emergency stop
+      
+      Xidx_Stop_Instr : access Stop_Inst_Type;
+      Yidx_Stop_Instr : access Stop_Inst_Type;
+      Aidx_Stop_Instr : access Stop_Inst_Type;
+      -- (Noinstr, Idx_Lls, Idx_Rls, Idx_Hls)
+      -- indicates that some index unit requests service from B.Stop
+      
+      Xidx_Stop_Repl  : aliased Stop_Repl_Type := Norepl;
+      Yidx_Stop_Repl  : aliased Stop_Repl_Type := Norepl;
+      Aidx_Stop_Repl  : aliased Stop_Repl_Type := Norepl;
+      -- (Norepl, Reached, Error)
+      -- answer that stop instr has been reached and movement has stopped.
+      
+end Beren.Stop;
