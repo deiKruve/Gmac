@@ -43,8 +43,10 @@ package Beren.Jogobj is
    -- extra index attr
    type Index_Instr_Enumeration_Type is 
      (No_Go, Go_Pos_Ls, Go_Neg_Ls, Go_Pos_Hs, Go_Neg_Hs, Go_Pos_Idxm, Go_Neg_Idxm);
+   type Stop_Inst_Type is (Noinstr, Idx_Lls, Idx_Rls, Idx_Hls); -- for the idx units
+   type Stop_Repl_Type is (Norepl, Reached, mDone, Error);
    -- so we know which enumeration type is stored in the attr.message
-   type Enumeration_Type is (Pulse_Mode, Curve, Index_Instr);
+   type Enumeration_Type is (Pulse_Mode, Curve, Index_Instr, Stop_Inst, Stop_Repl);
    
    -- jog attibutes message
    type Attr_Msg is new Earendil.Objects.Obj_Msg with

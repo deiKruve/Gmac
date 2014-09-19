@@ -69,7 +69,7 @@ package Beren.Index is
    -- after setting a disable message must be send after eom??
    -- jogging might be reenabled after the Estop is resolved.
    
-   idx_Stop_Instr   : aliased Stop_Inst_Type := Noinstr;
+   Idx_Stop_Instr   : aliased Stop_Inst_Type := Noinstr;
    -- flags to the stop unit to look out for a ls switch or index pulse.
    
    Idx_Stop_Repl    : access Stop_Repl_Type;

@@ -39,7 +39,8 @@
 --
 
 with Ada.Text_Io;-- debug??
---with Ada.Numerics;
+with Ada.Unchecked_Deallocation;
+with Ada.Numerics;
 with Gmactextscan;
 with O_String;
 with Beren.Err;
@@ -47,7 +48,7 @@ with Beren.Jogobj;
 
 package body Beren.Index is
    package Tio renames Ada.Text_Io; -- debug??
-   
+   package Math renames Ada.Numerics;
    package Bst renames Beren.Stop;
    
    package Gts renames Gmactextscan;
@@ -66,7 +67,43 @@ package body Beren.Index is
    Tmp_Pos         : M_Type with Atomic;
    -- to keep the position on a signal from Beren.Stop.
    
+    
+   -------------------------------
+   -- clear a instruction table --
+   -------------------------------
+   procedure Clear_Table (T : Table_P_Type)
+   is
+      procedure Free is 
+	 new Ada.Unchecked_Deallocation (Table_Type, Table_P_Type);
+      Tn : Table_P_Type := T.Next;
+   begin
+      while Tn /= T loop
+	 T.Next      := Tn.Next;
+	 T.Next.Prev := T;
+	 Free (Tn);
+	 Tn          := T.Next;
+      end loop;
+   end Clear_Table;
    
+   
+   -------------------------------------
+   -- to radian or not to radian . .  --
+   -------------------------------------
+   function To_Radians (Deg : Long_Float) return Long_Float
+   is
+   begin
+      return (Deg * 2.0 * Math.Pi) / 360.0;
+   end To_Radians;
+   
+   function To_Degrees (Rad : Long_Float) return Long_Float
+   is
+   begin
+      return (Rad * 360.0) / (2.0 * Math.Pi);
+   end To_Degrees;
+   
+   pragma Inline (To_Radians, To_Degrees);
+   
+  
    -----------------------
    -- Message interface --
    -----------------------
@@ -80,19 +117,249 @@ package body Beren.Index is
 			       M : in out Bjo.Attr_Msg) 
 	with Inline
       is
+	 Tmp_Val : Long_Float := 0.0;
+	 Tmp_Instr : Index_Instr_Type := Bjo.No_Go;
 	 use type Bob.Op_Type;
 	 use type Bjo.Attr_Class;
 	 use type Bjo.Enumeration_Type;
       begin
 	 if M.Id = Bob.Get and then Obs.Eq (M.S, Name) then 
-	    null;
+	    M.Res := 0;
+	    if Obs.Eq (M.Name, "Enabled") then
+	       M.Class := Bjo.Bool;
+	       M.B := Obj.Enabled;
+	    elsif Obs.Eq (M.Name, "Offset") then
+	      M.Class := Bjo.Real;
+	      M.X     := Obj.Offset;
+	    elsif Obs.Eq (M.Name, "Preset") then
+	      M.Class := Bjo.Real;
+	      M.X     := Obj.Preset;
+	    elsif Obs.Eq (M.Name, "Instr_Table") then
+	       declare 
+		  T   : Table_P_Type := Indexer.Instr_table.Next;
+	       begin
+		  while T /= Indexer.Instr_Table loop
+		     M.Class := Bjo.Enum_Real_Pair;
+		     M.E     := Index_Instr_Type'Pos (Indexer.all.Instr_Table.Inst);
+		     M.E1    := Bjo.Index_Instr;
+		     M.X     := Indexer.all.Instr_Table.Feed;
+		     M.Enum  (Name, M);
+		     T := T.Next;
+		  end loop;
+	       end;
+	    elsif Obs.Eq (M.Name, "Idx_Stop_Instr") then
+	      M.Class := Bjo.Enum;
+	      M.E1    := Bjo.Stop_Inst;
+	      M.E     := Stop_Inst_Type'Pos (Idx_Stop_Instr);
+	    elsif Obs.Eq (M.Name, "Idx_Stop_Repl") then
+	      M.Class := Bjo.Enum;
+	      M.E1    := Bjo.Stop_Repl;
+	      M.E     := Stop_Repl_Type'pos (Idx_Stop_Repl.all);
+	    elsif Obs.Eq (M.Name, "In_Cpos") then
+	       M.Class := Bjo.Real;
+	       M.X     := In_Cpos.all;
+	    elsif Obs.Eq (M.Name, "Out_Cpos") then
+	       M.Class := Bjo.Real;
+	       M.X     := Out_Cpos;
+	    elsif Obs.Eq (M.Name, "In_Rpos") then
+	       M.Class := Bjo.Real;
+	       M.X     := In_Rpos.all;
+	    elsif Obs.Eq (M.Name, "Out_Rpos") then
+	       M.Class := Bjo.Real;
+	       M.X     := Out_Rpos;
+	    else
+	       Ber.Report_Error 
+		 ("get param: " & Name & "no such attribute");
+	       M.Res := 1; -- attr. name not known
+	    end if;
 	    
 	 elsif M.Id = Bob.Set and then Obs.Eq (M.S, Name) then
-	    null;
+	    M.Res := 0;
+	    if Obs.Eq (M.Name, "Preset") and then M.Class = Bjo.Real then
+	       Obj.Preset := M.X;
+	    elsif Obs.Eq (M.Name, "Cli") and then M.Class = Bjo.Bool then
+	       Clear_Table (Obj.Instr_Table);
+	    elsif Obs.Eq (M.Name, "Instr") and then 
+	      M.Class = Bjo.Enum_Real_Pair and then M.E1 = Bjo.Index_Instr then
+	       declare
+		  T, Tn  : Table_P_Type;
+	       begin
+		  T := Obj.Instr_Table;
+		  Tn := new Table_type;
+		  T.Prev.Next := Tn;
+		  Tn.Prev := T.Prev;
+		  Tn.Next := T;
+		  T.Prev  := Tn;
+		  Tn.Inst := Index_Instr_Type'Val (M.E);
+		  Tn.Feed := M.X;
+	       end;
+	    else
+	       M.Res := 1; -- attr. name not known
+	    end if;
 	    
 	 elsif M.Id = Bob.Setpar then
-	    null;
-	    
+	    -- dissect the string 
+	    --   <Name> ".Preset = " <floatValue> ["mm" | "deg"]
+	    --   <Name> ".Cli = " <boolValue>
+	    --   <Name> ".Instr = " ["Go_Pos_Ls"|"Go_Neg_Ls"|"Go_Pos_Hs"|
+	    --                    "Go_Neg_Hs"|"Go_Pos_Idxm"|"Go_Neg_Idxm"] 
+	    --                    " F" <floatValue> ["m/min" | "deg/min"]
+	    if M.Class = Bjo.Str then
+	       declare
+		  J, K : Integer := 0;
+		  Tmp_Val : Long_Float := 0.0;
+	       begin
+		  for I in M.S'Range loop
+		     J := I;
+		     exit when M.S (I) = '.';
+		     exit when M.S (I) /= Name (I);
+		  end loop;
+		  if M.S (J) = '.' then -- module name found
+		     for I in J + 1 .. M.S'Length loop
+			exit when M.S (I) in ' ' | '=';
+			K := I;
+		     end loop;
+		     if String (M.S) (J + 1 .. K) = "Preset" then
+			-- set Preset
+			K := K + 1;
+			while M.S (K) in ' ' | '=' loop
+			   K := K + 1;
+			end loop;
+			J := K;
+			while M.S (J) in '0' .. '9' | '.' | '-' | '+' loop
+			   J := J + 1;
+			end loop;
+			Tmp_Val := Long_Float'Value (String (M.S) (K .. J - 1));
+			while M.S (J) = ' ' loop
+			   J := J + 1;
+			end loop;
+			if Xis = Linear and then 
+			  String (M.S) (J .. J + 1) = "mm" then
+			   Obj.Preset := Tmp_Val / 1000.0;
+			   M.Res := 0; -- success
+			elsif Xis = Linear and then 
+			  String (M.S) (J .. J) = "m" then
+			   Obj.Preset := Tmp_Val;
+			   M.Res := 0; -- success
+			elsif Xis = Rotary and then 
+			  String (M.S) (J .. J + 2) = "deg" then
+			   Obj.Preset := To_Radians (Tmp_Val);
+			   M.Res := 0; -- success
+			elsif Xis = Rotary and then 
+			  String (M.S) (J .. J + 2) = "rad" then
+			   Obj.Preset := Tmp_Val;
+			   M.Res := 0; -- success
+			else
+			   
+			   Ber.Report_Error 
+			     ("set param: " & Name & ".Preset -> wrong units.");
+			   M.Res := 2; -- units wrong
+			end if;
+		     elsif String (M.S) (J + 1 .. K) = "Cli" then
+		     	-- clear the table
+		     	K := K + 1;
+		     	while M.S (K) in ' ' | '=' loop
+		     	   K := K + 1;
+		     	end loop;
+		     	J := K;
+		     	while M.S (J) in 'T' | 'a' .. 'z' loop
+		     	   J := J + 1;
+		     	end loop;
+		     	if String (M.S) (K .. J - 1) in "True" | "true" then
+		     	   Clear_Table (Obj.Instr_Table);
+		     	   M.Res := 0;
+		     	else
+		     	   Ber.Report_Error 
+		     	     ("set param: " & Name & 
+		     		".Relative -> expected 'True'.");
+		     	   M.Res := 3; -- exception in conversion
+		     	end if; -- true
+		     elsif String (M.S) (J + 1 .. K) =  "Instr" then
+			-- add an instruction to the table
+			K := K + 1;
+		     	while M.S (K) in ' ' | '=' loop
+		     	   K := K + 1;
+		     	end loop;
+		     	J := K;
+		     	while M.S (J) in 'G' | 'a' .. 'z' loop
+		     	   J := J + 1;
+		     	end loop;
+			M.Res := 0;
+		     	if String (M.S) (K .. J - 1) = "Goposls" then
+			   Tmp_Instr := Bjo.Go_Pos_Ls;
+			elsif String (M.S) (K .. J - 1) = "Gonegls" then
+			   Tmp_Instr := Bjo.Go_Neg_Ls;
+			elsif String (M.S) (K .. J - 1) = "Goposhs" then
+			   Tmp_Instr := Bjo.Go_Pos_Hs;
+			elsif String (M.S) (K .. J - 1) = "Goneghs" then
+			   Tmp_Instr := Bjo.Go_Neg_Hs;
+			elsif String (M.S) (K .. J - 1) = "Goposidxm" then
+			   Tmp_Instr := Bjo.Go_Pos_Idxm;
+			elsif String (M.S) (K .. J - 1) = "Gonegidxm" then
+			   Tmp_Instr := Bjo.Go_Neg_Idxm;
+			else
+			   Ber.Report_Error 
+			     ("set param: " & Name & ".Instr -> expected " & 
+				ASCII.LF & 
+				"'Go_Pos_Ls'|'Go_Neg_Ls'|'Go_Pos_Hs'|" & 
+				"'Go_Neg_Hs'|'Go_Pos_Idxm'|'Go_Neg_Idxm'");
+			   M.Res := 3; -- exception in conversion
+			end if; -- index instruction.
+			K := J;
+			while M.S (K) in (' ',  'F') loop
+			   K := K + 1;
+			end loop;
+			J := K;
+			while M.S (J) in '0' .. '9' | '.' | '-' | '+' loop
+			   J := J + 1;
+			end loop;
+			Tmp_Val := Long_Float'Value (String (M.S) (K .. J - 1));
+			while M.S (J) = ' ' loop
+			   J := J + 1;
+			end loop;
+			if Xis = Linear and then 
+			  String (M.S) (J .. J + 4) = "m/min" then
+			   Tmp_Val := Tmp_Val / 60.0;
+			   --M.Res := 0; -- success
+			elsif Xis = Rotary and then 
+			  String (M.S) (J .. J + 6) = "deg/min" then
+			   Tmp_Val := To_Radians (Tmp_Val / 60.0);
+			   --M.Res := 0; -- success
+			else
+			   Ber.Report_Error 
+			    ("set param: " & Name & ".Instr . . F -> wrong units.");
+			   M.Res := 2; -- units wrong
+			end if;
+			if M.Res = 0 then -- found a validly formatted instruction
+			   declare 
+			      T, Tn  : Table_P_Type;
+			   begin
+			      T := Obj.Instr_Table;
+			      Tn := new Table_type;
+			      T.Prev.Next := Tn;
+			      Tn.Prev := T.Prev;
+			      Tn.Next := T;
+			      T.Prev  := Tn;
+			      Tn.Inst := Tmp_Instr;
+			      Tn.Feed := Tmp_Val;
+			   end;
+			end if;
+		     else
+			Ber.Report_Error 
+			  ("set param: " & Name & "no such attribute");
+			M.Res := 1; -- no such attribute
+		     end if; -- attr name found
+		  else
+		     M.Res := -4; -- name not found, this is not an error
+		  end if; -- module name found
+	       exception
+		  when others =>
+		     Ber.Report_Error 
+		       ("set param: " & Name & 
+			  ".Instr . . F -> expected a real value.");
+		     M.Res := 3; -- exception in conversion
+	       end; -- m.class = string block	
+	    end if; -- if m.class = string
 	 elsif M.Id = Bob.Enum then
 	    M.Name  := Obs.To_O_String (32, "Enabled");
 	    M.Class := Bjo.Bool;
@@ -115,19 +382,26 @@ package body Beren.Index is
 	       while T /= Indexer.Instr_Table loop
 		  M.Name  := Obs.To_O_String (32, "Instr_Table");
 		  M.Class := Bjo.Enum_Real_Pair;
-		  M.E     := Indexer.all.Instr_Table.Inst;
+		  M.E     := Index_Instr_Type'Pos (Indexer.all.Instr_Table.Inst);
 		  M.E1    := Bjo.Index_Instr;
-		  M.X := Indexer.all.Instr_Table.Feed;
+		  M.X     := Indexer.all.Instr_Table.Feed;
 		  M.Enum  (Name, M);
 		  T := T.Next;
 	       end loop;
 	    end;
 	    
-	    M.Name  := Obs.To_O_String (32, "-> In_Corrector");
-	    M.Class := Bjo.Real;
-	    M.X     := In_Corrector.all;
+	    M.Name  := Obs.To_O_String (32, "-> Idx_Stop_Instr");
+	    M.Class := Bjo.Enum;
+	    M.E1    := Bjo.Stop_Inst;
+	    M.E     := Stop_Inst_Type'Pos (Idx_Stop_Instr);
 	    M.Enum  (Name, M);
 	    
+	    M.Name  := Obs.To_O_String (32, "<- Idx_Stop_Repl");
+	    M.Class := Bjo.Enum;
+	    M.E1    := Bjo.Stop_Repl;
+	    M.E     := Stop_Repl_Type'pos (Idx_Stop_Repl.all);
+	    M.Enum  (Name, M);
+					      
 	    M.Name  := Obs.To_O_String (32, "-> In_Cpos");
 	    M.Class := Bjo.Real;
 	    M.X     := In_Cpos.all;
@@ -160,6 +434,46 @@ package body Beren.Index is
 	 use type Gts.Extended_Token_Type;
       begin
 	 if M.Id = Bob.Store then
+	    declare
+	    begin
+	       String'Write (M.Ostr, "" & Name & " = {");
+	       String'Write (M.Ostr, "      Preset = {" &
+			       Long_Float'Image (Obj.Preset) & "}" & ASCII.LF);
+	       String'Write (M.Ostr, "          Instr_Table = {" & ASCII.LF);
+	       declare                                      
+		  T   : Table_P_Type := Obj.Instr_Table.Next;
+	       begin
+		  while T /= Obj.Instr_Table loop
+		     if Xis = Linear then 
+			declare 
+			   Ustr : String := " m/min}";
+			begin
+			   String'Write 
+			     (M.Ostr, "                       {"& 
+				Index_Instr_Type'Image (T.Inst) & " " &
+				Long_Float'Image (T.Feed * 60.0)  & 
+				Ustr & ASCII.LF);
+			end;
+		     elsif Xis = Rotary then
+			declare 
+			   Ustr : String := " deg/min}";
+			begin
+			   String'Write 
+			     (M.Ostr, "                       {"& 
+				Index_Instr_Type'Image (T.Inst) & " " &
+				Long_Float'Image (To_Degrees (T.Feed) * 60.0) &
+				Ustr & ASCII.LF);
+			end;
+		     end if; -- Xis = . .
+		     T := T.Next;
+		  end loop;
+	       end;
+	       String'Write (M.Ostr, "                    }" & ASCII.LF);
+	       String'Write (M.Ostr, "         }" & ASCII.LF);
+	       M.Res := -1; -- success with this unit
+	    exception
+	       when others => M.Res := 4; -- disk full
+	    end;
 	    null;
 	    
 	 elsif M.Id = Bob.Load then
@@ -210,7 +524,7 @@ begin
    Indexer.Instr_Table := new Table_Type;
    Indexer.Instr_Table.Next  := Indexer.Instr_Table;
    Indexer.Instr_Table.Prev  := Indexer.Instr_Table;
-   Indexer.Instr_Table.Inst  := No_Go;
+   Indexer.Instr_Table.Inst  := Bjo.No_Go;
    Indexer.Instr_Table.Feed  := 0.0;
    
    Req_Move := 0.0;

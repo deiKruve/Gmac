@@ -94,6 +94,35 @@ package body Beren.Despatch.Helpers is
 		  Send_Reply_Msg 
 		    (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
 	       end;
+	    elsif M.E1 = Bjo.Stop_Inst then
+	       declare
+		  Rstr  : String := 
+		    Bjo.Stop_Inst_Type'Image (Bjo.Stop_Inst_Type'Val (M.E));
+	       begin
+		  Send_Reply_Msg 
+		    (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
+	       end;
+	    elsif M.E1 = Bjo.Stop_Repl then
+	       declare
+		  Rstr  : String := 
+		    Bjo.Stop_Repl_Type'Image (Bjo.Stop_Repl_Type'Val (M.E));
+	       begin
+		  Send_Reply_Msg 
+		    (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
+	       end;
+	    end if;
+	 when Bjo.Enum_Real_Pair =>
+	    if M.E1 = Bjo.Index_Instr then
+	       declare
+		  Rstr  : String := 
+		    Bjo.Index_Instr_Enumeration_Type'Image 
+		    (Bjo.Index_Instr_Enumeration_Type'Val (M.E)) & 
+		    "  F " & 
+		    Long_Float'Image (M.X); 
+	       begin
+		  Send_Reply_Msg 
+		    (Name & " : " & Obs.To_String (M.Name) & " = " & Rstr);
+	       end;
 	    end if;
 	 when others   => 
 	    null;

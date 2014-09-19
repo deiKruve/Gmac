@@ -366,6 +366,14 @@ package body Beren.Despatch is
       ("Beren.Despatch.Send_Reply_Msg.Pulse_Mode_Enumeration_Type : Error " & 
 	 "not implemented yet.");
    end Send_Reply_Msg;
+   
+   procedure Send_Reply_Msg (E : Bjo.Index_Instr_Enumeration_Type)
+   is
+   begin
+      Ber.Report_Error 
+      ("Beren.Despatch.Send_Reply_Msg.Index_Instr_Enumeration_Type : Error " & 
+	 "not implemented yet.");
+   end Send_Reply_Msg;
 
   
 begin
