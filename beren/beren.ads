@@ -44,7 +44,7 @@ package Beren is
    type Axis_Type is (Linear, Rotary);
    type U16value_Type is mod 2 ** 16; -- for encoder perhaps
    
-   type Stop_Inst_Type is (Noinstr, Idx_Lls, Idx_Rls, Idx_Hls); -- for the idx units
+   --type Stop_Inst_Type is (Noinstr, Idx_Nls, Idx_Pls, Idx_Hls); -- for the idx units
    type Stop_Repl_Type is (Norepl, Reached, mDone, Error);
    
    private

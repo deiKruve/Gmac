@@ -59,15 +59,6 @@ package body Beren.Index is
    package Ber renames Beren.Err;
    
    
-   --------------------
-   -- Scan variables --
-   --------------------
-   Req_Move         : M_Type with Atomic;
-   -- to send to sonja on jog
-   Tmp_Pos         : M_Type with Atomic;
-   -- to keep the position on a signal from Beren.Stop.
-   
-    
    -------------------------------
    -- clear a instruction table --
    -------------------------------
@@ -150,7 +141,7 @@ package body Beren.Index is
 	    elsif Obs.Eq (M.Name, "Idx_Stop_Instr") then
 	      M.Class := Bjo.Enum;
 	      M.E1    := Bjo.Stop_Inst;
-	      M.E     := Stop_Inst_Type'Pos (Idx_Stop_Instr);
+	      M.E     := Index_Instr_Type'Pos (Idx_Stop_Instr);
 	    elsif Obs.Eq (M.Name, "Idx_Stop_Repl") then
 	      M.Class := Bjo.Enum;
 	      M.E1    := Bjo.Stop_Repl;
@@ -306,7 +297,7 @@ package body Beren.Index is
 			   M.Res := 3; -- exception in conversion
 			end if; -- index instruction.
 			K := J;
-			while M.S (K) in (' ',  'F') loop
+			while M.S (K) in ' ' | 'F' loop
 			   K := K + 1;
 			end loop;
 			J := K;
@@ -382,9 +373,9 @@ package body Beren.Index is
 	       while T /= Indexer.Instr_Table loop
 		  M.Name  := Obs.To_O_String (32, "Instr_Table");
 		  M.Class := Bjo.Enum_Real_Pair;
-		  M.E     := Index_Instr_Type'Pos (Indexer.all.Instr_Table.Inst);
+		  M.E     := Index_Instr_Type'Pos (T.Inst);
 		  M.E1    := Bjo.Index_Instr;
-		  M.X     := Indexer.all.Instr_Table.Feed;
+		  M.X     := T.Feed;
 		  M.Enum  (Name, M);
 		  T := T.Next;
 	       end loop;
@@ -393,7 +384,7 @@ package body Beren.Index is
 	    M.Name  := Obs.To_O_String (32, "-> Idx_Stop_Instr");
 	    M.Class := Bjo.Enum;
 	    M.E1    := Bjo.Stop_Inst;
-	    M.E     := Stop_Inst_Type'Pos (Idx_Stop_Instr);
+	    M.E     := Index_Instr_Type'Pos (Idx_Stop_Instr);
 	    M.Enum  (Name, M);
 	    
 	    M.Name  := Obs.To_O_String (32, "<- Idx_Stop_Repl");
@@ -429,7 +420,9 @@ package body Beren.Index is
 			       M : in out Bob.File_Msg)
 	with Inline
       is
+	 Done      : Boolean := False;
 	 Token     : Gts.Extended_Token_Type;
+	 Lpreset   : M_Type  := 0.0;
 	 use type Bob.File_Op_Type;
 	 use type Gts.Extended_Token_Type;
       begin
@@ -477,8 +470,123 @@ package body Beren.Index is
 	    null;
 	    
 	 elsif M.Id = Bob.Load then
-	    null;
+	    Token := Gts.Find_Parameter ("Machine." & Name & ".Preset");
+	    case Token is
+	       when Gts.Float =>
+		  Lpreset := M_Type'Value (Gts.String_Value);
+		  Token := Gts.Next_Token;
+		  loop
+		     exit when Token /= Gts.Id;
+		     if Gts.String_Value = "inch" then
+			exit when Xis /= Linear;
+			Lpreset := Lpreset * 0.0254;
+		     elsif Gts.String_Value = "m" then
+			exit when Xis /= Linear;
+			Lpreset := Lpreset;
+		     elsif Gts.String_Value = "deg" then
+			exit when Xis /= Rotary;
+			Lpreset := To_Radians (Lpreset);
+		     elsif Gts.String_Value = "rad" then
+			exit when Xis /= Rotary;
+			Lpreset := Lpreset;
+		     else exit;
+		     end if;
+		     Done := True;
+		     exit;
+		  end loop;
+		  when Gts.Error =>
+		  Ber.Report_Error 
+		    ("gmac.text: " & Name & " : attr. name not known.");
+		  M.Res := 1; -- attr. name not known.
+	       when others    =>
+		  Ber.Report_Error 
+		    ("gmac.text: " & Name & ".Preset -> expected a float value.");
+		  M.Res := 3; -- exception in conversion
+	    end case;
+	    if not Done then
+	       Lpreset := 0.0;
+	       if Xis = Linear then
+		  Ber.Report_Error 
+		    ("gmac.text: " & Name & 
+		       ".Preset -> expected m or inch.");
+	       elsif Xis = Rotary then
+		  Ber.Report_Error 
+		    ("gmac.text: " & Name & 
+		       ".Preset -> expected deg or rad.");
+	       end if;
+	       M.Res := 2; -- error - wrong units.
+	    else -- Done
+	       Indexer.Preset := Lpreset;
+	       M.Res := 0;
+	    end if;
 	    
+	    -- parse table entries
+	    --        Instr_Table = {
+            --           {GO_POS_LS  1.00000000000000E+00 m/min}
+            --           {GO_NEG_HS  5.00000000000000E-01 m/min}
+            --        }
+	    Token := Gts.Find_Parameter ("Machine." & Name & ".Instr_Table");
+	    declare 
+	       Lfeed : Long_Float := 0.0;
+		  T   : Table_P_Type := Indexer.Instr_Table.Next;
+		  Exptn : exception;
+	    begin
+	       if Token /= Gts.Open_Brace then raise Exptn; end if;
+	       while T /= Indexer.Instr_Table loop
+		  Token := Gts.Next_Token;
+		  if Token = Gts.T_String then
+		     T.inst := Index_Instr_Type'Value (Gts.String_Value);
+		  else raise Exptn; 
+		  end if;
+		  Token := Gts.Next_Token;
+		  if Token = Gts.T_String then
+			Lfeed := Long_Float'Value (Gts.String_Value);
+		     else raise Exptn; 
+		  end if;
+		  Token := Gts.Next_Token;
+		  loop
+		     exit when Token /= Gts.Id;
+		     if Gts.String_Value = "inch" then
+			exit when Xis /= Linear;
+			Lfeed := Lfeed * 0.0254 / 60.0;
+		     elsif Gts.String_Value = "m" then
+			exit when Xis /= Linear;
+			Lfeed := Lfeed / 60.0;
+		     elsif Gts.String_Value = "deg" then
+			exit when Xis /= Rotary;
+			Lfeed := To_Radians (Lfeed) / 60.0;
+		     elsif Gts.String_Value = "rad" then
+			exit when Xis /= Rotary;
+			Lfeed := Lfeed / 60.0;
+		     else exit;
+		     end if;
+		     Token := Gts.Next_Token;
+		     exit when Token /= Gts.Fwd_Slash;
+		     Token := Gts.Next_Token;
+		     exit when Token /= Gts.Id;
+		     exit when Gts.String_Value /= "min";
+		     Done := True;
+		     exit;
+		  end loop;
+		  if not Done then
+		     if Token = Gts.Error then
+			Ber.Report_Error 
+			  ("gmac.text: " & Name & 
+			     " : scanning error in Instr_Table.Feed String.");
+		     else 
+			Ber.Report_Error 
+			  ("gmac.text: " & Name & 
+			     " : wrong Instr_Table.Feed String specification.");
+		     end if;
+		     M.Res := 3; -- exception in conversion
+		  else
+		     T.Feed := Lfeed;
+		     M.Res := 0;
+		  end if; -- not done
+	       end loop;
+	    end; -- block
+	    null;
+	 
 	 end if;
       end Handle_File_M;
       ------------------
@@ -497,15 +605,83 @@ package body Beren.Index is
    -- Scan once per cnc scan period         --
    -- this is executed in a priority thread --
    -------------------------------------------
+      
+   ---------------------------
+   -- Scan global variables --
+   ---------------------------
+   type Index_State_Type is 
+     (Park, Reset, Nextt, Q_On_Switch, Wait_Off, Wait_On, Wait_Mdone);
+   Index_State : Index_State_Type := Reset;
+   Ts : Table_P_Type := Indexer.Instr_Table;
+
+   
+   Req_Move         : M_Type with Atomic;
+   -- to send to sonja on jog
+   Tmp_Pos         : M_Type with Atomic;
+   -- to keep the position on a signal from Beren.Stop.
+   
+ 
    procedure Down_Scan
    is
    begin
+      Out_Cpos := In_Cpos.all;
+      if not Indexer.Enabled or E_Stop.all then
+	 Index_State := Reset;
+      else
+	 case Index_State is
+	    when Park        => 
+	       null; -- hang here until Indexer.Enabled cycles
+	    when Reset       =>
+	       if Indexer.Enabled then 
+		  Ts          := Indexer.Instr_Table;
+		  Index_State := Nextt; 
+	       end if;
+	    when Nextt       =>
+	       Ts := Ts.Next;
+	       if Ts = Indexer.Instr_Table then
+		  -- end game---------------------------------------------
+		  Out_Rpos := Indexer.Preset;
+		  Indexer.Offset := In_Rpos.all - Out_Rpos;
+		  ----------------------------
+		  Index_State := Park;
+	       else
+		  Idx_Stop_Instr := Ts.Inst; -- request the stop unit for answer
+	       end if;
+	    when Q_On_Switch =>
+	       if Idx_Stop_Repl.all = Reached then
+		  -- request sonja for a move----------------------------------
+		  Index_State := Wait_Off;
+	       else
+		  -- request sonja for a move----------------------------------
+		  Index_State := Wait_On;
+	       end if;
+	    when Wait_Off    =>
+	       if Idx_Stop_Repl.all /= Reached then
+		  -- request sonja for a move----------------------------------
+		  Index_State := Wait_On;
+	       end if;
+	    when Wait_On     =>
+	       if Idx_Stop_Repl.all = Reached then
+		  Tmp_Pos     := In_Rpos.all;
+		  Index_State := Wait_Mdone;
+	       end if;
+	    when Wait_Mdone  =>
+	       if Idx_Stop_Repl.all = Mdone then
+		  Idx_Stop_Instr := Bjo.No_Go;
+		  Index_State    := Nextt;
+	       end if;
+	 end case;
+      end if;
+
+      ----------------------------------------------------------------------
+	 
       null;
    end Down_Scan;
    
    procedure Up_Scan
    is
    begin
+      Out_Rpos := In_Rpos.all - Indexer.Offset;
       null;
    end Up_Scan;
    

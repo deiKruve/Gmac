@@ -74,7 +74,7 @@ package body Luthien.Tasks is
    begin
       loop
 	 Astc.Suspend_Until_True (Selector.all);
-	 Astc.Set_False (Selector.all);
+	 Astc.Set_False (Selector.all);--??????
 	 if Selector.all in Idle_Selector then
 	    null;
 	 elsif Selector.all in Hand_Selector then

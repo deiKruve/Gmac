@@ -69,7 +69,11 @@ package Beren.Index is
    -- after setting a disable message must be send after eom??
    -- jogging might be reenabled after the Estop is resolved.
    
-   Idx_Stop_Instr   : aliased Stop_Inst_Type := Noinstr;
+   subtype Index_Instr_Type is Beren.Jogobj.Index_Instr_Enumeration_Type;
+  --type Index_Instr_Type is 
+  --(No_Go, Go_Pos_Ls, Go_Neg_Ls, Go_Pos_Hs, Go_Neg_Hs, Go_Pos_Idxm, Go_Neg_Idxm);
+
+   Idx_Stop_Instr   : aliased Index_Instr_Type := Beren.Jogobj.No_Go;
    -- flags to the stop unit to look out for a ls switch or index pulse.
    
    Idx_Stop_Repl    : access Stop_Repl_Type;
@@ -132,9 +136,6 @@ package Beren.Index is
    procedure Up_Scan;
    
 private
-   subtype Index_Instr_Type is Beren.Jogobj.Index_Instr_Enumeration_Type;
-  --type Index_Instr_Type is 
-  --(No_Go, Go_Pos_Ls, Go_Neg_Ls, Go_Pos_Hs, Go_Neg_Hs, Go_Pos_Idxm, Go_Neg_Idxm);
    
    type Table_Type;
    type Table_P_Type is access all Table_Type;
@@ -149,7 +150,7 @@ private
    Type Index_Object_Type is new Earendil.Objects.Object_Desc with
       record
 	 Instr_Table : Table_P_Type;
-	 Preset      : Long_Float with Atomic; -- preset of the offset on
+	 Preset      : M_Type with Atomic; -- preset of the offset on
 					       -- reaching the last position, 
 	 Offset      : M_Type  with Atomic;
 	 Enabled     : Boolean with Atomic;

@@ -29,6 +29,8 @@
 -- beren-stop implements a central movement stop module
 --
 
+with Beren.Jogobj;
+
 package Beren.Stop is
    
    
@@ -44,10 +46,10 @@ package Beren.Stop is
       E_stop           : access Boolean;
       -- Set On An Emergency stop
       
-      Xidx_Stop_Instr : access Stop_Inst_Type;
-      Yidx_Stop_Instr : access Stop_Inst_Type;
-      Aidx_Stop_Instr : access Stop_Inst_Type;
-      -- (Noinstr, Idx_Lls, Idx_Rls, Idx_Hls)
+      Xidx_Stop_Instr : access Beren.Jogobj.Index_Instr_Enumeration_Type;
+      Yidx_Stop_Instr : access Beren.Jogobj.Index_Instr_Enumeration_Type;
+      Aidx_Stop_Instr : access Beren.Jogobj.Index_Instr_Enumeration_Type;
+    -- (No_Go, Go_Pos_Ls, Go_Neg_Ls, Go_Pos_Hs, Go_Neg_Hs, Go_Pos_Idxm, Go_Neg_Idxm)
       -- indicates that some index unit requests service from B.Stop
       
       Xidx_Stop_Repl  : aliased Stop_Repl_Type := Norepl;
