@@ -9,19 +9,20 @@ procedure Plldes is
    ---------------------
    -- input variables --
    ---------------------
-   vJ,
-   vKd,
-   vKt,
-   vPm   : Long_Float := 0.0;
-   vN    : Positive := 1;
-   vVcc,
-   vHrpm,
-   vWc   : Long_Float := 0.0;
+   vJ,                            -- r 10
+   VJh,
+   vKd,                           -- r 12
+   vKt,                           -- r 14
+   vPm   : Long_Float := 0.0;     -- r 16
+   vN    : Positive := 1;         -- r 18
+   vVcc,                          -- r 20
+   vHrpm,                         -- r 22
+   vWc   : Long_Float := 0.0;     -- r 24
    
    
    -------------------------
    
-   type Arg_Type is (None, J, Kd, Kt, Pm, N, Vcc, Hrpm, Wc);
+   type Arg_Type is (None, J, Jh, Kd, Kt, Pm, N, Vcc, Hrpm, Wc);
    Argv  : Arg_Type := None;
    Jj    : Natural := 0;
    Gotname,
@@ -52,6 +53,7 @@ begin
 	    Tio.Put_Line (Sarg);
 	    case Argv is
 	       when J     => vJ    := Long_Float'Value (sArg);
+	       when Jh    => VJh   := Long_Float'Value (sArg);
 	       when Kd    => Vkd   := Long_Float'Value (sArg);
 	       when Kt    => Vkt   := Long_Float'Value (sArg);
 	       when Pm    => Vpm   := Long_Float'Value (sArg);
@@ -102,7 +104,11 @@ begin
       Wrong_Spec := True; 
    end if;
    if Wrong_Spec then raise Wrong_Spec_Exeption; end if;
-   Pll.Calc.Calcit (vJ, vKd, vKt, vPm, vVcc, vHrpm, VWc, Vn);
+   if Vjh /= 0.0 then
+      Pll.Calc.Calc_Hl (vJ, Vjh, vKd, vKt, vPm, vVcc, vHrpm, VWc, Vn);
+   else	
+      Pll.Calc.Calcit (vJ, vKd, vKt, vPm, vVcc, vHrpm, VWc, Vn);
+   end if;
    
 exception
    when Wrong_Spec_Exeption => Tio.Put_Line ("Execution halted.");

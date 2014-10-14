@@ -1,0 +1,38 @@
+
+
+motor name plate:
+
+150v / 3000 rpm		37A / 1600 Ncm
+
+new model:
+
+152volt / 3000 rpm	33 a   14.3 Nm
+
+
+take the new model to be true:
+
+kt = 0.433 Nm / A
+
+ke = 50.6 V / 1000 rpm   by formula Ke should be 45.37 so there are losses
+     	      	   	 so work the losses back to get some idea of the damping constant
+
+Kt = Ke  		 [Nm / a; V / rad s^-1]
+
+kt = 9.4593x10^-3 x Ke   [Nm / a; V / krpm]
+
+Kt = 1.3524 Ke      	 [oz-in / a; V / krpm]
+
+
+so assume the Kt is taken at stall and the ke is taken at 3000rpm then
+
+lossy kt = 9.4593x10^-3 x lossy Ke
+
+Kt-l = 0.4792712 Nm / a
+
+so Kt-lost = Kt-l - Kt 
+
+
+
+Kt-lost = 0.045937866667 Nm / Amp
+
+
