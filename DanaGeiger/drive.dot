@@ -1,0 +1,458 @@
+digraph "g" {
+	graph [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+	]
+	node [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		shape = "ellipse"
+		style = "solid"
+	]
+	edge [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd hndl\n init"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd\n set current"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd hndl\n sync time"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n3" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "ev hndl\n cycle int"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n4" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd hndl\n start"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n5" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd hndl\n update pars"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n6" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd hndl\n update_dest"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n7" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "init\n modules"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n8" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd\n set current"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n11" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd hndl\n init"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n10" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "interrupts"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n12" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd hndl\n read a/d"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n13" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd\n read a/d"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n14" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd sync"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n15" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd hndl\n read enc"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n16" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd\n set new\n dest"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n17" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd hndl\n set new dest"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n18" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd hndl\n set new pars"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n19" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd\n set new pars"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n20" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd\n pid start"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n22" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "cmd hndl\n init"
+		shape = "ellipse"
+		style = "solid"
+	]
+	"n21" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		label = "resolve pid\n sync time"
+		shape = "ellipse"
+		style = "solid"
+	]
+	subgraph "cluster_1" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			ratio = "1.7"
+			labelloc = "t"
+			label = "pid + sync"
+			style = "solid"
+			color = "blue"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"n0"
+		"n1"
+		"n2"
+		"n3"
+		"n4"
+		"n5"
+		"n6"
+		"n17"
+		"n18"
+		"n21"
+	}
+	subgraph "cluster_2" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			ratio = "1.7"
+			labelloc = "t"
+			label = "system"
+			style = "solid"
+			color = "blue"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"n7"
+	}
+	subgraph "cluster_3" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			ratio = "1.7"
+			labelloc = "t"
+			label = "pwd"
+			style = "solid"
+			color = "blue"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"n8"
+		"n11"
+		"n13"
+	}
+	subgraph "cluster_4" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			ratio = "1.7"
+			labelloc = "t"
+			label = "hardware"
+			style = "solid"
+			color = "blue"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"n10"
+		"n12"
+		"n15"
+		"n22"
+	}
+	subgraph "cluster_5" {
+		graph [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			ratio = "1.7"
+			labelloc = "t"
+			label = "powerlink"
+			style = "solid"
+			color = "blue"
+		]
+		node [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			shape = "ellipse"
+			style = "solid"
+		]
+		edge [
+			fontsize = "14"
+			fontname = "Times-Roman"
+			fontcolor = "black"
+			style = "solid"
+		]
+		"n14"
+		"n16"
+		"n19"
+		"n20"
+	}
+	"n7" -> "n0" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n1" -> "n8" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n7" -> "n11" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n3" -> "n10" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+		color = "red"
+		arrowhead = "inv"
+	]
+	"n13" -> "n12" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n14" -> "n2" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n14" -> "n15" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n14" -> "n6" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n16" -> "n17" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n14" -> "n5" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n19" -> "n18" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n17" -> "n6" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+		color = "grey"
+	]
+	"n18" -> "n5" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+		color = "grey"
+	]
+	"n20" -> "n4" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n7" -> "n22" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+	]
+	"n3" -> "n21" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+		color = "grey"
+	]
+	"n21" -> "n1" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+		color = "grey"
+	]
+	"n2" -> "n21" [
+		fontsize = "14"
+		fontname = "Times-Roman"
+		fontcolor = "black"
+		style = "solid"
+		color = "grey"
+	]
+}

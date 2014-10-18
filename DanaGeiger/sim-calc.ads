@@ -1,8 +1,9 @@
 
 package Sim.Calc is
    
+   --type Enc_Pos is range -2 ** 31 .. +2 ** 31 - 1;
    
-   task Simulate is
+   task Simulate is -- motor
       entry Start (Jmi, Jli, Kti, Kdwi, Tfi, Tli : Long_Float; Ni : integer);
       -- start motor simulation
       --
@@ -25,5 +26,26 @@ package Sim.Calc is
       --   so for a static current the simmotor will run away.
       --   be sure to toggle it.
    end Simulate;
+   
+   
+   task Drive_Sim is
+      entry Start (VPeriod : Duration;
+		   Vvcc, Vmax_Current, Vhrpm, Va1, Vkp_Phi, Vki_Phi, Vki, Vkp : Long_Float; 
+		   Vn : Positive);
+      entry Stop;
+      entry Ch_Pars (VPeriod : Duration;
+		     Vvcc, Vhrpm, Va1, Vkrho, Vki, Vg1 : Long_Float;
+		     Vn : Positive);
+      entry Update_dest (Position : Long_Float);
+      entry Get_Position (Position : in out Long_Float);
+   end Drive_Sim;
+   
+   
+   task Cnc_Sim is
+   --begin
+      --null;
+   end Cnc_Sim;
+
+      
    
 end Sim.Calc;
