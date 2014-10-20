@@ -9,26 +9,29 @@ procedure Msim is
    ---------------------
    -- input variables --
    ---------------------
-   vJ,                            -- r 10
-   VJh,
-   vKd,                           -- r 12
-   vKt,                           -- r 14
-   vPm   : Long_Float := 0.0;     -- r 16
-   vN    : Positive := 1;         -- r 18
+   vJ,                            -- r 10  -- massa-trm motor
+   VJh,                                    -- massa-trm load
+   vKd,                           -- r 12  -- demping nm / krpm
+   VKt   : Long_Float := 0.0;     -- r 14  -- nm / amp
+   --vPm   : Long_Float := 0.0;     -- r 16
+   vN    : Positive := 1;         -- r 18  -- lines / rev 
    vVcc,                          -- r 20
-   vHrpm,                         -- r 22
-     vWc   : Long_Float := 0.0;     -- r 24
+   Vmax_I  : Long_Float := 0.0;   -- r 22  -- max input current 
+     --vWc   : Long_Float := 0.0;     -- r 24
    
-   vA1,
-   vKrho,
-   vKi,
-   vG1   : Long_Float := 0.0; -- gain factors from plldes.
+   vA1,                            -- amps per volt 
+   VKp_Phi,                        -- position kp
+   Vki_Phi,                        -- position ki
+   vKi,                            -- speed ki    
+     vkp   : Long_Float := 0.0;      -- speed kp
    
-   vTf   : Long_Float := 0.0; -- total friction torque (tf + tl).
-   
+   Vtl,                            -- opposing load torque
+   vTf   : Long_Float := 0.0;      -- friction torque.
+    
    Runperiod : Long_Float := 0.0; -- in secs, duration of the test.
    Logperiod : Long_Float := 0.0; -- in secs, interval od log outputs.
    dPeriod : Long_Float := 0.0; -- in secs, drive samoling period
+   eplperiod : Long_Float := 0.0; -- in secs, powerlink period
    Speriod : Long_Float := 0.0; -- in secs, stimulation square wave period
    Sspeed  : Long_Float := 0.0; -- in w / sec, stimulation square wave amplitude
    
@@ -36,7 +39,7 @@ procedure Msim is
    
    -------------------------
    
-   type Arg_Type is (None, J, Jh, Kd, Kt, Pm, N, Vcc, Hrpm, Wc, A1, Krho, Ki, G1, Tf, Rp, Lp, Dp, Sp, Ssp);
+   type Arg_Type is (None, J, Jh, Kt, Kd, Tf, Tl, N, Vcc, Max_I, A1, Kp_phi, Ki_Phi, Kp, Ki, Rp, Lp, Dp, Eplp, Sp, Ssp);
    Argv  : Arg_Type := None;
    Jj    : Natural := 0;
    Gotname,
@@ -68,21 +71,24 @@ begin
 	    case Argv is
 	       when J     => vJ    := Long_Float'Value (sArg);
 	       when Jh    => VJh   := Long_Float'Value (sArg);
+	       when Tf    => Vtf   := Long_Float'Value (sArg);
+	       when Tl    => Vtl   := Long_Float'Value (sArg);
 	       when Kd    => Vkd   := Long_Float'Value (sArg);
 	       when Kt    => Vkt   := Long_Float'Value (sArg);
-	       when Pm    => Vpm   := Long_Float'Value (sArg);
+	       --when Pm    => Vpm   := Long_Float'Value (sArg);
 	       when N     => Vn    := Positive'Value (Sarg);
 	       when Vcc   => Vvcc  := Long_Float'Value (sArg);
-	       when Hrpm  => Vhrpm := Long_Float'Value (sArg);
-	       when Wc    => Vwc   := Long_Float'Value (sArg);
+	       when Max_I => Vmax_i := Long_Float'Value (sArg);
+	       --when Wc    => Vwc   := Long_Float'Value (sArg);
 	       when A1    => Va1   := Long_Float'Value (sArg);
-	       when Krho  => Vkrho := Long_Float'Value (sArg);
+	       when Kp_phi => Vkp_Phi := Long_Float'Value (sArg);
+	       when Ki_phi => Vki_Phi := Long_Float'Value (sArg);
+	       when Kp    => Vkp   := Long_Float'Value (sArg);
 	       when Ki    => Vki   := Long_Float'Value (sArg);
-	       when G1    => Vg1   := Long_Float'Value (sArg);
-	       when Tf    => Vtf   := Long_Float'Value (sArg);
 	       when Rp    => Runperiod := Long_Float'Value (sArg);
 	       when Lp    => Logperiod := Long_Float'Value (sArg);
 	       when Dp    => Dperiod   := Long_Float'Value (sArg);
+	       when Eplp  => eplperiod := Long_Float'Value (sArg);
 	       when Sp    => Speriod   := Long_Float'Value (sArg);
 	       when Ssp   => Sspeed    := Long_Float'Value (sArg);
 	       when others => raise Arg_Exeption;
@@ -107,10 +113,10 @@ begin
       Tio.Put_Line ("Kt   has not been specified."); 
       Wrong_Spec := True; 
    end if;
-   if Vpm  = 0.0 then 
-      Tio.Put_Line ("PM   has not been specified."); 
-      Wrong_Spec := True; 
-   end if;
+   --  if Vpm  = 0.0 then 
+   --     Tio.Put_Line ("PM   has not been specified."); 
+   --     Wrong_Spec := True; 
+   --  end if;
    if Vn   = 1 then 
       Tio.Put_Line ("N    has not been specified."); 
       Wrong_Spec := True; 
@@ -119,14 +125,14 @@ begin
       Tio.Put_Line ("Vcc  has not been specified."); 
       Wrong_Spec := True; 
    end if;
-   if Vhrpm = 0.0 then 
-      Tio.Put_Line ("hRPM has not been specified."); 
+   if Vmax_i = 0.0 then 
+      Tio.Put_Line ("Max_I has not been specified."); 
       Wrong_Spec := True; 
    end if;
-   if Vwc  = 0.0 then 
-      Tio.Put_Line ("Wc   has not been specified."); 
-      Wrong_Spec := True; 
-   end if;
+   --  if Vwc  = 0.0 then 
+   --     Tio.Put_Line ("Wc   has not been specified."); 
+   --     Wrong_Spec := True; 
+   --  end if;
    if Va1 = 0.0 then 
       Tio.Put_Line ("A1   has not been specified."); 
       Wrong_Spec := True; 
@@ -137,6 +143,10 @@ begin
    end if;
    if Dperiod = 0.0 then 
       Tio.Put_Line ("Drive SamplePeriod   has not been specified."); 
+      Wrong_Spec := True; 
+   end if;
+   if Eplperiod = 0.0 then 
+      Tio.Put_Line ("Powerlink ScanPeriod   has not been specified."); 
       Wrong_Spec := True; 
    end if;
    if Speriod = 0.0 then

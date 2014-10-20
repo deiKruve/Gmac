@@ -86,26 +86,31 @@ package body Sim.Calc is
    ---------------------
    -- Drive simulator --
    ---------------------
-   type Unsigned32 is mod 2 ** 32;
-   
+  
    -- global variables -- 
-   Epl_Period          : Duration   := 0.001;   -- written during phase 1 I presume
-   Request_Init        : Boolean    := False;
    
+   -- errors
+   Drive_Limit_Error   : Boolean := False;
+
+   
+   Epl_Period          : Duration   := 0.001;   -- written during phase 1 I presume
    T_Period,
    T_Half_Period       : Duration   := 0.0;
+   T_Max_Limt          : Duration   := 0.0;
+   Request_Init        : Boolean    := False;
+   
    T_Vcc,        
    T_Max_Current,
-   T_Hrpm,       
    T_Kp,         
-   T_Kpit,       
+   T_Kpi,       
    T_Phi_Kp,     
-   T_Phi_Kpit          : Long_Float := 0.0;
+   T_Phi_Kpi           : Long_Float := 0.0;
    T_N                 : Positive   := 1;
    Request_Update_Pars : Boolean    := False;
    
    Request_Sync_Time   : Boolean    := False;
    
+   Phi_Delta_Scaler,
    T_Phi_Soll,
    T_Phi_Ist,
    T_Phi_Delta         : Long_Float := 0.0;
@@ -121,24 +126,22 @@ package body Sim.Calc is
       T_Period      := Vperiod;
       T_Half_Period := Vperiod / 2.0;
       Request_Init  := True;
+      Phi_Delta_scaler := Long_Float (T_Period) / Long_Float (Epl_Period);
    end Set_Init_Pars;
    
    
    -- temp store for new parameters --
-   procedure Set_New_Pars (VPeriod : Duration;
-			       Vvcc, Vhrpm, Va1, Vkrho, Vki, Vg1 : Long_Float;
-			       Vn : Positive)
+   procedure Set_New_Pars (Vvcc, Vmax_Current, Vmax_limt, 
+			     Va1, Vkp_Phi, Vki_Phi, Vki, Vkp : Long_Float)
    is
    begin
-      T_Period      := Vperiod;
       T_Vcc         := Vvcc;
       T_Max_Current := Vmax_Current;
-      T_Hrpm        := Vhrpm;
+      T_Max_Limt    := Duration (Vmax_Limt);
       T_Kp          := Vkp * vA1;
-      T_Kpit        := Kp + Vki * Long_Float (T_Period) * vA1;
+      T_Kpi         := T_Kp + Vki * Long_Float (T_Period) * vA1;
       T_Phi_Kp      := Vkp_Phi * Va1;
-      T_Phi_Kpit    := T_Phi_Kp + VKi_Phi * Long_Float (T_Period) * vA1;
-      T_N           := Vn;
+      T_Phi_Kpi     := T_Phi_Kp + VKi_Phi * Long_Float (T_Period) * vA1;
       Request_Update_Pars := True;
    end Set_New_Pars;
    
@@ -162,24 +165,33 @@ package body Sim.Calc is
       Position := T_Phi_Ist;
    end Get_Position;
    
+   procedure Get_Errors (Drive_Limit : in out Boolean)
+   is
+   begin
+      Drive_Limit := Drive_Limit_Error;
+   end Get_Errors;
+   
 
    task body Drive_Sim 
       is
       use type Cal.Time;
+      -- hardware bridge enable
+      Bridge_Enable     : Boolean := False;
+      
       N          : Positive   := 1;
-      Vcc, Hrpm, 
+      Vcc, 
 	--A1, Krho, 
 	--Ki, G1   : Long_Float := 0.0;
-	Kp, Kpit,
-	Phi_Kp, Phi_Kpit : Long_Float := 0.0;
+	Kp, Kpi,
+	Phi_Kp, Phi_Kpi : Long_Float := 0.0;
       Enabled,
       Done       : Boolean    := False;
       Period     : Duration   := 0.001_000; -- secs
-					   --Period    : Duration   := 1.0;
+      Max_Limt   : Duration   := 0.0;
       Next_Time  : Cal.Time   := Cal.Clock + period;
       
       -- running vars --
-      Phi_Ist,    -- does this need a start position?! ---------------------
+      Phi_Ist,    -- does this need a start position?! Yah zero on Start-
       Phi_Soll,
       Phi_Delta,
       Tmp,
@@ -204,55 +216,56 @@ package body Sim.Calc is
 	 select
 	    when not Enabled =>
 	       accept Start 
-		 (VPeriod                           : Duration;
-		  Vvcc, vMax_Current, Vhrpm, 
+		 ( Vvcc, vMax_Current, Vmax_limt, 
 		    Va1, Vkp_Phi, Vki_Phi, Vki, Vkp : Long_Float;
 		  Vn                                : Positive)
 	      do
-		 Period      := Vperiod;
 		 Vcc         := Vvcc;
 		 Max_Current := Vmax_Current;
-		 Hrpm        := Vhrpm;
+		 
+		 T_Max_Limt  := Duration (Vmax_Limt);
+		 Max_limt    := T_Max_Limt;
 		 Kp          := Vkp * vA1;
-		 Kpit        := Kp + Vki * Long_Float (Period) * vA1;
+		 Kpi         := Kp + Vki * Long_Float (Period) * vA1;
 		 Phi_Kp      := Vkp_Phi * Va1;
-		 Phi_Kpit    := Phi_Kp + VKi_Phi * Long_Float (Period) * vA1;
+		 Phi_Kpi     := Phi_Kp + VKi_Phi * Long_Float (Period) * vA1;
 		 N           := Vn;
 		 
 		 Phi_Ist        := 0.0;
+		 
 		 Phi_Soll       := 0.0;
 		 Phi_Delta      := 0.0;
 		 Phi_Error      := 0.0;
 		 Phi_Error_Last := 0.0;
 		 Enabled        := True;
+		 Bridge_Enable  := True;
 	      end Start;
 	 or
 	    when Enabled =>
-	      accept Stop do
-		 Done := True;
-	      end Stop;
+	       accept Stop do
+		  Bridge_Enable := False;
+		  Done := True;
+	       end Stop;
 	 or 
 	    accept Sync_Pulse do
 	       Sync_Time := Cal.Clock;
 	       Simulate.Get_Pos (Long_Integer (T_Phi_Ist)); -- get motor position
 	       Request_Sync_Time := True;
 	       if Request_Update_Phi then
-		  Tmp := (T_Phi_Soll - Phi_Soll) * T_Period / Epl_period;
+		  Tmp := (T_Phi_Soll - Phi_Soll) * Phi_Delta_Scaler;
 		  if abs (Tmp) > abs (Phi_Delta) / 2.0 then
 		     Phi_Delta := Tmp; -- we have a valid new position
 		  end if; -- else we did not get, carry on with the old delta.
 		  Request_Update_Phi := False;
 	       end if; -- Request_Update_Phi
 	       if Request_Update_Pars then
-		  Period      := T_Period;
 		  Vcc         := T_Vcc;
 		  Max_Current := T_Max_Current;
-		  Hrpm        := T_Hrpm;
+		  Max_limt    := T_Max_Limt;
 		  Kp          := T_Kp;
-		  Kpit        := T_Kpit;
+		  Kpi         := T_Kpi;
 		  Phi_Kp      := T_Phi_Kp;
-		  Phi_Kpit    := T_Phi_Kpit;
-		  N           := T_N;
+		  Phi_Kpi     := T_Phi_Kpi;
 		  Request_Update_Pars := False;
 	       end if; -- Request_Update_Pars
 	       if Request_Init then
@@ -268,30 +281,42 @@ package body Sim.Calc is
 	    if Enabled then
 	       Simulate.Get_Pos (Long_Integer (Phi_Ist)); -- get motor position
 	       Phi_Error   := Phi_Soll - Phi_Ist;     -- posistion error
-	       Omega_Error := Phi_Error - Phi_Error_Last; -- speed error
+	       Omega_Error := Phi_Error - Phi_Error_Last; -- speed error * period
 	       
 	       -- this implements 2 PI controllers
 	       --  Omega for speed
 	       --  and Phi for position.
-	       Co := Co + Omega_Error * Kpit - Omega_Error_Last * Kp + 
-		 Phi_Error * Phi_Kpit - Phi_Error_Last * Phi_Kp;
+	       Co := Co + Omega_Error * Kpi - Omega_Error_Last * Kp + 
+		 Phi_Error * Phi_Kpi - Phi_Error_Last * Phi_Kp;
 	       
 	       Omega_Error_Last := Omega_Error;
-	       Phi_Error_Last := Phi_Error;
-	       Phi_Soll := Phi_Soll + Phi_Delta; -- move the destination fwd
+	       Phi_Error_Last   := Phi_Error;
+	       Phi_Soll         := Phi_Soll + Phi_Delta; -- move the destination fwd
 	       
-	       if Co > +Max_Current    then Co := Max_Current;
-	       elsif Co < -Max_Current then Co := -Max_Current;
+	       if Co > +Max_Current    then 
+		  Co         := Max_Current;
+		  Max_Limt   := Max_Limt - Period;
+	       elsif Co < -Max_Current then 
+		  Co         := -Max_Current;
+		  Max_Limt   := Max_Limt - Period;
+	       else Max_Limt := T_Max_Limt;
 	       end if; -- anti windup;
-
+	       if Max_Limt < 0.0 then
+		  Bridge_Enable     := False;
+		  Drive_Limit_Error := True;
+		  Enabled           := False;
+		  Co                := 0.0;
+	       end if;
+	       -----we also need following error here
+	       
 	       Simulate.Set_Current (Co);
 	    else 
 	       Simulate.Set_Current (0.0);
 	    end if; -- enabled
 		 -- sync the sample clock to the EPL cycle
 	    if Request_Sync_Time then
-	       Sigma_Diff_T := Sigma_Diff_T + (Sync_Time - Next_Time_Last) + 
-		 (Next_Time - Sync_Time);
+	       Sigma_Diff_T := Sigma_Diff_T + (Next_Time - Sync_Time) - 
+		 (Sync_Time - Next_Time_Last);
 	       Diff_T := Sigma_Diff_T / 100.0;
 	       if Diff_T > Up_Lim then 
 		  Period := Period - 0.000_000_010;
@@ -315,9 +340,116 @@ package body Sim.Calc is
       end loop;
    end Drive_Sim;
    
-   task body Cnc_Sim is
+   
+   -------------------
+   -- cnc simulator --
+   -------------------
+   
+   -- global variables --
+   Epl_Sync_Time,
+   Epl_Req_Time  : Cal.Time;
+   Epl_Period    : Duration := 0.0;
+   Start_Ready   : Integer := 0;
+   
+   M_Jm,
+   M_Jl,
+   M_Kt,
+   M_Kdw,
+   M_Tf,
+   M_Tl  : Long_Float := 0.0;
+   M_N   : Positive   := 1;
+   
+   procedure Set_Motor_Details (vJm, vJl, vKt, vKdw, vTf, vTl : Long_Float; 
+				vN : integer)
+   is
    begin
-      null;
+      M_Jm  := Vjm;  
+      M_Jl  := Vjl;
+      M_Kt  := Vkt;
+      M_Kdw := Vkdw;
+      M_Tf  := Vtf; 
+      M_Tl  := Vtl;
+      M_N   := Vn;
+      Start_Ready := Start_Ready + 1;
+   end Set_Motor_Details;
+   
+   procedure Set_Drive_Details (Vvcc, vMax_Current, Vmax_limt, 
+				 Va1, Vkp_Phi, Vki_Phi, Vki, Vkp : Long_Float;
+				Vn                                : Positive)
+   is
+   begin
+      C_Vcc         := Vvcc;
+      C_Max_Current := Vmax_Current;
+      C_Max_Limt    := Vmax_Limt;
+      C_A1          := Va1;
+      C_Kp_Phi      := Vkp_Phi;
+      C_Ki_Phi      := Vki_Phi;
+      C_Kp          := Vkp;
+      C_Ki          := Vki;
+      C_N           := Vn;
+      Start_Ready := Start_Ready + 1;
+   end Set_Drive_Details;
+   
+   
+   task body Cnc_Sim 
+      is
+      use type Cal.Time;
+      Link_Enabled,
+      Enabled,
+      Done          : Boolean := False;
+      
+      Position : Long_Float;
+      
+   begin
+      while not Done loop
+	 select
+	    when Start_Ready = 2  =>
+	       accept Start_Link (Dperiod, Eplperiod : Duration)
+	       do
+		  Epl_Period   := Eplperiod;
+		  Drive_Period := Dperiod;
+		  -- start motor simulation
+		  Simulate.Start (M_Jm, M_Jl, M_Kt, M_Kdw, M_Tf, M_Tl, M_N);
+		  -- eplink and sync parms to the drive
+		  Set_Init_Pars (Unsigned32 (Eplperiod * 1000_000.0), Dperiod);
+		  null;
+		  delay Eplperiod;
+		  Epl_Sync_Time := Cal.Time;
+		  Epl_Req_Time := Cal.Time + 1.5 * Eplperiod;
+		  Link_Enabled := True;
+		  Start_Ready := Start_Ready + 1;
+		  --delay Eplperiod;
+	       end Start_Link;
+	 or
+	    when Start_Ready = 3  =>
+	       accept Start_Sim (Runperiod, Speriod : Duration; Sspeed : Long_Float)
+	       do
+		  null;
+	       end Start_Sim;
+	 or
+	    when Enabled =>
+	       accept Stop
+	       do
+		  null;
+	       end Stop;
+	 or
+	    when Link_Enabled =>
+	       delay until Epl_Sync_Time;
+	       Drive_Sim.Sync_Pulse;
+	       Epl_Sync_Time := Epl_Sync_Time + Eplperiod;
+	 or 
+	    when Link_Enabled =>
+	       delay until Epl_Req_Time;
+	       Get_Position (Position);
+	       if Enabled then
+		  while Run_Period > 0.0 loop
+		     
+	       end if; -- enabled
+		 
+	       Epl_Req_Time:= Epl_Req_Time + Dperiod;
+	 end select;
+	 if Done then exit; end if;
+      end loop;
    end Cnc_Sim;
    
  end Sim.Calc;  
