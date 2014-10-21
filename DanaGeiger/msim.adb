@@ -1,22 +1,26 @@
 with Ada.Command_line; use Ada.Command_Line;
 with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Numerics;
 with Sim.Calc;
 
 procedure Msim is
    package Acl renames Ada.Command_Line;
    package Tio renames Ada.Text_IO;
    
+   Pi : Long_Float := Ada.Numerics.Pi;
    ---------------------
    -- input variables --
    ---------------------
    vJ,                            -- r 10  -- massa-trm motor
    VJh,                                    -- massa-trm load
-   vKd,                           -- r 12  -- demping nm / krpm
+     vKd,                           -- r 12  -- demping nm / krpm
+     Vkdw,                                   -- demping nm / rad /sec
    VKt   : Long_Float := 0.0;     -- r 14  -- nm / amp
    --vPm   : Long_Float := 0.0;     -- r 16
    vN    : Positive := 1;         -- r 18  -- lines / rev 
    vVcc,                          -- r 20
-   Vmax_I  : Long_Float := 0.0;   -- r 22  -- max input current 
+     Vmax_I  : Long_Float := 0.0;   -- r 22  -- max input current 
+   Vmax_Limt : Long_Float := 0.200;    -- secs
      --vWc   : Long_Float := 0.0;     -- r 24
    
    vA1,                            -- amps per volt 
@@ -159,6 +163,21 @@ begin
    end if;
    if Wrong_Spec then raise Wrong_Spec_Exeption; end if;
    
+   --procedure Set_Motor_Details (vJm, vJl, vKt, vKdw, vTf, vTl : Long_Float; 
+   --vN : integer);
+   Vkdw := Vkd * (30.0 /1000.0 * Pi); -- or something like this
+   Sim.Calc.Set_Motor_Details (Vj, Vjh, Vkt, Vkdw, Vtf, Vtl, Vn);
+   
+   --procedure Set_Drive_Details (Vvcc, vMax_Current, Vmax_limt, 
+				 --Va1, Vkp_Phi, Vki_Phi, Vki, Vkp : Long_Float;
+				--Vn                                : Positive);
+   Sim.Calc.Set_Drive_Details 
+     (Vvcc, VMax_I, Vmax_limt, Va1, Vkp_Phi, Vki_Phi, Vki, Vkp, Vn);
+   
+   Sim.Calc.Cnc_Sim.Start_Link (Duration (DPeriod), Duration (Eplperiod));
+   
+   Sim.Calc.Cnc_Sim.Start_Sim 
+     (Duration (Runperiod), Duration (Speriod), Duration (Logperiod), Sspeed);
    
 exception
    when Wrong_Spec_Exeption => Tio.Put_Line ("Execution halted.");

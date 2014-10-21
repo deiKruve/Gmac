@@ -105,16 +105,56 @@ package Sim.Calc is
    
    procedure Set_Motor_Details (vJm, vJl, vKt, vKdw, vTf, vTl : Long_Float; 
 				vN : integer);
+   -- sets motor and load parameters.
+   --  the first thing to do when starting a simulation
+   --
+   -- vJm   : motor moment of inertia, kg m^2.
+   -- vJl   : load moment of inertia, kg m^2.
+   -- vKt   : torque constant, Nm / amp.
+   -- vKdw  : damping constant, Nm per rad / sec.
+   -- vTf   : friction torque, Nm.
+   -- vTl   : opposing load torque, Nm. 
+   -- vN    : encoder impulses per revolution.
    
    procedure Set_Drive_Details (Vvcc, vMax_Current, Vmax_limt, 
 				 Va1, Vkp_Phi, Vki_Phi, Vki, Vkp : Long_Float;
 				Vn                                : Positive);
-   
+   -- sets drive parameters
+   --  the second thing to do when starting a simulation
+   --
+   -- Vvcc         : Suply voltage, might not be needed.
+   -- vMax_Current : Maximum motor current is drive saturation current.
+   -- Vmax_limt    : Maximum time the drive is allowed to be in saturation.
+   -- Va1          : transconductance gain in amps / 'volt'.
+   --                 'volts' being internal units of the drive, its a bit fuzzy.
+   -- Vkp_Phi      : proportional gain of the position error.
+   -- Vki_Phi      : integral gain of the position error.
+   -- Vki          : integral gain of the speed error, 
+   --                 note that Vkp_Phi has the same effect.
+   -- Vkp          : proportional gain of the speed error,
+   --                 note that this is the diff gain of the pos error.
+   -- Vn           : encoder lines per revolution.
    
    task Cnc_Sim is
       entry Start_Link (Dperiod, Eplperiod : Duration);
-      entry Start_Sim (Runperiod, Speriod : Duration; Sspeed : Long_Float);
+      -- start up the eplink, the third thing to do
+      --
+      -- Dperiod   : The period at wich the drive resolves the pid algorithm.
+      -- Eplperiod : the eplink scan period, must be a whole multiple of dperiod.
+      
+      entry Start_Sim (Runperiod, Speriod, Loginterval : Duration; 
+		       Sspeed : Long_Float);
+      -- This will finally start the simulation running.
+      -- the fourth thing to do.
+      --
+      -- Runperiod   : the time the simulation must run for.
+      -- loginterval : time between speed log points.
+      -- Speriod     : the period of the square wave used for testing.
+      -- Sspeed      : the amplitude of the square wave used for testing.
+      
       entry Stop;
+      -- stop the simulation if needed.
+      
    end Cnc_Sim;
 
       

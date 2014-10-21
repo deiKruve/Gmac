@@ -1,8 +1,13 @@
 with Ada.Calendar;
+with Ada.Real_Time;
 with Ada.Numerics;
+with Ada.Text_Io;
 
 package body Sim.Calc is
    package Cal renames Ada.Calendar;
+   package Art renames Ada.Real_Time;
+   package Tio renames Ada.Text_Io;
+   
    Pi : Long_Float := Ada.Numerics.Pi;
    
    
@@ -180,8 +185,6 @@ package body Sim.Calc is
       
       N          : Positive   := 1;
       Vcc, 
-	--A1, Krho, 
-	--Ki, G1   : Long_Float := 0.0;
 	Kp, Kpi,
 	Phi_Kp, Phi_Kpi : Long_Float := 0.0;
       Enabled,
@@ -346,11 +349,12 @@ package body Sim.Calc is
    -------------------
    
    -- global variables --
-   Epl_Sync_Time,
-   Epl_Req_Time  : Cal.Time;
-   Epl_Period    : Duration := 0.0;
-   Start_Ready   : Integer := 0;
+   Log_Time,                     -- next time to take a log.
+   Epl_Sync_Time,                -- when the next sync pulse will happen
+   Epl_Req_Time  : Cal.Time;     -- when the next update will happen
+   Start_Ready   : Integer := 0; -- crude attempt at pre operational phases
    
+   -- motor parameter intermediate storage
    M_Jm,
    M_Jl,
    M_Kt,
@@ -359,6 +363,18 @@ package body Sim.Calc is
    M_Tl  : Long_Float := 0.0;
    M_N   : Positive   := 1;
    
+   -- drive parameter intermediate storage.
+   C_Vcc,         
+   C_Max_Current, 
+   C_Max_Limt,    
+   C_A1,          
+   C_Kp_Phi,      
+   C_Ki_Phi,      
+   C_Kp,          
+   C_Ki            : Long_Float := 0.0;             
+   C_N            : Positive    := 1;           
+   
+   -- prepare the motor for running
    procedure Set_Motor_Details (vJm, vJl, vKt, vKdw, vTf, vTl : Long_Float; 
 				vN : integer)
    is
@@ -387,18 +403,28 @@ package body Sim.Calc is
       C_Kp          := Vkp;
       C_Ki          := Vki;
       C_N           := Vn;
-      Start_Ready := Start_Ready + 1;
+      Start_Ready   := Start_Ready + 1;
    end Set_Drive_Details;
    
    
    task body Cnc_Sim 
       is
       use type Cal.Time;
+      use type Art.Time_Span;
       Link_Enabled,
       Enabled,
       Done          : Boolean := False;
       
-      Position : Long_Float;
+      Drive_Period,                -- EPL scan period
+      Running,                     -- how long the test has been running.
+      Run_Period,                  -- period the test will run, from the commandline
+      Log_Interval,                -- time between speed log points.
+      S_Period      : Duration   := 0.0; -- test square wave period
+      S_Speed       : Long_Float := 0.0; -- test square wave amplitude
+					 -- so the destination is advanced by 
+					 -- s_speed * epl scan period each scan.
+      
+      Position      : Long_Float := 0.0; -- position at the last sync
       
    begin
       while not Done loop
@@ -414,39 +440,70 @@ package body Sim.Calc is
 		  Set_Init_Pars (Unsigned32 (Eplperiod * 1000_000.0), Dperiod);
 		  null;
 		  delay Eplperiod;
-		  Epl_Sync_Time := Cal.Time;
-		  Epl_Req_Time := Cal.Time + 1.5 * Eplperiod;
+		  Epl_Sync_Time := Cal.Clock;
+		  Epl_Req_Time := Cal.Clock + 1.5 * Eplperiod;
 		  Link_Enabled := True;
 		  Start_Ready := Start_Ready + 1;
 		  --delay Eplperiod;
 	       end Start_Link;
 	 or
 	    when Start_Ready = 3  =>
-	       accept Start_Sim (Runperiod, Speriod : Duration; Sspeed : Long_Float)
+	       accept Start_Sim (Runperiod, Speriod, Loginterval : Duration; 
+				 Sspeed : Long_Float)
 	       do
-		  null;
+		  Running      := 0.0;  -- start time
+		  Run_Period   := Runperiod;
+		  Log_Interval := Loginterval;
+		  Log_Time     := Cal.Clock + Log_Interval;
+		  S_Period     := Speriod;
+		  S_Speed      := S_Speed;
+		  Enabled      := True;
 	       end Start_Sim;
 	 or
 	    when Enabled =>
 	       accept Stop
 	       do
+		  Running       := 0.0;
+		  Run_Period    := 0.0;
+		  S_Period      := 0.0;
+		  S_Speed       := 0.0;
+		  Enabled := False;
+		  Done := True;
 		  null;
 	       end Stop;
 	 or
 	    when Link_Enabled =>
 	       delay until Epl_Sync_Time;
 	       Drive_Sim.Sync_Pulse;
-	       Epl_Sync_Time := Epl_Sync_Time + Eplperiod;
+	       Epl_Sync_Time := Epl_Sync_Time + Epl_Period;
 	 or 
 	    when Link_Enabled =>
 	       delay until Epl_Req_Time;
 	       Get_Position (Position);
 	       if Enabled then
-		  while Run_Period > 0.0 loop
-		     
+		  if Running < Run_Period then
+		     if (Art.To_Time_Span (Running) - 
+			   ((Art.To_Time_Span (Running) / 
+			       Art.To_Time_Span (S_Period)) * 
+			      Art.To_Time_Span (S_Period))) < 
+		       (Art.To_Time_Span (S_Period) / 2) 
+		     then
+			Set_New_Dest (S_Speed * Long_Float (Running));
+		     else
+			Set_New_Dest (-S_Speed * Long_Float (Running));
+		     end if;
+		     Running := Running + Drive_Period;
+		  else
+		     Set_New_Dest (0.0);
+		     Enabled := False;
+		  end if; -- running loop
 	       end if; -- enabled
-		 
-	       Epl_Req_Time:= Epl_Req_Time + Dperiod;
+	       Epl_Req_Time:= Epl_Req_Time + Drive_Period;
+	 or 
+	    when Enabled =>
+	       delay until Log_Time;
+	       Tio.Put_Line (Duration'Image (Running) & " " & 
+			       Long_Float'Image (Position));
 	 end select;
 	 if Done then exit; end if;
       end loop;
