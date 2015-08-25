@@ -29,7 +29,7 @@
 -- root of all parser and low level parser structures
 --
 with System;
-with Ada.Numerics.Generic_Real_Arrays;
+-- with Ada.Numerics.Generic_Real_Arrays;
 
 package Luthien is
    
@@ -47,27 +47,27 @@ package Luthien is
    --    for the planner and friends    --
    -- see cnc-states-of-the-planner.dot --
    ---------------------------------------
-   type Planner_State_Type is (State1,   -- idle
-			       State2,   -- hand mode
-			       State3,   -- index mode
-			       State4,   -- hw mode
-			       State4a,  -- imm mode
-			       State5,   -- single mode
-			       State6,   -- auto mode
-			       State7,   -- run hand-move, wait pb release
-			       State8,   -- run index-move, wait index ls
-			       State9,   -- run hw-move, wait eom or click
-			       State10,  -- hand, wait eom
-			       State11,  -- hw-mode, wait eom
-			       State12,  -- stop, look for decelleration
-			       State13,  -- stop-mode, wait eom
-			       State5a,  -- single-mode, wait eom
-			       State5b,  -- single-mode, wait pb
-			       State6a,  -- auto-mode, run program
-			       State15,  -- auto-mode, wait eom
-			       State16); -- switch auxes off
+   --  type Planner_State_Type is (State1,   -- idle
+   --       		       State2,   -- hand mode
+   --       		       State3,   -- index mode
+   --       		       State4,   -- hw mode
+   --       		       State4a,  -- imm mode
+   --       		       State5,   -- single mode
+   --       		       State6,   -- auto mode
+   --       		       State7,   -- run hand-move, wait pb release
+   --       		       State8,   -- run index-move, wait index ls
+   --       		       State9,   -- run hw-move, wait eom or click
+   --       		       State10,  -- hand, wait eom
+   --       		       State11,  -- hw-mode, wait eom
+   --       		       State12,  -- stop, look for decelleration
+   --       		       State13,  -- stop-mode, wait eom
+   --       		       State5a,  -- single-mode, wait eom
+   --       		       State5b,  -- single-mode, wait pb
+   --       		       State6a,  -- auto-mode, run program
+   --       		       State15,  -- auto-mode, wait eom
+   --       		       State16); -- switch auxes off
    
-private
+
    ---------------------------
    -- for sonja and friends --
    ---------------------------
@@ -79,18 +79,10 @@ private
    subtype Mpsec2_Type is Long_Float; -- acc type
    subtype Mpsec3_Type is Long_Float; -- jerk type
    
-   package Mv is new Ada.Numerics.Generic_Real_Arrays 
-     (Real => Long_Float);
+   --  package Mv is new Ada.Numerics.Generic_Real_Arrays 
+   --    (Real => Long_Float);
    
-   --  type Pos_Vector_Type is
-   --     record
-   --  	 X,
-   --  	 Y,
-   --  	 Z  : M_Type;
-   --  	 A,
-   --  	 B,
-   --  	 C  : M_Type;
-   --     end record;
-   type Real_Vector_Type is new Mv.Real_Vector (1 .. 6);
+
+   --  type Real_Vector_Type is new Mv.Real_Vector (1 .. Nof_Axes);
 
 end Luthien;

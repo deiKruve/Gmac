@@ -2,7 +2,7 @@
 --                                                                          --
 --                            LUTHIEN COMPONENTS                            --
 --                                                                          --
---                        L U T H I E N . S O N J A 3                       --
+--                 L U T H I E N . S O N J A . S O N J A 3                  --
 --                                                                          --
 --                                  S p e c                                 --
 --                                                                          --
@@ -28,30 +28,24 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
--- implementation of chapter 3 of the Sonja Macfarlane Thesis
+-- implementation of chapter3 of the Sonja Macfarlane Thesis
 
---with Silmaril;
---with Silmaril.Dll;
+
 with Luthien.Dll.Qcp;
-package Luthien.Sonja3 is
+with Ada.Numerics.Generic_Real_Arrays;
+
+generic
+   Nof_Axes : Positive := 1;
    
-   type Sonja3_In_Type is
-      record
-	 --P1   : Pos_Vector_Type;  -- start point
-	 --P2   : Pos_Vector_Type;  -- end position
-	 P1,
-	 P2 : Real_Vector_Type;
-	 S1   : Mpsec_Type;       -- start speed
-	 S2   : Mpsec_Type;       -- end speed
-	 Smax : Mpsec_Type;       -- max speed
-	 Amax : Mpsec2_Type;      -- max accel
-	 Jmax : Mpsec3_Type;      -- max jerk
-	 --Ift1 : Sec_Type;         -- start inverse feed time
-	 --Ift2 : Sec_Type;         -- end inverse feed time
-      end record;
+package Luthien.Sonja.Sonja3 is
+   
+   package Mv is new Ada.Numerics.Generic_Real_Arrays (Real => Long_Float);
+   type Real_Vector_Type is new Mv.Real_Vector (1 .. Nof_Axes);
+   
+   package Dll is new Luthien.Dll;
+   --package Dqcp is new Dll.Qcp (Nof_Axes);
    
 private
-   
    type Lin_Move_Record_Type is
       record	 
 	 Sinv_Flag : Boolean; -- indicates that s1 and s2 are reversed for
@@ -162,37 +156,38 @@ private
 			      -- zero acceleration while respecting jmax.
       end record;
    
-   procedure Math_In (Invec : Sonja3_In_Type);
+   -- procedure Math_In (Invec : Sonja3_In_Type);
    procedure Math312_314;
    procedure Math315_316;
    procedure Math317_318;
    procedure Math324_325;
    procedure Math326_325;
-   procedure Math_Yy;
+   procedure Math_B_Dv  ;
+   procedure Math_Yy    ;
    procedure Math_Bii_A1;
    procedure Math_Bii_A2;
-   procedure Math_Bii_B;
+   procedure Math_Bii_B ;
    procedure Math_Biii_1;
    procedure Qcp_Cv (Anchor  : in out Dll.Dllist_Access_Type; 
 		     Delta_D : in M_Type; 
 		     S1      : in Mpsec_Type);
-   procedure Qcp_Sap_B1 (Anchor          : in out Luthien.Dll.Dllist_Access_Type; 
+   procedure Qcp_Sap_B1 (Anchor         : in out Dll.Dllist_Access_Type; 
 			 Sinv_Flag           : in Boolean;
 			 D1, D2, D3, Delta_D : in M_Type; 
 			 S1, Sa, Sb, S2      : in Mpsec_Type; 
 			 Amax                : in Mpsec2_Type; 
 			 Delta_Tmax          : in Sec_Type);
    
-   procedure Qcp_Ap_B2 (Anchor    : in out Luthien.Dll.Dllist_Access_Type; 
+   procedure Qcp_Ap_B2 (Anchor    : in out Dll.Dllist_Access_Type; 
 			Sinv_Flag : in Boolean;
-			 Delta_D  : in M_Type; 
-			 S1       : in Mpsec_Type; 
-			 Apeak    : in Mpsec2_Type; 
-			 Delta_T  : in Sec_Type);
+                        Delta_D   : in M_Type; 
+                        S1        : in Mpsec_Type; 
+                        Apeak     : in Mpsec2_Type; 
+                        Delta_T   : in Sec_Type);
    
    Lm : Lin_Move_Record_Type := (Sinv_Flag => False, 
-				 P1        => (others => 0.0), 
-				 Dinc      => (others => 0.0), 
-				 others    => 0.0);
-     
-end Luthien.Sonja3;
+        			 P1        => (others => 0.0), 
+        			 Dinc      => (others => 0.0), 
+        			 others    => 0.0);
+   
+end Luthien.Sonja.Sonja3;

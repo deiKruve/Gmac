@@ -2,9 +2,9 @@
 --                                                                          --
 --                            LUTHIEN COMPONENTS                            --
 --                                                                          --
---                       L U T H I E N . D L L . B C P                      --
+--                       L U T H I E N . D L L . Q C P                      --
 --                                                                          --
---                                  B o d y                                 --
+--                                  S p e c                                 --
 --                                                                          --
 --                     Copyright (C) 2014, Jan de Kruyf                     --
 --                                                                          --
@@ -26,21 +26,41 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
--- dll of all BCP controlpoints for the low level parser
+-- dll of all QCP controlpoints for the low level parser
 
-package body Luthien.Dll.Bcp is
+with Ada.Numerics.Generic_Real_Arrays;
+  
+generic
+   Nof_Axes : Positive := 1;
    
-   procedure Get_Item (N : access Dllist_Type; 
-		       B_P : in out Bcp_Access_Type)
-   is
-      This : access Cp_Type'class;
-   begin
-      Pars_Q.Get_Item (N, Cp_Access_Type (This));
-      if This in Bcp_Access_Type then
-	 B_P  := Bcp_Access_Type (This);
-      else
-	 B_P := null;
-      end if;
-   end Get_Item;
+package Luthien.Dll.Qcp is
    
-end Luthien.Dll.Bcp;
+   package Mv is new Ada.Numerics.Generic_Real_Arrays 
+     (Real => Long_Float);
+   type Real_Vector_Type is new Mv.Real_Vector (1 .. Nof_Axes);
+   
+   --  subtype Sec_Type is Long_Float;
+   --  subtype M_Type is Long_Float; -- this is disingenious, 
+   --  				 --rads are now also called meters.
+   --  subtype Rad_Type is Long_Float;
+   --  subtype Mpsec_Type is Long_Float;  -- speed type
+   --  subtype Mpsec2_Type is Long_Float; -- acc type
+   --  subtype Mpsec3_Type is Long_Float; -- jerk type
+   
+   
+   type Qcp_Type is tagged;
+   type Qcp_Access_Type is access all Qcp_Type;
+   type Qcp_Type is new Cp_Type with
+      record
+	 Tqi : Sec_Type; -- time
+	 Pqi : M_Type; -- position (D)
+	 Vqi : Mpsec_Type; -- velocity (s)
+	 Aqi : Mpsec2_Type; -- acceleration (s)
+	 P1,
+	 Dinc : Real_Vector_Type;
+      end record;
+   
+   procedure Get_Item (N   : access Dllist_Type; 
+		       Q_P : in out Qcp_Access_Type);
+   
+end Luthien.Dll.Qcp;

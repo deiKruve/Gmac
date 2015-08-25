@@ -2,7 +2,7 @@
 --                                                                          --
 --                            LUTHIEN COMPONENTS                            --
 --                                                                          --
---                        L U T H I E N . S O N J A 4                       --
+--                  L U T H I E N . S O N J A . S O N J A 4                 --
 --                                                                          --
 --                                  B o d y                                 --
 --                                                                          --
@@ -32,29 +32,26 @@
 --
 
 with Ada.Numerics.Generic_Elementary_Functions;
--- with Ada.Numerics.Generic_Real_Arrays;
 
-package body Luthien.Sonja4 is
+package body Luthien.Sonja.Sonja4 is
    
-   package Dll  renames Luthien.Dll;
-   package Dbcp renames Luthien.Dll.Bcp;
+   package Dbcp is new Dll.Bcp (Nof_Axes);
    package Num  renames Ada.Numerics;
    package Math is new Ada.Numerics.Generic_Elementary_Functions 
      (Float_Type => Long_Float);
-   package Mv is new Ada.Numerics.Generic_Real_Arrays 
-     (Real => Long_Float);
    
-   Tighthyper    : Long_Float := 0.0;
+   Tighthyper    : Long_Float          := 0.0;
    Rho           : constant Long_Float := 0.8;
    Ptmpa, Ptmpb,
-   P1a,
-     P1b         : Real_Vector_Type;
+   P1a, P1b      : Real_Vector_Type;
    
    
    function Test_Bend (Inp : Sonja4_In_Type) return Mpsec_Type
    is
-      function "**" (Left, Right : Long_Float) return Long_Float Renames  Math."**";
-      function Norm (Right : Mv.Real_Vector) return Long_Float Renames  Mv."abs";
+      function "**" (Left, Right : Long_Float) return Long_Float 
+        Renames  Math."**";
+      function Norm (Right : Mv.Real_Vector) return Long_Float 
+        Renames  Mv."abs";
       Theta,
       Cos_Theta        : Long_Float := 0.0;
       Ptmp             : Real_Vector_Type;
@@ -104,18 +101,18 @@ package body Luthien.Sonja4 is
    is
       function Norm (Right : Mv.Real_Vector) return Long_Float Renames  Mv."abs";
       Bcp      : Dbcp.Bcp_Access_Type := new Dbcp.Bcp_Type;
-      V1a, V1b : Real_Vector_Type;
+      V1a, V1b : Real_Vector_Type; 
    begin
       Bcp.Tau := Tighthyper / Inp.S1;
       V1a := Inp.S1 * (Ptmpa / Norm (Mv.Real_Vector (Ptmpa))); -- (4.16)
       V1b := Inp.S1 * (Ptmpb / Norm (Mv.Real_Vector (Ptmpb))); -- (4.17)
-      Bcp.B1 := P1a; -- (4.14)
-      Bcp.B2 := P1b - 2.0 * Bcp.Tau * V1b;
-      Bcp.M1 := 2.0 * Bcp.Tau * V1a; -- (4.15)
-      Bcp.M2 := 2.0 * Bcp.Tau * V1b;
+      Bcp.B1 := Dbcp.Real_Vector_Type (P1a); -- (4.14)
+      Bcp.B2 := Dbcp.Real_Vector_Type (P1b - 2.0 * Bcp.Tau * V1b);
+      Bcp.M1 := Dbcp.Real_Vector_Type (2.0 * Bcp.Tau * V1a); -- (4.15)
+      Bcp.M2 := Dbcp.Real_Vector_Type (2.0 * Bcp.Tau * V1b);
       Dll.Pars_Q.Insert_Pv_Before (This => Bcp, Next => Anchor);
    exception
       when others => null;
    end Calc_Blend;
    
-end Luthien.Sonja4;
+end Luthien.Sonja.Sonja4;

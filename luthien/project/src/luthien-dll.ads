@@ -2,7 +2,7 @@
 --                                                                          --
 --                            LUTHIEN COMPONENTS                            --
 --                                                                          --
---                       L U T H I E N . D L L . Q C P                      --
+--                           L U T H I E N . D L L                          --
 --                                                                          --
 --                                  S p e c                                 --
 --                                                                          --
@@ -26,33 +26,47 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
--- dll of all QCP controlpoints for the low level parser
-
-package Luthien.Dll.Qcp is
+-- dll of all controlpoints for the low level parser
+generic
+package Luthien.Dll is
+   
+   -- base of all Cp records
+   type Cp_Type is abstract tagged;
+   type Cp_Access_Type is access all Cp_Type'Class;
+   type Cp_Type is abstract tagged record
+      null;
+   end record;
    
    
-   --  subtype Sec_Type is Long_Float;
-   --  subtype M_Type is Long_Float; -- this is disingenious, 
-   --  				 --rads are now also called meters.
-   --  subtype Rad_Type is Long_Float;
-   --  subtype Mpsec_Type is Long_Float;  -- speed type
-   --  subtype Mpsec2_Type is Long_Float; -- acc type
-   --  subtype Mpsec3_Type is Long_Float; -- jerk type
+   type Dllist_Type;
+   type Dllist_Access_Type is access all Dllist_Type;
+     
+   type Dllist_Type is tagged record
+      Q_P            : access Cp_Type'Class;
+      Prev, Next     : Dllist_Access_Type       := null;
+   end record;
    
+   procedure Initialize (Anchor : access Dllist_Type);
    
-   type Qcp_Type is tagged;
-   type Qcp_Access_Type is access all Qcp_Type;
-   type Qcp_Type is new Cp_Type with
-      record
-	 Tqi : Sec_Type; -- time
-	 Pqi : M_Type; -- position (D)
-	 Vqi : Mpsec_Type; -- velocity (s)
-	 Aqi : Mpsec2_Type; -- acceleration (s)
-	 P1,
-	 Dinc : Real_Vector_Type;
-      end record;
+   protected type Parser_Queue_Type is
+      pragma Priority (Parser_Q_Thread_Priority);
+      
+      entry Finalize(Anchor : access Dllist_Type);
+      entry Get_Item (N : access Dllist_Type; 
+		      Q_P : out Cp_Access_Type);
+      entry Insert_Pv_Before (This : access Cp_Type'Class;  
+			      next : access Dllist_Type);
+      entry Insert_Pv_After (This : access Cp_Type'Class;   
+			     Prev : access Dllist_Type );
+      entry Unlink_Dllist_Item (This : access Dllist_Type);
+      -- destroy a Dllist-item in the link
+   private
+      Open : Boolean := True;
+   end Parser_Queue_Type;
    
-   procedure Get_Item (N   : access Dllist_Type; 
-		       Q_P : in out Qcp_Access_Type);
+   Pq_Anchor : Dllist_Access_Type := new Dllist_Type;
+   -- where is this thing used????????????????????????????????
    
-end Luthien.Dll.Qcp;
+   Pars_Q    : Parser_Queue_Type;
+   
+end Luthien.Dll;

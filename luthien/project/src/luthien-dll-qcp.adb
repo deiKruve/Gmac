@@ -2,13 +2,11 @@
 --                                                                          --
 --                            LUTHIEN COMPONENTS                            --
 --                                                                          --
---                        L U T H I E N . S O N J A 4                       --
+--                       L U T H I E N . D L L . Q C P                      --
 --                                                                          --
---                                  S p e c                                 --
+--                                  B o d y                                 --
 --                                                                          --
 --                     Copyright (C) 2014, Jan de Kruyf                     --
---                 Algorithms copyright (C) Sonja Macfarlane,               --
---                   The University of New Brunswick, 1999                  --
 --                                                                          --
 -- This is free software;  you can redistribute it  and/or modify it  under --
 -- terms of the  GNU General Public License as published  by the Free Soft- --
@@ -28,28 +26,24 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
--- implementation of chapter 4 of the Sonja Macfarlane Thesis
+-- dll of all QCP controlpoints for the low level parser
 
-with Luthien.Dll.Bcp;
-package Luthien.Sonja4 is
-   
-   type Sonja4_In_Type is
-      record
-	 P0,
-	 P1,
-	 P2        : Real_Vector_Type;  -- start point, blend point, next point
-	 Tightness : M_Type;
-	 S1        : Mpsec_Type;       -- requested speed at P1
-	 
-	 Amax      : Mpsec2_Type;      -- max accel
-	 Jmax      : Mpsec3_Type;      -- max jerk
-      end record;
-   
-   function Test_Bend (Inp : Sonja4_In_Type) return Mpsec_Type;
-   procedure Calc_Blend (Anchor : in out Dll.Dllist_Access_Type; 
-			 Inp : Sonja4_In_Type);
-   
 
-end Luthien.Sonja4;
+--with Ada.Tags; use Ada.Tags;
 
+package body Luthien.Dll.Qcp is
    
+   procedure Get_Item (N : access Dllist_Type; 
+		       Q_P : in out Qcp_Access_Type)
+   is
+      This : Cp_Access_Type;
+   begin
+      Pars_Q.Get_Item (N, This);
+      if This.all in Qcp_Type then
+	 Q_P  := Qcp_Access_Type (This);
+      else
+	 Q_P := null;
+      end if;
+   end Get_Item;
+   
+end Luthien.Dll.Qcp;

@@ -2,9 +2,9 @@
 --                                                                          --
 --                            LUTHIEN COMPONENTS                            --
 --                                                                          --
---                         L U T H I E N . T A S K S                        --
+--                 L U T H I E N . S O N J A . S O N J A 4                  --
 --                                                                          --
---                                  B o d y                                 --
+--                                  S p e c                                 --
 --                                                                          --
 --                     Copyright (C) 2014, Jan de Kruyf                     --
 --                 Algorithms copyright (C) Sonja Macfarlane,               --
@@ -27,75 +27,37 @@
 --                     (email: jan.de.kruyf@hotmail.com)                    --
 --                                                                          --
 ------------------------------------------------------------------------------
---
--- this is the interface between the plc thread(s) and the Cnc Task Planner
--- conceptually: when a cnc mode button is pressed, the cnc planner goes into 
--- some state where the cnc behaves as the operator expects. 
--- This module is the tasks interface: operator - plc - TASKS - planner.
---  a reportback task to the plc is implemented.
---
 
-with Text_Io; 
-package body Luthien.Tasks is
-      
-   package Astc renames Ada.Synchronous_Task_Control;
-   package Tio  renames Text_Io; 
+-- implementation of chapter 4 of the Sonja Macfarlane Thesis
+
+with Luthien.Dll.Bcp;
+with Ada.Numerics.Generic_Real_Arrays;
+
+generic
+   Nof_Axes : Positive := 1;
    
-   -----------------------------
-   -- result reporting        --
-   -- to the real time thread --
-   -----------------------------
-   protected body Planner_State is
+package Luthien.Sonja.Sonja4 is
       
-      function Get return Command_Type 
-      is
-      begin
-	 return Command_Res;
-      end Get;
-      
-      procedure Set (State : Command_Type)
-      is
-      begin
-	 Command_Res := State;
-      end Set;
-      
-   end Planner_State;
+   package Mv is new Ada.Numerics.Generic_Real_Arrays (Real => Long_Float);
+   type Real_Vector_Type is new Mv.Real_Vector (1 .. Nof_Axes);
    
-   
-   task type State_Selector_Type (Pri      : System.Priority; 
-				  Selector : access Astc.Suspension_Object) is 
-      pragma Priority (Pri);
-      -- waits for a Selector 
-      -- and sets the planner state accordingly
-   end State_Selector_Type;
-   
-   task body State_Selector_Type 
-      is
-   begin
-      loop
-	 Astc.Suspend_Until_True (Selector.all);
-	 Astc.Set_False (Selector.all);--??????
-	 if Selector.all in Idle_Selector then
-	    null;
-	 elsif Selector.all in Hand_Selector then
-	    null;
-	 elsif Selector.all in Index_Selector then
-	    null;
-	 elsif Selector.all in Hw_Selector then
-	    null;
-	 elsif Selector.all in Imm_Selector then
-	    null;
-	 elsif Selector.all in Single_Selector then
-	    null;
-	 elsif Selector.all in Auto_Selector then
-	    null;
-	 else null; -- bubu
-	 end if;
+   package Dll is new Luthien.Dll;
+
+   type Sonja4_In_Type is
+      record
+	 P0,
+	 P1,
+	 P2        : Real_Vector_Type;  -- start point, blend point, next point
+	 Tightness : M_Type;
+	 S1        : Mpsec_Type;       -- requested speed at P1
 	 
-      end loop;
-   end State_Selector_Type;
+	 Amax      : Mpsec2_Type;      -- max accel
+	 Jmax      : Mpsec3_Type;      -- max jerk
+      end record;
    
+   function Test_Bend (Inp : Sonja4_In_Type) return Mpsec_Type;
+   procedure Calc_Blend (Anchor : in out Dll.Dllist_Access_Type; 
+			 Inp : Sonja4_In_Type);
    
-   
-   
-end Luthien.Tasks;
+
+end Luthien.Sonja.Sonja4;

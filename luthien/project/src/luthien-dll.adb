@@ -34,14 +34,14 @@ with Ada.Unchecked_Deallocation;
 
 package body Luthien.Dll is
    
-   package Sdll renames Silmaril.Dll;
+  -- package Sdll renames Silmaril.Dll;
    
    procedure Initialize (Anchor : access Dllist_Type) is
    begin
       null;
       --Anchor := new Dllist_Type; must be done before calling
       Anchor.Q_P  := null;
-      Anchor.Silm := null;
+      --Anchor.Silm := null;
       Anchor.Prev := Dllist_Access_Type (Anchor);
       Anchor.Next := Dllist_Access_Type (Anchor);
    end Initialize;
@@ -56,7 +56,7 @@ package body Luthien.Dll is
       begin 
 	 This.Prev.Next := This.Next;
 	 This.Next.Prev := This.Prev;
-	 This.Silm := null;
+	 --This.Silm := null;
 	 -- the from-silmaril connection
 	 Free_Dllist (That);
       end Unlink_From_Dllist;
@@ -94,7 +94,7 @@ package body Luthien.Dll is
       when Open is   
 	 P : Dllist_Access_Type := 
 	   new Dllist_Type'(Q_P  => Cp_Access_Type (This),
-			    Silm => null,
+			    --Silm => null,
 			    Prev => Next.prev, 
 			    Next => Dllist_Access_Type (Next));
       begin
@@ -110,7 +110,7 @@ package body Luthien.Dll is
       when Open is
 	 P : Dllist_Access_Type := 
 	   new Dllist_Type'(Q_P  => Cp_Access_Type (This),
-			    Silm => null,
+			    --Silm => null,
 			    Prev  => Dllist_Access_Type (Prev), 
 			    Next  => Prev.Next);
       begin

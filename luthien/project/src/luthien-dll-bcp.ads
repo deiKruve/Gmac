@@ -2,9 +2,9 @@
 --                                                                          --
 --                            LUTHIEN COMPONENTS                            --
 --                                                                          --
---                       L U T H I E N . D L L . Q C P                      --
+--                       L U T H I E N . D L L . B C P                      --
 --                                                                          --
---                                  B o d y                                 --
+--                                  S p e c                                 --
 --                                                                          --
 --                     Copyright (C) 2014, Jan de Kruyf                     --
 --                                                                          --
@@ -26,21 +26,32 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
--- dll of all QCP controlpoints for the low level parser
+-- dll of all BCP controlpoints for the low level parser
+-- b1, b2, m1, m2, tau
 
-package body Luthien.Dll.Qcp is
+with Ada.Numerics.Generic_Real_Arrays;
+  
+generic
+   Nof_Axes : Positive := 1;
    
-   procedure Get_Item (N : access Dllist_Type; 
-		       Q_P : in out Qcp_Access_Type)
-   is
-      This : access Cp_Type'class;
-   begin
-      Pars_Q.Get_Item (N, Cp_Access_Type (This));
-      if This in Qcp_Access_Type then
-	 Q_P  := Qcp_Access_Type (This);
-      else
-	 Q_P := null;
-      end if;
-   end Get_Item;
+package Luthien.Dll.Bcp is
    
-end Luthien.Dll.Qcp;
+   package Mv is new Ada.Numerics.Generic_Real_Arrays 
+     (Real => Long_Float);
+   type Real_Vector_Type is new Mv.Real_Vector (1 .. Nof_Axes);
+   
+   type Bcp_Type is tagged;
+   type Bcp_Access_Type is access all Bcp_Type;
+   type Bcp_Type is new Cp_Type with
+      record
+	 B1,
+	 B2  : Real_Vector_Type;
+	 M1,
+	 M2  : Real_Vector_Type;
+	 Tau : Sec_Type;
+      end record;
+   
+   procedure Get_Item (N   : access Dllist_Type;
+		       B_P : in out Bcp_Access_Type);
+   
+end Luthien.Dll.Bcp;

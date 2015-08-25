@@ -33,55 +33,57 @@
 
 with Ada.Numerics.Generic_Elementary_Functions;
 
-with Ada.Numerics.Generic_Real_Arrays;
+--with Ada.Numerics.Generic_Real_Arrays;
+--with Ada.Text_IO;
 
-package body Luthien.Sonja3 is
+package body Luthien.Sonja.Sonja3 is
    
-   package Dll  renames Luthien.Dll;
-   package Dqcp renames Luthien.Dll.Qcp;
+   --package Tio renames Ada.Text_IO;
+   
+   package Dqcp is new Dll.Qcp (Nof_Axes);
    package Num  renames Ada.Numerics;
    package Math is new Ada.Numerics.Generic_Elementary_Functions 
      (Float_Type => Long_Float);
-   package Mv is new Ada.Numerics.Generic_Real_Arrays 
-     (Real => Long_Float);
+   --  package Mv is new Ada.Numerics.Generic_Real_Arrays 
+   --    (Real => Long_Float);
    --package Vm is new Ada.Numerics.Generic_Real_Arrays (Real => Long_Float);
   
    -- Lm : Lin_Move_Record_Type := (Sinv_Flag => False, others => 0.0);
    
    
-   procedure Math_In (Invec : Sonja3_In_Type)
-   is
-      function Norm (Right : Mv.Real_Vector) return Long_Float Renames  Mv."abs";
-      Ddiff : Real_Vector_Type;
-   begin
-      Lm.Jmax := Invec.Jmax;
-      Lm.Amax := Invec.Amax;
-      Lm.Smax := Invec.Smax;
-      if Invec.S2 > Invec.S1 then
-	 Lm.S1 := Invec.S1;
-	 Lm.S2 := Invec.S2;
-	 Lm.Sinv_Flag := False;
-      else
-	 Lm.S1 := Invec.S2;
-	 Lm.S2 := Invec.S1;
-	 Lm.Sinv_Flag := True;
-      end if;
-      Lm.P1 := Invec.P1;
-      Ddiff := Invec.P1 - Invec.P2;
-      Lm.D := Norm (Mv.Real_Vector (Ddiff));
-      Lm.Dinc := Ddiff / Lm.D;
-      Lm.Delta_Tmax := (Num.Pi * Lm.Amax) / (2.0 * Lm.Jmax); --(3.4)
-      Lm.Dmin := Lm.Amax * Lm.Delta_Tmax ** 2 + 2.0 * Lm.S1 * Lm.Delta_Tmax; -- (3.20)
-      Lm.Delta_Smin := Lm.Delta_Tmax * Lm.Amax; -- (3.22)
-      Lm.X_Rat := Invec.P1 (1) - Invec.P2 (1) / Lm.D;
-      Lm.Y_Rat := Invec.P1 (2) - Invec.P2 (2) / Lm.D;
-      Lm.Z_Rat := Invec.P1 (3) - Invec.P2 (3) / Lm.D;
-      Lm.A_Rat := Invec.P1 (4) - Invec.P2 (4) / Lm.D;
-      Lm.B_Rat := Invec.P1 (5) - Invec.P2 (5) / Lm.D;
-      Lm.C_Rat := Invec.P1 (6) - Invec.P2 (6) / Lm.D;
-   exception
-      when others => null;
-   end Math_In;
+   --  procedure Math_In (Invec : Sonja3_In_Type)
+   --  is
+   --     function Norm (Right : Mv.Real_Vector) return Long_Float Renames  Mv."abs";
+   --     Ddiff : Real_Vector_Type;
+   --  begin
+   --     Lm.Jmax := Invec.Jmax;
+   --     Lm.Amax := Invec.Amax;
+   --     Lm.Smax := Invec.Smax;
+   --     if Invec.S2 > Invec.S1 then
+   --        Lm.S1 := Invec.S1;
+   --        Lm.S2 := Invec.S2;
+   --        Lm.Sinv_Flag := False;
+   --     else
+   --        Lm.S1 := Invec.S2;
+   --        Lm.S2 := Invec.S1;
+   --        Lm.Sinv_Flag := True;
+   --     end if;
+   --     Lm.P1 := Invec.P1;
+   --     Ddiff := Invec.P1 - Invec.P2;
+   --     Lm.D := Norm (Mv.Real_Vector (Ddiff));
+   --     Lm.Dinc := Ddiff / Lm.D;
+   --     Lm.Delta_Tmax := (Num.Pi * Lm.Amax) / (2.0 * Lm.Jmax); --(3.4)
+   --     Lm.Dmin := Lm.Amax * Lm.Delta_Tmax ** 2 + 2.0 * Lm.S1 * Lm.Delta_Tmax; -- (3.20)
+   --     Lm.Delta_Smin := Lm.Delta_Tmax * Lm.Amax; -- (3.22)
+   --     Lm.X_Rat := Invec.P1 (1) - Invec.P2 (1) / Lm.D;
+   --     Lm.Y_Rat := Invec.P1 (2) - Invec.P2 (2) / Lm.D;
+   --     Lm.Z_Rat := Invec.P1 (3) - Invec.P2 (3) / Lm.D;
+   --     Lm.A_Rat := Invec.P1 (4) - Invec.P2 (4) / Lm.D;
+   --     Lm.B_Rat := Invec.P1 (5) - Invec.P2 (5) / Lm.D;
+   --     Lm.C_Rat := Invec.P1 (6) - Invec.P2 (6) / Lm.D;
+   --  exception
+   --     when others => null;
+   --  end Math_In;
    
    
    -- Sustained Acceleration Pulse Algorithm
@@ -107,7 +109,7 @@ package body Luthien.Sonja3 is
      -- gives: Lm.D2, Lm.D3
    is
    begin
-      Lm.D2 := (Lm.Sb ** 2 - Lm.Sa ** 2) / 2.0 * Lm.Amax; -- (3.15)
+      Lm.D2 := (Lm.Sb ** 2 - Lm.Sa ** 2) / (2.0 * Lm.Amax); -- (3.15)
       Lm.D3 := Lm.Amax * Lm.Delta_Tmax ** 2 * 
 	(1.0 / 4.0 + 1.0 / Num.Pi ** 2) + Lm.Sb * Lm.Delta_Tmax; -- (3.16)
    exception
@@ -170,13 +172,17 @@ package body Luthien.Sonja3 is
    
    -- calculates the upramp from S1 to S2
    procedure Math_B_Dv
-     -- takes: Lm.S1, Lm.S2, Lm.Amax, Lm.Delta_Tmax, Lm.Jmax
+     -- takes: Lm.S1, Lm.S2, Lm.Amax, Lm.Delta_Tmax, Lm.Jmax, Lm.Delta_Smin
      -- gives: Lm.Dv
    is
    begin
       if Lm.S2 - Lm.S1 > Lm.Delta_Smin then
-	 Math312_314;
-	 Math315_316;
+         
+	 Math312_314; -- gives: Lm.Sa, Lm.Sb, Lm.D1
+         --Tio.Put_Line ("Lm.D1 " & M_Type'Image (Lm.D1));-----------------
+	 Math315_316; -- gives: Lm.D2, Lm.D3
+         --Tio.Put_Line ("Lm.D2 " & M_Type'Image (Lm.D2));-----------------
+         --Tio.Put_Line ("Lm.D3 " & M_Type'Image (Lm.D3));-----------------
 	 Lm.Dv := Lm.D1 + Lm.D2 + Lm.D3;
       else
 	 Math326_325; -- gives dT and Apeak
@@ -435,8 +441,8 @@ package body Luthien.Sonja3 is
    procedure Qratios (Qcp : access Dqcp.Qcp_Type)
    is
    begin
-      Qcp.P1 := Lm.P1;
-      Qcp.Dinc := Lm.Dinc;
+      Qcp.P1 := Dqcp.Real_Vector_Type (Lm.P1);
+      Qcp.Dinc := Dqcp.Real_Vector_Type (Lm.Dinc);
    end Qratios;
    
    
@@ -548,7 +554,7 @@ package body Luthien.Sonja3 is
    end Qcp_Sap_B1;
    
    
-   procedure Qcp_Ap_B2 (Anchor    : in out Luthien.Dll.Dllist_Access_Type; 
+   procedure Qcp_Ap_B2 (Anchor    : in out Dll.Dllist_Access_Type; 
 			Sinv_Flag : Boolean;
 			Delta_D   : in M_Type; 
 			S1        : in Mpsec_Type; 
@@ -621,4 +627,4 @@ package body Luthien.Sonja3 is
       when others => null;
    end Qcp_Ap_B2;
    
-end Luthien.Sonja3;
+end Luthien.Sonja.Sonja3;
